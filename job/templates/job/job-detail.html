@@ -1,0 +1,53 @@
+{% extends "job/base-job.html" %}
+{% load static %}
+{% block content %}
+<p class="lead text-center text-white">Detalles del trabajo:</p>
+<div class="card">
+    <div class="row g-0">
+        <p class="text-end fw-bold m-0">Precio: {{ job.price }} usd, {{ job.status }}</p>
+        <div class="col-md-8">
+            <div class="card-body">
+                <h5 class="card-title">{{ job.client }}</h5>
+                <p class="card-text">{{ job.description }}</p>
+                <p class="card-text">{{ job.address }}</p>
+                <p class="card-text"><small class="text-body-secondary">{{ job.date }}</small></p>
+            </div>
+        </div>
+        <div class="col-md-4 m-auto">
+            <img src="{{ job.image.url }}" class="img-fluid rounded-start" alt="...receipt">
+        </div>
+    </div>
+</div>
+<div class="list-group-item d-flex justify-content-end align-items-start">
+    {% if not job.closed %}
+    <a href="{% url 'job:job_list' %}"><button class="btn btn-outline-light m-2">Editar</button></a>
+    <a href="{% url 'job:close_job' job.id %}"><button class="btn btn-danger m-2">Cerrar</button></a>
+    <a href="{% url 'job:delete_job' job.id %}"><button class="btn btn-danger m-2">Eliminar</button></a>
+    {% else %}
+    <button disabled class="btn btn-danger m-2">Cerrado</button>
+    {% endif %}
+</div>
+<p class="lead text-center text-white">Total de gastos: {{ total_spent }}usd, Ganancia: {{ profit }}usd</p>
+{% if not job.closed %}
+<div class="list-group-item d-flex justify-content-start align-items-start">
+    <a href="{% url 'job:create_spent' job.id %}"><button class="btn btn-outline-light m-2">Agregar gasto</button></a>
+</div>
+{% endif %}
+<p class="lead text-center text-white">Gastos:</p>
+{% if spents %}
+<ul class="list-group">
+    {% for spent in spents %}
+    <li class="list-group-item d-flex justify-content-between align-items-start mb-1">
+        <a class="list-group-item list-group-item-action" href="{% url 'job:spent_detail' spent.id %}">
+            <div class="ms-2 me-auto">
+                <div class="fw-bold">{{ spent.amount }} usd</div>
+                {{ spent.description}}
+            </div>
+        </a>
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<div class="fw-bold text-white text-center">No hay gastos, cree el primero.</div>
+{% endif %}
+{% endblock content %}

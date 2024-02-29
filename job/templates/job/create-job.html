@@ -1,0 +1,33 @@
+{% extends "job/base-job.html" %}
+{% block content %}
+<p class="lead text-center text-white">Crear nuevo trabajo:</p>
+<div style="max-width: 400px; margin: auto">
+    <form action="{% url 'job:create_job' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group mb-1">
+            <label for="{{ form.client.id_label}}" class="control-label text-white">Cliente:</label>
+            {{ form.client }}
+        </div>
+        <div class="form-group mb-1">
+            <label for="{{ form.description.id_label}}" class="control-label text-white">Descripcion:</label>
+            {{ form.description }}
+        </div>
+        <div class="form-group mb-1">
+            <label for="{{ form.address.id_label}}" class="control-label text-white">Direccion:</label>
+            {{ form.address }}
+        </div>
+        <div class="form-group mb-1">
+            <label for="{{ form.price.id_label}}" class="control-label text-white">Precio:</label>
+            {{ form.price }}
+        </div>
+        <div class="form-group mb-2">
+            <label for="{{ form.image.id_label}}" class="control-label text-white">Imagen:</label>
+            {{ form.image }}
+        </div>
+        <div class="text-end">
+            <button class="btn btn-outline-light" type="submit">Guardar</button>
+            <a class="btn btn-outline-danger" href="{% url 'job:job_list' %}">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock content %}

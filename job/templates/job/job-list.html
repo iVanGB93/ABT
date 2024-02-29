@@ -1,0 +1,24 @@
+{% extends "job/base-job.html" %}
+{% block content %}
+<div>
+    <p class="lead text-center text-white">Trabajos:</p>
+    {% if jobs %}
+    <ul class="list-group">
+        {% for j in jobs %}
+        <li class="list-group-item d-flex justify-content-between align-items-start mb-1">
+            <span class="badge text-bg-info rounded-pill">{{ j.status }}</span>
+            <a class="list-group-item list-group-item-action" href="{% url 'job:job_detail' j.id %}">
+                <div class="ms-2 me-auto">
+                    <div class="fw-bold">{{ j.client }}</div>
+                    {{ j.description}}
+                </div>
+            </a>
+            <span class="badge text-bg-primary rounded-pill">{{ j.price }} usd</span>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <div class="fw-bold text-white text-center">No hay trabajos guardados, cree el primero.</div>
+    {% endif %}
+</div>
+{% endblock content %}

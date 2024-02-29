@@ -1,0 +1,15 @@
+{% extends "web/base.html" %}
+{% load static %}
+{% block head %}
+    <link rel="stylesheet" href="{% static 'web/css/style.css' %}">
+{% endblock head %}
+{% block body %}
+<div class="main-frame">
+    <div class="box">
+        <div class="brand">Akssen Solutions</div>
+        <div class="jobs">
+            <a class="btn btn-outline-info" href="{% url 'job:job_list' %}">Trabajos</a>
+        </div>
+    </div>
+</div>
+{% endblock body %}

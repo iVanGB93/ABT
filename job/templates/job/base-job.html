@@ -1,0 +1,17 @@
+{% extends "web/base.html" %}
+{% load static %}
+{% block head %}
+    <link rel="stylesheet" href="{% static 'job/css/style.css' %}">
+{% endblock head %}
+{% block body %}
+<div class="main-frame">
+    <div class="frame">
+        <div class="list-group-item d-flex justify-content-between align-items-start m-2">
+            <a href="{% url 'job:create_job' %}"><button class="btn btn-outline-light">Nuevo Trabajo</button></a>
+            <a href="{% url 'job:job_list' %}"><button class="btn btn-outline-light">Lista de Trabajos</button></a>
+        </div>
+        {% block content %}
+        {% endblock content %}
+    </div>
+</div>
+{% endblock body %}
