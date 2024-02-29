@@ -1,3 +1,17 @@
+services:
+  # This is the Django service
+  app:
+    # The name of the Dockerfile for the service
+    dockerfile: Dockerfile
+    # The environment variables required by Django
+    environment:
+      DJANGO_SETTINGS_MODULE: "core.settings"
+    # The port on which Django should listen for incoming connections
+    http_port: 8000
+    # A build command to prepare the service for deployment
+    build_command: "pip install -r requirements.txt"
+    # The start command for running the Django development server
+    start_command: "python manage.py runserver 0.0.0.0:$PORT"
 
 # Specify the version of the Railway platform
 platform: "python=3.11.2"
