@@ -2,13 +2,9 @@
 /nginx_waitress
 
 /static/admin/
-/static/forum/
-/static/portal/
-/static/rest_framework/
-/static/sorteo/
+/static/job/
 /static/web/
 
-/media/forum/
 /media/usuario/
 /media/usuarios/
 
