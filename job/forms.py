@@ -12,6 +12,10 @@ class JobForm(forms.ModelForm):
     class Meta:
         model = Job
         fields = ['client', 'description', 'price', 'image', 'address']
+    
+    def __init__(self, *args, **kwargs):
+        super(JobForm, self).__init__(*args, **kwargs)
+        self.fields['image'].required = False
 
 class SpentForm(forms.ModelForm):
 
@@ -22,3 +26,7 @@ class SpentForm(forms.ModelForm):
     class Meta:
         model = Spent
         fields = ['description', 'amount', 'image']
+    
+    def __init__(self, *args, **kwargs):
+        super(SpentForm, self).__init__(*args, **kwargs)
+        self.fields['image'].required = False

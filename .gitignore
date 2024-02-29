@@ -5,10 +5,10 @@
 /static/job/
 /static/web/
 
-/media/usuario/
-/media/usuarios/
+/media/jobs/
+/media/spents/
 
-/runserver.py
+db.sqlite3
 
 *.ini
 *.pyc
