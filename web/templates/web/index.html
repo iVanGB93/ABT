@@ -4,12 +4,133 @@
     <link rel="stylesheet" href="{% static 'web/css/style.css' %}">
 {% endblock head %}
 {% block body %}
-<div class="main-frame">
-    <div class="box">
-        <div class="brand">Akssen Solutions</div>
-        <div class="jobs">
-            <a class="btn btn-outline-info" href="{% url 'job:job_list' %}">Trabajos</a>
+<header class="header" data-aos="fade-down">
+    <section class="flex">
+        <a href="#" class="logo">Akssen Solutions</a>
+        <nav class="navbar">
+            <a href="#">Services</a>
+            <a href="#about">About</a>
+            <a href="#contact">Contact</a>
+            {% if user.is_authenticated %}
+            <a href="{% url 'job:job_list' %}">Panel</a>
+            {% else %}
+            <a href="{% url 'job:login' %}">Login</a>
+            {% endif %}
+        </nav>
+        <div id="menu-btn"><i class="fas fa-bars"></i></div>
+    </section>
+</header>
+<div class="container home" data-aos="zoom-out" style="min-width: 100vw;">
+    <section class="flex" data-aos="zoom-in" data-aos-delay="600">
+        <form action="" method="post">
+            <h3>make an appoinment</h3>
+            <p>where to?</p>
+            <input type="text" name="location" required maxlength="50" placeholder="enter your location" class="box">
+            <p>when?</p>
+            <input type="date" name="date" class="box" required placeholder="when?">
+            <input type="submit" value="search appoinment" name="search" class="btn">
+        </form>
+    </section>
+</div>
+<div class="container about" id="about" style="min-width: 100vw;">
+    <h1 class="heading" data-aos="zoom-out">about us</h1>
+    <section>
+        <div class="details">
+            <div class="box" data-aos="zoom-in">
+                <h3>why choose us?</h3>
+                <p>some text...</p>
+                <a href="#" class="btn">contact us</a>
+            </div>
         </div>
-    </div>
+        <div class="grid">
+            <div class="box" data-aos="fade-up">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTlCeVhPcF0B061dWx6Y2p6ZshztnAoVQI59g&usqp=CAU" alt="">
+                <h3>Motive 1</h3>
+                <p>Explicar</p>
+            </div>
+            <div class="box" data-aos="fade-up" data-aos-delay="400">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTlCeVhPcF0B061dWx6Y2p6ZshztnAoVQI59g&usqp=CAU" alt="">
+                <h3>Motive 2</h3>
+                <p>Explicar</p>
+            </div>
+            <div class="box" data-aos="fade-up" data-aos-delay="600">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTlCeVhPcF0B061dWx6Y2p6ZshztnAoVQI59g&usqp=CAU" alt="">
+                <h3>Motive 3</h3>
+                <p>Explicar</p>
+            </div>
+        </div>
+    </section>
+</div>
+<div class="container reviews" style="min-width: 100vw;">
+    <h1 class="heading" data-aos="zoom-out">client's reviews</h1>
+    <section class="grid">
+        <div class="box" data-aos="fade-up">
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTlCeVhPcF0B061dWx6Y2p6ZshztnAoVQI59g&usqp=CAU" alt="">
+            <h3>Jhon Doe</h3>
+            <p>vkfdvmomfvoaimcoaismca</p>
+            <div class="stars">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star-half-alt"></i>
+            </div>
+        </div>
+        <div class="box" data-aos="fade-up">
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTlCeVhPcF0B061dWx6Y2p6ZshztnAoVQI59g&usqp=CAU" alt="">
+            <h3>Jhon Doe</h3>
+            <p>vkfdvmomfvoaimcoaismca</p>
+            <div class="stars">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star-half-alt"></i>
+            </div>
+        </div>
+        <div class="box" data-aos="fade-up">
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTlCeVhPcF0B061dWx6Y2p6ZshztnAoVQI59g&usqp=CAU" alt="">
+            <h3>Jhon Doe</h3>
+            <p>vkfdvmomfvoaimcoaismca</p>
+            <div class="stars">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star-half-alt"></i>
+            </div>
+        </div>
+    </section>
+</div>
+<div class="container contact" id="contact" style="min-width: 100vw;">
+    <h1 class="heading" data-aos="zoom-out">Contact Us</h1>
+    <section>
+        <div class="row">
+            <iframe data-aos="flip-left" class="map" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14378.873873155413!2d-80.4215239!3d25.7137438!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x88d9c089772334c1%3A0x636c4b65a7b38794!2sKendale%20Lakes%2C%20FL!5e0!3m2!1sen!2sus!4v1709327487388!5m2!1sen!2sus" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+            <form data-aos="flip-right" action="">
+                <h3>Get in Touch</h3>
+                <input type="text" name="name" required maxlength="50" placeholder="enter your name" class="box">
+                <input type="email" name="email" required maxlength="50" placeholder="enter your email" class="box">
+                <input type="number" name="number" required maxlength="50" placeholder="enter your number" class="box">
+                <textarea class="box" name="message" id="" cols="30" rows="10"></textarea>
+                <input type="submit" class="btn" value="send message">
+            </form>
+        </div>
+        <div class="grid">
+            <div class="box" data-aos="fade-up">
+                <i class="fas fa-phone"></i>
+                <h3>Phone Number</h3>
+                <a href="">+1234567890</a>
+            </div>
+            <div class="box" data-aos="fade-up">
+                <i class="fas fa-envelope"></i>
+                <h3>Email Address</h3>
+                <a href="mailto:asda@asdas.com">asdasd@asdas.com</a>
+            </div>
+        </div>
+        <div class="credit">
+            &copy; copyright @ 2024 by <span>iVan</span> | all rights reserved
+        </div>
+    </section>
 </div>
 {% endblock body %}

@@ -1,0 +1,21 @@
+{% extends 'web/base.html' %}
+{% load static %}
+{% block head %}
+    <link rel="stylesheet" href="{% static 'web/css/style.css' %}">
+{% endblock head %}
+{% block body %}
+<div class="container home" >
+    <section class="flex">
+        <form action="{% url 'job:login' %}" method="post">
+            {% if message %}
+            <h3>{{ message }}</h3>
+            {% endif %}
+            {% csrf_token %}
+            <input type="text" name="username" required maxlength="50" placeholder="username" class="box">
+            <input type="password" name="password" class="box" placeholder="password">
+            <input type="submit" value="Login" name="search" class="btn">
+            <a href="{% url 'web:index' %}" class="btn">Atras</a>
+        </form>
+    </section>
+</div>
+{% endblock body %}

@@ -1,6 +1,9 @@
 from django.shortcuts import render, redirect
 from .models import Job, Spent
 from .forms import JobForm, SpentForm
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.models import User
+
 
 def job_list(request):
     jobs = Job.objects.all()
@@ -66,3 +69,19 @@ def close_job(request, id):
     job.status = 'finished'
     job.save()
     return redirect('job:job_list')
+
+def loginView(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        if User.objects.filter(username=username).exists():
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect('web:index')
+            else:
+                content = {'message': 'contraseña incorrecta'}
+                return render(request, 'job/login.html', content)
+        content = {'message': 'usuario no existe'}
+        return render(request, 'job/login.html', content)            
+    return render(request, 'job/login.html')

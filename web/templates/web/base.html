@@ -11,6 +11,15 @@
         <title>Akssen Solutions</title>
         <link rel="stylesheet" href="{% static 'web/bootstrap v5.3/css/bootstrap.min.css' %}">
         <link rel="stylesheet" href="{% static 'web/css/allStyles.css' %}">
+        <!-- FontAwesomeFree -->
+        <link href="{% static 'fontawesomefree/css/fontawesome.css' %}" rel="stylesheet" type="text/css">
+        <link href="{% static 'fontawesomefree/css/brands.css' %}" rel="stylesheet" type="text/css">
+        <link href="{% static 'fontawesomefree/css/solid.css' %}" rel="stylesheet" type="text/css">
+        <script src="{% static 'fontawesomefree/js/fontawesome.js' %}"></script>
+        <script src="{% static 'fontawesomefree/js/solid.js' %}"></script>
+        <script src="{% static 'fontawesomefree/js/brands.js' %}"></script>
+        <!-- AOS -->
+        <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
         {% block head %}
         {% endblock head %}
     </head>
@@ -18,5 +27,8 @@
         {% block body %}
         {% endblock body %}
     <script src="{% static 'web/bootstrap v5.3/js/bootstrap.bundle.min.js' %}"></script>
-    </body>
+    <!-- AOS -->
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script src="{% static 'web/js/script.js' %}"></script>
+</body>
 </html>
