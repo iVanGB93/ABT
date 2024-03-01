@@ -1,0 +1,10 @@
+.main-frame {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: rgb(55, 112, 150);
+}
+.frame {
+    max-width: 600px; 
+    margin: auto
+}

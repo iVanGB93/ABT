@@ -1,9 +1,6 @@
 /env
 /nginx_waitress
 
-/static/admin/
-/static/job/
-/static/web/
 
 /media/jobs/
 /media/spents/
