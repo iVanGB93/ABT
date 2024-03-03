@@ -6,7 +6,7 @@
 {% block body %}
 <div class="container home" >
     <section class="flex">
-        <form action="{% url 'job:login' %}" method="post">
+        <form action="{% url 'user:login' %}" method="post">
             {% if message %}
             <h3>{{ message }}</h3>
             {% endif %}

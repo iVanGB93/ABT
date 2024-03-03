@@ -1,0 +1,28 @@
+{% extends "job/base-job.html" %}
+{% load static %}
+{% block bar %}
+<p class="lead text-center fw-bold titulo">Clientes:</p>
+{% endblock bar %}
+{% block content %}
+<div class="col-10 mt-0 mb-4 m-auto">
+    <a href="{% url 'job:create_client' %}"><button class="btn btn-outline-dark mb-2">Nuevo Cliente</button></a>
+    {% if clients %}
+    <ul class="list-group listDisplay">
+        {% for c in clients %}
+        <li class="caja list-group-item d-flex justify-content-between align-items-start mb-1">
+            <a class="list-group-item list-group-item-action" href="{% url 'job:client_detail' c.id %}">
+                <div class="ms-2 me-auto">
+                    <div class="fw-bold titulo">{{ c.user.username }}</div>
+                    <p class="card-text m-0 texto">Direccion: {{ c.address }}</p>
+                    <p class="card-text m-0 texto">Telefono: {{ c.phone }}</p>
+                    <p class="card-text m-0 texto">Email: {{ c.user.email }}</p>
+                </div>
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <div class="fw-bold text-center texto">No hay clientes guardados, cree el primero.</div>
+    {% endif %}
+</div>
+{% endblock content %}

@@ -14,7 +14,7 @@
             {% if user.is_authenticated %}
             <a href="{% url 'job:job_list' %}">Panel</a>
             {% else %}
-            <a href="{% url 'job:login' %}">Login</a>
+            <a href="{% url 'user:login' %}">Login</a>
             {% endif %}
         </nav>
         <div id="menu-btn"><i class="fas fa-bars"></i></div>
@@ -133,4 +133,5 @@
         </div>
     </section>
 </div>
+<script src="{% static 'web/js/script.js' %}"></script>
 {% endblock body %}

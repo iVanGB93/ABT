@@ -1,0 +1,36 @@
+{% extends "job/base-job.html" %}
+{% load static %}
+{% block bar %}
+<p class="lead text-center fw-bold">Crear nuevo cliente:</p>
+{% endblock bar %}
+{% block content %}
+<div class="caja mt-3" style="max-width: 400px; margin: auto; padding: 2rem;">
+    <form class="form-floating" action="{% url 'job:create_client' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-floating mb-2">
+            <input type="text" name="username" required class="form-control" id="floatingUsername" placeholder="Nombre">
+            <label for="floatingUsername">Nombre</label>
+        </div>
+        <div class="form-floating mb-2">
+            <input type="text" name="phone" class="form-control" id="floatingPhone" placeholder="Telefono">
+            <label for="floatingPhone">Telefono</label>
+        </div>
+        <div class="form-floating mb-2">
+            <input type="email" name="email" class="form-control" id="floatingInputEmail" placeholder="name@example.com">
+            <label for="floatingInputEmail">Email</label>
+        </div>
+        <div class="form-floating mb-2">
+            <input type="text" name="address" class="form-control" id="floatingAddress" placeholder="Direccion">
+            <label for="floatingAddress">Direccion</label>
+        </div>
+        <div class="input-group mb-2">
+            <input type="file" name="image" class="form-control" id="image" accept="image/*">
+            <label class="input-group-text" for="image">Imagen</label>
+          </div>
+        <div class="text-end">
+            <button class="btn btn-outline-dark" type="submit">Guardar</button>
+            <a class="btn btn-outline-danger" href="{% url 'job:client_list' %}">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock content %}

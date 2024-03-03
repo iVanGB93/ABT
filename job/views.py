@@ -1,9 +1,39 @@
 from django.shortcuts import render, redirect
 from .models import Job, Spent
 from .forms import JobForm, SpentForm
-from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
+from user.models import Profile
 
+
+def soon(request):
+    return render(request, 'job/soon.html')
+
+def client_list(request):
+    clients = Profile.objects.filter(is_client=True)
+    content = {'clients': clients}
+    return render(request, 'job/client-list.html', content)
+
+def create_client(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        email = request.POST.get('email', 'example@email.com')
+        new_user = User(username=username, email=email)
+        new_user.first_name = username
+        new_user.set_password('temporaryPassword')
+        new_user.save()
+        profile = Profile.objects.get(user=new_user)
+        profile.phone = request.POST.get('phone', '-')
+        profile.address = request.POST.get('address', '-')
+        if request.FILES.get('image'):
+            profile.image = request.FILES['image']
+        profile.save()
+        return redirect('job:client_list')
+    return render(request, 'job/create-client.html')
+
+def client_detail(request, id):
+    client = Profile.objects.get(id=id)
+    content = {'client': client}
+    return render(request, 'job/client-detail.html', content)
 
 def job_list(request):
     jobs = Job.objects.all()
@@ -12,15 +42,22 @@ def job_list(request):
 
 def create_job(request):
     form = JobForm
+    content = {'form': form}
     if request.method == 'POST':
-        form = JobForm(request.POST, request.FILES)
+        copydata = request.POST.copy()
+        profile = Profile.objects.get(id=request.POST['client'])
+        if request.POST.get('sameAddress'):
+            if profile.address != None:
+                copydata['address'] = profile.address
+            else:
+                content['message': 'El cliente no tiene direccion guardada']
+                return render(request, 'job/create-job.html', content)
+        form = JobForm(copydata, request.FILES)
         if form.is_valid():
             form.save()
+            return redirect('job:job_list')
         else:
-            error = form.errors
-            print(error)
-        return redirect('job:job_list')
-    content = {'form': form}
+            content['message'] = form.errors
     return render(request, 'job/create-job.html', content)
 
 def job_detail(request, id):
@@ -69,19 +106,3 @@ def close_job(request, id):
     job.status = 'finished'
     job.save()
     return redirect('job:job_list')
-
-def loginView(request):
-    if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        if User.objects.filter(username=username).exists():
-            user = authenticate(request, username=username, password=password)
-            if user is not None:
-                login(request, user)
-                return redirect('web:index')
-            else:
-                content = {'message': 'contraseña incorrecta'}
-                return render(request, 'job/login.html', content)
-        content = {'message': 'usuario no existe'}
-        return render(request, 'job/login.html', content)            
-    return render(request, 'job/login.html')

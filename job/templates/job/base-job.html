@@ -4,14 +4,112 @@
     <link rel="stylesheet" href="{% static 'job/css/style.css' %}">
 {% endblock head %}
 {% block body %}
-<div class="main-frame">
-    <div class="frame">
-        <div class="list-group-item d-flex justify-content-between align-items-start m-2">
-            <a href="{% url 'job:create_job' %}"><button class="btn btn-outline-light">Nuevo Trabajo</button></a>
-            <a href="{% url 'job:job_list' %}"><button class="btn btn-outline-light">Lista de Trabajos</button></a>
+<div class="fondo"></div>
+<div class="navegacion">
+    <div class="navigation">
+        <ul>
+            <li>
+                <a href="{% url 'web:index' %}">
+                    <span class="icon"><i class="fab fa-quinscape" style="font-size: 26px;"></i></span>
+                    <span class="title"><h4>AkssenSolutions</h4></span>
+                </a>
+            </li>
+            <li style="background: transparent; text-align: center;">
+                <div class="user my-3">
+                    <img  src="{{ user.profile.image.url }}" alt="user_image">            
+                </div>
+                <h4 class="seccion text-white">Hola {{ user }}</h4>
+            </li>
+            <hr class="dropdown-divider text-white" />
+            <h3 class="seccion">Mi cuenta:</h3>
+            <li>
+                <a href="{% url 'job:soon' %}">
+                    <span class="icon"><i class="fas fa-address-card"></i></span>
+                    <span class="title"><h5>Dashboard</h5></span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'job:soon' %}">
+                    <span class="icon"><i class="fas fa-user-tie"></i></span>
+                    <span class="title"><h5>Editar perfil</h5></span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'job:soon' %}">
+                    <span class="icon"><i class="fas fa-key"></i></span>
+                    <span class="title"><h5>Cambiar contraseña</h5></span>
+                </a>
+            </li>
+            <hr class="dropdown-divider text-white" />
+            <h3 class="seccion">Servicio:</h3>
+            <li>
+                <a href="{% url 'job:client_list' %}">
+                    <span class="icon"><i class="fab fa-internet-explorer"></i></span>
+                    <span class="title"><h5>Clientes</h5></span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'job:job_list' %}">
+                    <span class="icon"><i class="fas fa-network-wired"></i></span>
+                    <span class="title"><h5>Trabajos</h5></span>
+                </a>
+            </li>
+            <hr class="dropdown-divider text-white" />
+            <h3 class="seccion">Herramientas:</h3>
+            <li>
+                <a href="{% url 'job:soon' %}">
+                    <span class="icon"><i class="fas fa-donate"></i></span>
+                    <span class="title"><h5>Inventario</h5></span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+<div class="contenido">
+    <div class="barra_arriba">
+        <div class="toggle" onclick="toggleMenu();"><i class="fas fa-bars"></i></div>
+        {% block bar %}
+        {% endblock bar %}
+        <div class="boton_salir">  
+            <a class="btn btn-sm btn-outline-danger" href="{% url 'user:logout' %}"><span><i class="fas fa-sign-out-alt mx-1"></i></span>Salir</a>          
         </div>
+    </div>
+    <div class="block">
+        {% if message %}
+            <h6 class="caja">{{ message }}</h3>
+        {% endif %}
         {% block content %}
         {% endblock content %}
     </div>
+    <div class="footer">
+        <div class="social">
+            <a href="https://t.me/joinchat/MSKtLdbfoDBiMjRh" target="_blank" rel="noopener noreferrer"><i class="fab fa-telegram"></i></a>
+            <a href="https://www.youtube.com/channel/UC3eLYmYuNWN89CxTPJXcR2g" target="_blank" rel="noopener noreferrer"><i class="fab fa-youtube text-danger"></i></a>
+            <a href="https://www.twitch.tv/qbared" target="_blank" rel="noopener noreferrer"><i style="color: #7f06a3;" class="fab fa-twitch"></i></a>
+            <a href="https://discord.gg/s5QGCarBHd" target="_blank" rel="noopener noreferrer"><i style="color: #9b3bb8;" class="fab fa-discord"></i></a>
+        </div>
+        <ul class="list-inline">
+            <li class="list-inline-item"><a href="{% url 'web:index' %}">Inicio</a></li>
+        </ul>
+        <p class="copyright">Akssen Solutions © 2024</p>
+    </div>
 </div>
+<script>
+    function toggleMenu(){
+        let toggle = document.querySelector('.toggle');
+        let navigation = document.querySelector('.navigation');
+        let contenido = document.querySelector('.contenido');
+        let user = document.querySelector('.user');
+        let secciones = document.querySelectorAll('.seccion');
+        toggle.classList.toggle('active');
+        navigation.classList.toggle('active');
+        contenido.classList.toggle('active');
+        user.classList.toggle('active');
+        secciones.forEach(element => {
+            element.classList.toggle('active');
+        });
+    }
+</script>
+{% block script %}
+{% endblock script %}
 {% endblock body %}

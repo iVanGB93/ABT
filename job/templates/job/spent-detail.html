@@ -1,22 +1,26 @@
 {% extends "job/base-job.html" %}
 {% load static %}
+{% block bar %}
+<p class="lead text-center fw-bold">Detalles del gasto:</p>
+{% endblock bar %}
 {% block content %}
-<p class="lead text-center text-white">Detalles del gasto:</p>
-<div class="card">
-    <div class="row g-0">
-        <div class="col-md-8">
-            <div class="card-body">
-                <h5 class="card-title">{{ spent.amount }} usd</h5>
-                <p class="card-text">{{ spent.description }}</p>
-                <p class="card-text"><small class="text-body-secondary">{{ spent.date }}</small></p>
+<div class="col-10 mt-0 m-auto">
+    <div class="caja card">
+        <div class="row g-0">
+            <div class="col-md-8">
+                <div class="card-body">
+                    <h5 class="card-title">{{ spent.amount }} usd</h5>
+                    <p class="card-text">{{ spent.description }}</p>
+                    <p class="card-text"><small class="text-body-secondary">{{ spent.date }}</small></p>
+                </div>
+            </div>
+            <div class="col-md-4 m-auto">
+                <img src="{{ spent.image.url }}" class="img-fluid rounded-start" alt="...receipt">
             </div>
         </div>
-        <div class="col-md-4 m-auto">
-            <img src="{{ spent.image.url }}" class="img-fluid rounded-start" alt="...receipt">
-        </div>
     </div>
-</div>
-<div class="list-group-item d-flex justify-content-end align-items-start">
-    <a href="{% url 'job:job_detail' spent.job.id %}"><button class="btn btn-outline-light m-2">Atras</button></a>
+    <div class="list-group-item d-flex justify-content-end align-items-start">
+        <a href="{% url 'job:job_detail' spent.job.id %}"><button class="btn btn-outline-dark m-2">Atras</button></a>
+    </div>
 </div>
 {% endblock content %}

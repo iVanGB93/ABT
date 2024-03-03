@@ -18,6 +18,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'web.apps.WebConfig',
+    'user.apps.UserConfig',
     'job.apps.JobConfig',
     'fontawesomefree',
 ]

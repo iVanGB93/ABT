@@ -1,23 +1,26 @@
 {% extends "job/base-job.html" %}
+{% load static %}
+{% block bar %}
+<p class="lead text-center fw-bold titulo">Crear gasto:</p>
+{% endblock bar %}
 {% block content %}
-<p class="lead text-center text-white">Crear gasto:</p>
-<div style="max-width: 400px; margin: auto">
+<div class="caja mt-3" style="max-width: 400px; margin: auto; padding: 2rem;">
     <form action="{% url 'job:create_spent' job.id %}" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="form-group mb-1">
-            <label for="{{ form.description.id_label}}" class="control-label text-white">Descripcion:</label>
+            <label for="{{ form.description.id_label}}" class="control-label titulo">Descripcion:</label>
             {{ form.description }}
         </div>
         <div class="form-group mb-1">
-            <label for="{{ form.amount.id_label}}" class="control-label text-white">Cantidad:</label>
+            <label for="{{ form.amount.id_label}}" class="control-label titulo">Cantidad:</label>
             {{ form.amount }}
         </div>
         <div class="form-group mb-2">
-            <label for="{{ form.image.id_label}}" class="control-label text-white">Imagen:</label>
+            <label for="{{ form.image.id_label}}" class="control-label titulo">Imagen:</label>
             {{ form.image }}
         </div>
         <div class="text-end">
-            <button class="btn btn-outline-light" type="submit">Guardar</button>
+            <button class="btn btn-outline-dark" type="submit">Guardar</button>
             <a class="btn btn-danger" href="{% url 'job:job_detail' job.id %}">Cancelar</a>
         </div>
     </form>

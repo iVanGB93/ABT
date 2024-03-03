@@ -1,33 +1,64 @@
 {% extends "job/base-job.html" %}
+{% load static %}
+{% block bar %}
+<p class="lead text-center fw-bold titulo">Crear nuevo trabajo:</p>
+{% endblock bar %}
 {% block content %}
-<p class="lead text-center text-white">Crear nuevo trabajo:</p>
-<div style="max-width: 400px; margin: auto">
+<div class="caja mt-3" style="max-width: 400px; margin: auto; padding: 2rem;">
     <form action="{% url 'job:create_job' %}" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="form-group mb-1">
-            <label for="{{ form.client.id_label}}" class="control-label text-white">Cliente:</label>
+            <label for="{{ form.client.id_label}}" class="control-label titulo">Cliente:</label>
             {{ form.client }}
         </div>
         <div class="form-group mb-1">
-            <label for="{{ form.description.id_label}}" class="control-label text-white">Descripcion:</label>
+            <p class="texo">No encuentra el cliente?
+                <span><a class="titulo" style="color: black; margin-left: 2rem;" href="{% url 'job:create_client' %}">Crear</a></span>
+            </p>
+        </div>  
+        <div class="form-group mb-1">
+            <label for="{{ form.description.id_label}}" class="control-label titulo">Descripcion:</label>
             {{ form.description }}
         </div>
         <div class="form-group mb-1">
-            <label for="{{ form.address.id_label}}" class="control-label text-white">Direccion:</label>
+            <label for="{{ form.address.id_label}}" class="control-label titulo">Direccion:</label>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="sameAddress" id="sameAddress">
+                <label class="form-check-label texto" style="font-size: 12px;" for="sameAddress">usar la misma del cliente</label>
+            </div>
             {{ form.address }}
         </div>
         <div class="form-group mb-1">
-            <label for="{{ form.price.id_label}}" class="control-label text-white">Precio:</label>
+            <label for="{{ form.price.id_label}}" class="control-label titulo">Precio:</label>
             {{ form.price }}
         </div>
         <div class="form-group mb-2">
-            <label for="{{ form.image.id_label}}" class="control-label text-white">Imagen:</label>
+            <label for="{{ form.image.id_label}}" class="control-label titulo">Imagen:</label>
             {{ form.image }}
         </div>
         <div class="text-end">
-            <button class="btn btn-outline-light" type="submit">Guardar</button>
+            <button class="btn btn-outline-dark" type="submit">Guardar</button>
             <a class="btn btn-outline-danger" href="{% url 'job:job_list' %}">Cancelar</a>
         </div>
     </form>
 </div>
 {% endblock content %}
+{% block script %}
+<script>
+    let address = document.querySelector('#id_address');
+    let sameAddress = document.querySelector('#sameAddress');
+    sameAddress.onchange = () => {
+        if (sameAddress.checked) {
+            console.log("yes");
+            address.removeAttribute('required');
+            address.setAttribute('disabled', true);
+            address.style.display = 'none';
+        } else {
+            console.log("no");
+            address.setAttribute('required', true);
+            address.removeAttribute('disabled');
+            address.style.display = '';
+        }
+    }
+</script>
+{% endblock script %}

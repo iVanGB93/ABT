@@ -1,0 +1,45 @@
+{% extends "job/base-job.html" %}
+{% load static %}
+{% block bar %}
+<p class="lead text-center fw-bold titulo">Detalles del cliente:</p>
+{% endblock bar %}
+{% block content %}
+<div class="col-10 mt-0 mb-4 m-auto">
+    <a href="{% url 'job:client_list' %}"><button class="btn btn-outline-dark mb-2">Atras</button></a>
+    <div class="card caja">
+        <div class="row g-0">
+            <div class="col-md-8">
+                <div class="card-body">
+                    <h5 class="card-title titulo">Cliente</h5>
+                    <div class="fw-bold m-0 texto">Nombre: {{ client.user.username }}</div>
+                    <p class="card-text m-0 texto">Direccion: <a style="text-decoration: none;" href="geo:0,0?{{ client.address }}">{{ client.address }}</a></p>
+                    <p class="card-text m-0 texto">Telefono: <a style="text-decoration: none;" href="tel:{{ client.phone }}">{{ client.phone }}</a></p>
+                    <p class="card-text m-0 texto">Email: <a style="text-decoration: none;" href="mailto:{{ client.user.email }}">{{ client.user.email }}</a></p>
+                </div>
+            </div>
+            <div class="col-md-4 m-auto">
+                <img src="{{ client.image.url }}" style="width: 10rem; height: 10rem; border-radius: 50%;" class="img-fluid rounded-start" alt="...receipt">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="col-10 mt-0 mb-4 m-auto">
+    {% if client.job_set.all|length > 0 %}
+    <div class="fw-bold text-center texto">Trabajos realizado a {{ client.user.username}}:</div>
+    <ul class="list-group">
+        {% for job in client.job_set.all %}
+        <li class="caja list-group-item d-flex justify-content-between align-items-start mb-1">
+            <a class="list-group-item list-group-item-action" href="{% url 'job:job_detail' job.id %}">
+                <div class="ms-2 me-auto">
+                    <div class="fw-bold texto">{{ job.description }}, {{ job.price }} usd</div>
+                </div>
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <div class="fw-bold text-center texto">No hay trabajos realizado a {{ client.user.username}}.</div>
+    <a href="{% url 'job:create_job' %}"><button class="btn btn-outline-dark mb-2">Nuevo Trabajo</button></a>
+    {% endif %}
+</div>
+{% endblock content %}
