@@ -77,6 +77,10 @@ section {
     background: linear-gradient(0deg, transparent, var(--black));
     z-index: 1000;
 }
+.header.active {
+    background: var(--light-black);
+    box-shadow: 0 .2rem .5rem rgba(250, 250, 250, 0.3);
+}
 .header .flex {
     display: flex;
     align-items: center;
@@ -215,6 +219,7 @@ section {
 }
 .about .grid .box h3 {
     padding: 2rem 0;
+    color: var(--white);
 }
 .about .grid .box p {
     line-height: 2;
@@ -388,6 +393,8 @@ section {
     background-size: cover;
     background-position: center;
     position: relative;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 .container-home img {
     margin-left: -80px;
@@ -459,11 +466,10 @@ section {
     margin-top: 30px;
 }
 .text-box .row-types p {
-    background-color: var(--light-bg);
     font-size: 16px;
     padding: 5px;
     margin-right: 20px;
-    border: 2px solid var(--light-white);
+    width: 30%;
 }
 .text-box .row-types img {
     width: 100px;
