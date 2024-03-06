@@ -1,6 +1,14 @@
 /* @import url('https://fonts.googleapis.com/css2?family=Mate+SC&family=Rock+Salt&display=swap'); */
 /* rock-salt-regular - latin */
 @font-face {
+    font-family: 'Kode Mono';
+    font-style: 'semi-bold';
+    font-weight: 500;
+    src: local(''),
+         url('../css/fonts/KodeMono-SemiBold.ttf') format('ttf');
+}
+
+@font-face {
     font-family: 'Rock Salt';
     font-style: normal;
     font-weight: 400;
