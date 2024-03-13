@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     'web.apps.WebConfig',
     'user.apps.UserConfig',
     'job.apps.JobConfig',
+    'item.apps.ItemConfig',
     'fontawesomefree',
 ]
 

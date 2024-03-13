@@ -1,0 +1,27 @@
+{% extends "job/base-job.html" %}
+{% load static %}
+{% block bar %}
+<p class="lead text-center fw-bold">Item details:</p>
+{% endblock bar %}
+{% block content %}
+<div class="col-10 mt-0 m-auto">
+    <div class="caja card">
+        <div class="row g-0">
+            <div class="col-md-8">
+                <div class="card-body">
+                    <h5 class="card-title">{{ item.name }}, {{ item.price }} usd</h5>
+                    <p class="card-text">Amount: {{ item.amount }}</p>
+                    <p class="card-text">{{ item.description }}</p>
+                    <p class="card-text"><small class="text-body-secondary">{{ item.date }}</small></p>
+                </div>
+            </div>
+            <div class="col-md-4 text-end m-auto">
+                <img id="image-detail" src="{{ item.image.url }}" style="width: 10rem; height: 10rem; border-radius: 25px;" class="img-fluid rounded-start" alt="...receipt">
+            </div>
+        </div>
+    </div>
+    <div class="list-group-item d-flex justify-content-end align-items-start">
+        <a href="{% url 'item:items_list' %}"><button class="btn btn-outline-dark m-2">Back</button></a>
+    </div>
+</div>
+{% endblock content %}

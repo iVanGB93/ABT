@@ -13,12 +13,12 @@
                     <h5 class="card-title titulo">Cliente</h5>
                     <p class="card-text texto m-0">Nombre: <a style="text-decoration: none;" href="{% url 'job:client_detail' job.client.id %}">{{ job.client.user.username }}</a></p>
                     <p class="card-text texto m-0">Telefono: <a style="text-decoration: none;" href="tel:{{ job.client.phone }}">{{ job.client.phone }}</a></p>
-                    <p class="card-text texto m-0">Direccion: <a style="text-decoration: none;" href="geo:0,0?q={{ job.client.address }}">{{ job.client.address }}</a> <span> from computer: <a style="text-decoration: none;" target="_blank" href="https://www.google.com/maps?q={{ job.client.address }}"><i class="fa-solid fa-desktop"></i></a></p>
+                    <p class="card-text texto m-0">Direccion: <a style="text-decoration: none;" target="_blank" href="https://www.google.com/maps?q={{ job.client.address }}">{{ job.client.address }}</a></p>
                     <p class="card-text texto m-0">Email: <a style="text-decoration: none;" href="mailto:{{ job.client.user.email }}">{{ job.client.user.email }}</a></p>
                 </div>
             </div>
-            <div class="col-md-4 m-auto">
-                <img src="{{ job.image.url }}" style="width: 15rem; height: 10rem;" class="img-fluid" alt="...receipt">
+            <div class="col-md-4 text-end m-auto">
+                <img src="{{ job.client.user.profile.image.url }}" style="width: 8rem; height: 8rem; border-radius: 25%;" class="img-fluid" alt="...client">
             </div>
         </div>
     </div>
@@ -34,8 +34,8 @@
                     <p class="card-text texto"><small class="text-body-secondary">{{ job.date }}</small></p>
                 </div>
             </div>
-            <div class="col-md-4 m-auto">
-                <img src="{{ job.image.url }}" style="width: 15rem; height: 10rem;" class="img-fluid" alt="...receipt">
+            <div class="col-md-4 text-end m-auto">
+                <img src="{{ job.image.url }}" id="image-detail" style="width: 10rem; height: 10rem; border-radius: 25px;" class="img-fluid" alt="...receipt">
             </div>
         </div>
     </div>

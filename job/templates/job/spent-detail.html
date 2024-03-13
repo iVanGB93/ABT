@@ -14,12 +14,13 @@
                     <p class="card-text"><small class="text-body-secondary">{{ spent.date }}</small></p>
                 </div>
             </div>
-            <div class="col-md-4 m-auto">
-                <img src="{{ spent.image.url }}" class="img-fluid rounded-start" alt="...receipt">
+            <div class="col-md-4 text-end m-auto">
+                <img id="image-detail" src="{{ spent.image.url }}" style="width: 10rem; height: 10rem; border-radius: 25px;" class="img-fluid rounded-start" alt="...receipt">
             </div>
         </div>
     </div>
     <div class="list-group-item d-flex justify-content-end align-items-start">
+        <a href="{% url 'job:delete_spent' spent.id %}"><button class="btn btn-danger m-2">Eliminar</button></a>
         <a href="{% url 'job:job_detail' spent.job.id %}"><button class="btn btn-outline-dark m-2">Atras</button></a>
     </div>
 </div>

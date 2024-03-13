@@ -3,6 +3,7 @@
 
 
 /media/jobs/
+/media/items/
 /media/spents/
 
 db.sqlite3

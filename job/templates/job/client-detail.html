@@ -13,7 +13,7 @@
                     <h5 class="card-title titulo">Cliente</h5>
                     <div class="fw-bold m-0 texto">Nombre: {{ client.user.username }}</div>
                     <p class="card-text m-0 texto">Telefono: <a style="text-decoration: none;" href="tel:{{ client.phone }}">{{ client.phone }}</a></p>
-                    <p class="card-text m-0 texto">Direccion: <a style="text-decoration: none;" href="geo:0,0?q={{ client.address }}">{{ client.address }}</a> <span> from computer: <a style="text-decoration: none;" target="_blank" href="https://www.google.com/maps?q={{ client.address }}"><i class="fa-solid fa-desktop"></i></a></p>
+                    <p class="card-text m-0 texto">Direccion: <a style="text-decoration: none;" target="_blank" href="https://www.google.com/maps?q={{ client.address }}">{{ client.address }}</a></p>
                         <p class="card-text m-0 texto">Email: <a style="text-decoration: none;" href="mailto:{{ client.user.email }}">{{ client.user.email }}</a></p>
                 </div>
             </div>

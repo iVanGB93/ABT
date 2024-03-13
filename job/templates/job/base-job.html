@@ -57,7 +57,7 @@
             <hr class="dropdown-divider text-white" />
             <h3 class="seccion">Herramientas:</h3>
             <li>
-                <a href="{% url 'job:soon' %}">
+                <a href="{% url 'item:items_list' %}">
                     <span class="icon"><i class="fas fa-donate"></i></span>
                     <span class="title"><h5>Inventario</h5></span>
                 </a>
@@ -109,7 +109,22 @@
             element.classList.toggle('active');
         });
     }
+    if (document.getElementById("image-detail")) {
+        let image = document.getElementById("image-detail");
+        image.onclick = () => {
+            if (image.style.width === "10rem") {
+                image.style.position = "absolute";
+                image.style.width = "100%";
+                image.style.height = "100vh";
+                image.style.top = "0";
+                image.style.left = "0";
+                image.style.zIndex = "10";
+            } else {
+                image.style.position = "relative";
+                image.style.width = "10rem";
+                image.style.height = "10rem";
+            }
+        }
+    }
 </script>
-{% block script %}
-{% endblock script %}
 {% endblock body %}

@@ -8,6 +8,19 @@
     <form action="{% url 'job:create_spent' job.id %}" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="form-group mb-1">
+            <label for="{{ form.item.id_label}}" class="control-label titulo">Item:</label>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="extra" id="extra">
+                <label class="form-check-label texto" style="font-size: 12px;" for="extra">gasto extra</label>
+            </div>
+            {{ form.item }}
+        </div>
+        <div class="form-group mb-1">
+            <p class="texo">No encuentra el item?
+                <span><a class="titulo" style="color: black; margin-left: 2rem;" href="{% url 'item:create_item' %}">Crear</a></span>
+            </p>
+        </div>  
+        <div class="form-group mb-1">
             <label for="{{ form.description.id_label}}" class="control-label titulo">Descripcion:</label>
             {{ form.description }}
         </div>
@@ -26,3 +39,26 @@
     </form>
 </div>
 {% endblock content %}
+{% block script %}
+<script>
+    let item = document.querySelector('#id_item');
+    let description = document.querySelector('#id_description');
+    let amount = document.querySelector('#id_amount');
+    let extra = document.querySelector('#extra');
+    extra.onchange = () => {
+        if (extra.checked) {
+            item.removeAttribute('required');
+            description.setAttribute('required', true);
+            amount.setAttribute('required', true);
+            item.setAttribute('disabled', true);
+            item.style.display = 'none';
+        } else {
+            item.setAttribute('required', true);
+            description.removeAttribute('required');
+            amount.removeAttribute('required');
+            item.removeAttribute('disabled');
+            item.style.display = '';
+        }
+    }
+</script>
+{% endblock script %}
