@@ -1,6 +1,11 @@
 .listDisplay {
   height: 70vh;
   overflow-y: scroll;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+.listDisplay li a {
+  text-decoration: none;
 }
 .fondo {
   top: 0;

@@ -5,19 +5,19 @@
 {% endblock bar %}
 {% block content %}
 <div class="col-10 mt-0 mb-4 m-auto">
-    <a href="{% url 'item:create_item' %}"><button class="btn btn-outline-dark mb-2">New Item</button></a>
+    <a href="{% url 'item:create_item' %}"><button class="btn btn-outline-dark m-2">New Item</button></a>
     {% if items %}
     <ul class="list-group listDisplay">
         {% for i in items %}
-        <li class="caja list-group-item d-flex justify-content-between align-items-start mb-1">
-            <span class="badge text-bg-primary rounded-pill">{{ i.amount }}</span>
-            <a class="list-group-item list-group-item-action" href="{% url 'item:item_detail' i.id %}">
-                <div class="ms-2 me-auto">
-                    <div class="fw-bold titulo">{{ i.name }}</div>
+        <li class="caja list-group-item mb-1">
+            <a class="d-flex justify-content-between align-items-start" href="{% url 'item:item_detail' i.id %}">
+                <span class="badge text-bg-primary rounded-pill">{{ i.amount }}</span>
+                <div class="ms-2 me-auto text-dark">
+                    <div class="fw-bold border-bottom titulo">{{ i.name }}</div>
                     <p class="texto">{{ i.description}}</p>
                 </div>
+                <span class="badge text-bg-primary rounded-pill">{{ i.price }} usd</span>
             </a>
-            <span class="badge text-bg-primary rounded-pill">{{ i.price }} usd</span>
         </li>
         {% endfor %}
     </ul>

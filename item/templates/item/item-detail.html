@@ -1,7 +1,7 @@
 {% extends "job/base-job.html" %}
 {% load static %}
 {% block bar %}
-<p class="lead text-center fw-bold">Item details:</p>
+<p class="lead text-center titulo fw-bold">Item details:</p>
 {% endblock bar %}
 {% block content %}
 <div class="col-10 mt-0 m-auto">
@@ -21,7 +21,28 @@
         </div>
     </div>
     <div class="list-group-item d-flex justify-content-end align-items-start">
+        <a href="{% url 'item:delete_item' item.id %}"><button class="btn btn-danger m-2">Delete</button></a>
         <a href="{% url 'item:items_list' %}"><button class="btn btn-outline-dark m-2">Back</button></a>
+    </div>
+    <div class="div">
+        {% if items %}
+    <ul class="list-group listDisplay">
+        {% for i in items %}
+        <li class="caja list-group-item mb-1">
+            <a class="d-flex justify-content-between align-items-start" href="{% url 'job:job_detail' i.job.id %}">
+                <span class="badge text-bg-primary rounded-pill">{{ i.amount }}</span>
+                <div class="ms-2 me-auto text-dark">
+                    <div class="fw-bold border-bottom titulo">{{ i.job.client }}</div>
+                    <p class="texto">{{ i.job.description}}</p>
+                </div>
+                <span class="badge text-bg-primary rounded-pill">{{ i.price }} usd</span>
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <div class="fw-bold text-center">No items used yet.</div>
+    {% endif %}
     </div>
 </div>
 {% endblock content %}

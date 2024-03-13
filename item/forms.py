@@ -1,5 +1,5 @@
 from django import forms
-from .models import Item
+from .models import Item_List
 
 
 class ItemForm(forms.ModelForm):
@@ -11,10 +11,11 @@ class ItemForm(forms.ModelForm):
     image = forms.ImageField(widget=forms.FileInput(attrs={'class': 'form-control'}))
 
     class Meta:
-        model = Item
+        model = Item_List
         fields = ['name', 'description', 'amount', 'price', 'image']
     
     def __init__(self, *args, **kwargs):
         super(ItemForm, self).__init__(*args, **kwargs)
         self.fields['image'].required = False
         self.fields['description'].required = False
+

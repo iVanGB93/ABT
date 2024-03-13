@@ -1,6 +1,6 @@
 from django import forms
 from .models import Job, Spent
-from item.models import Item
+from item.models import Item_List
 from user.models import Profile
 
 class JobForm(forms.ModelForm):
@@ -21,7 +21,7 @@ class JobForm(forms.ModelForm):
 
 class SpentForm(forms.ModelForm):
 
-    item = forms.ModelChoiceField(queryset=Item.objects.filter(amount__gt=0), widget=forms.Select(attrs={'class': 'form-control', 'placeholder': 'Item'}))
+    item = forms.ModelChoiceField(queryset=Item_List.objects.filter(amount__gt=0), widget=forms.Select(attrs={'class': 'form-control', 'placeholder': 'Item'}))
     description = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'En que fue el gasto'}))
     amount = forms.IntegerField(widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '0'}))
     image = forms.ImageField(widget=forms.FileInput(attrs={'class': 'form-control'}))

@@ -56,11 +56,11 @@
     {% endif %}
     <p class="lead text-center fw-bold titulo">Gastos:</p>
     {% if spents %}
-    <ul class="list-group">
+    <ul class="list-group listDisplay">
         {% for spent in spents %}
-        <li class="caja list-group-item d-flex justify-content-between align-items-start mb-1">
-            <a class="list-group-item list-group-item-action" href="{% url 'job:spent_detail' spent.id %}">
-                <div class="ms-2 me-auto">
+        <li class="caja list-group-item mb-1">
+            <a class="d-flex justify-content-between align-items-start" href="{% url 'job:spent_detail' spent.id %}">
+                <div class="ms-2 me-auto text-dark">
                     <div class="fw-bold texto m-0">{{ spent.amount }} usd</div>
                     <p class="texto m-0">{{ spent.description}}</p>
                 </div>

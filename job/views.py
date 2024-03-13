@@ -3,7 +3,7 @@ from .models import Job, Spent
 from .forms import JobForm, SpentForm
 from django.contrib.auth.models import User
 from user.models import Profile
-from item.models import Item
+from item.models import Item, Item_List
 
 
 def soon(request):
@@ -86,10 +86,11 @@ def create_spent(request, id):
         form_data = request.POST.copy()
         form = SpentForm(form_data, request.FILES)
         if not request.POST.get('extra'):
-            item = Item.objects.get(id=request.POST['item'])
+            item = Item_List.objects.get(id=request.POST['item'])
             form.data['amount'] = item.price
             form.data['description'] = item.name
             item.amount = item.amount - 1
+            used_item = Item(list=item, name=item.name, description=item.description, price=item.price)
         if form.is_valid():
             job_form = form.save(commit=False)
             job_form.job_id = job.id
@@ -98,6 +99,7 @@ def create_spent(request, id):
             job.save()
             item.spent = job_form
             item.save()
+            used_item.save()
             return redirect('job:job_detail', job.id)
         else:
             error = form.errors
