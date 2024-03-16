@@ -7,9 +7,11 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('items/', include('item.urls')),
     path('jobs/', include('job.urls')),
+    path('api/jobs/', include('job.api.urls')),
     path('user/', include('user.urls')),
     path('', include('web.urls')),
     path('admin/', admin.site.urls),
+    path('api-auth/', include('rest_framework.urls'))
 ]
 
 if settings.DEBUG:
