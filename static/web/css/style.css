@@ -155,11 +155,15 @@ section {
 }
 
 .about {
-    background: url('../images/home.jpg') no-repeat rgba(0,0,0,.5);
+    /* background: url('../images/home.jpg') no-repeat rgba(0,0,0,.5); */
+    background-color: rgb(150, 150, 150);
     background-position: center;
     background-attachment: fixed;
     background-size: cover;
     background-blend-mode: multiply;
+}
+.about h1 {
+    color: #000;
 }
 .about .details {
     border-radius: .5rem;

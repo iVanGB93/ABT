@@ -248,7 +248,6 @@ class SpentView(APIView):
         return Response(status=status.HTTP_200_OK, data=data)
     
     def post(self, request, queryset=None, **kwargs):
-        print("LLEGO", request)
         pk = self.kwargs.get('pk')
         data = request.data
         print("SPENT DATA", pk, data)
