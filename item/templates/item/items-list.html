@@ -11,6 +11,7 @@
         {% for i in items %}
         <li class="caja list-group-item mb-1">
             <a class="d-flex justify-content-between align-items-start" href="{% url 'item:item_detail' i.id %}">
+                <img src="{{ i.image.url }}" style="width: 4rem; height: 4rem;" class="img-fluid rounded" alt="...client">
                 <span class="badge text-bg-primary rounded-pill">{{ i.amount }}</span>
                 <div class="ms-2 me-auto text-dark">
                     <div class="fw-bold border-bottom titulo">{{ i.name }}</div>

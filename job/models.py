@@ -23,9 +23,15 @@ class Job(models.Model):
 def upload_to_spent(instance, filename):
     return 'spents/{filename}'.format(filename=filename)
 
+def __str__(self):
+        return self.description
+
 class Spent(models.Model):
     job = models.ForeignKey(Job, on_delete=models.CASCADE)
     description = models.CharField(max_length=150)
     amount = models.IntegerField()
     image = models.ImageField(upload_to=upload_to_spent, default='spentDefault.jpg')
     date = models.DateTimeField(db_default=Now())
+
+    def __str__(self):
+        return self.description

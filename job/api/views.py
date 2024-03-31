@@ -6,7 +6,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 
 from job.api.serializers import JobSerializer, ClientSerializer, ItemListSerializer, ItemSerializer, SpentSerializer
 from job.models import Job, Spent
-from item.models import Item_List
+from item.models import Item_List, Item
 from user.models import Profile
 
 
@@ -248,15 +248,25 @@ class SpentView(APIView):
         return Response(status=status.HTTP_200_OK, data=data)
     
     def post(self, request, queryset=None, **kwargs):
+        print("LLEGO", request)
         pk = self.kwargs.get('pk')
         data = request.data
-        print("SPENT DATA", pk)
+        print("SPENT DATA", pk, data)
         action = data['action']
         response = {'OK': False}
         if action == 'new':
             job = Job.objects.get(id=data['job_id'])
             new_spent = Spent(job=job, description=data['description'], amount=data['price'])
-            new_spent.image = data.get('image', new_spent.image)
+            if data['use_item'] == 'true':
+                item_list = Item_List.objects.get(name=data['description'])
+                item = Item(list=item_list, job=job, name=item_list.name, description=item_list.description, price=item_list.price)
+                item.image = data.get('image', item_list.image)
+                new_spent.image = data.get('image', item.image)
+                item.save()
+                item_list.amount = item_list.amount - 1
+                item_list.save()
+            else:
+                new_spent.image = data.get('image', new_spent.image)
             new_spent.save()
             response['message'] = "New Spent created."
             response['OK'] = True

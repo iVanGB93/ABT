@@ -22,7 +22,7 @@ def upload_to_item(instance, filename):
 
 class Item(models.Model):
     list = models.ForeignKey(Item_List, on_delete=models.CASCADE)
-    job = models.OneToOneField(Job, on_delete=models.CASCADE)
+    job = models.ForeignKey(Job, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     description = models.CharField(max_length=150)
     price = models.IntegerField()
