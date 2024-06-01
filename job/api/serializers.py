@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from job.models import Job, Spent
+from job.models import Job, Spent, Invoice, Charge
 from user.models import Profile
 from item.models import Item_List, Item
 
@@ -44,4 +44,16 @@ class SpentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Spent
+        fields = '__all__'
+
+class InvoiceSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Invoice
+        fields = '__all__'
+    
+class ChargeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Charge
         fields = '__all__'

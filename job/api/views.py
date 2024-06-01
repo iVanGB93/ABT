@@ -4,8 +4,8 @@ from rest_framework import status
 from django.contrib.auth.models import User
 from rest_framework.parsers import MultiPartParser, FormParser
 
-from job.api.serializers import JobSerializer, ClientSerializer, ItemListSerializer, ItemSerializer, SpentSerializer
-from job.models import Job, Spent
+from job.api.serializers import JobSerializer, InvoiceSerializer, ItemListSerializer, ItemSerializer, SpentSerializer, ChargeSerializer
+from job.models import Job, Spent, Invoice, Charge
 from item.models import Item_List, Item
 from user.models import Profile
 
@@ -13,25 +13,12 @@ from user.models import Profile
 class JobsView(APIView):
 
     def get(self, request, queryset=None, **kwargs):
-        job_id = self.kwargs.get('pk')
-        print('pk', job_id)
-        if job_id != 'all':
-            client = Profile.objects.get(id=job_id)
-            jobs = Job.objects.filter(client=client)
-        else:
-            jobs = Job.objects.all()
+        provider = self.kwargs.get('pk')
+        provider_user = User.objects.get(username=provider)
+        jobs = Job.objects.filter(provider=provider_user)
         data = []
         for job in jobs:
             data.append(JobSerializer(job).data)
-        return Response(status=status.HTTP_200_OK, data=data)
-
-class ClientsView(APIView):
-
-    def get(self, request, queryset=None, **kwargs):
-        clients = Profile.objects.filter(is_client=True)
-        data = []
-        for client in clients:
-            data.append(ClientSerializer(client).data)
         return Response(status=status.HTTP_200_OK, data=data)
 
 class JobView(APIView):
@@ -48,9 +35,9 @@ class JobView(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND, data=data)
         
     def post(self, request, queryset=None, **kwargs):
-        pk = self.kwargs.get('pk')
+        provider = self.kwargs.get('pk')
+        provider_user = User.objects.get(username=provider)
         data = request.data
-        print("JOBS DATA", data)
         action = data['action']
         response = {'OK': False}
         if action == 'new':
@@ -60,14 +47,14 @@ class JobView(APIView):
                 response['message'] = "Client does not exits."
                 return Response(status=status.HTTP_200_OK, data=response)
             user = User.objects.get(username=username)
-            new_job = Job(client=user.profile, description=data['description'], address=data['address'], price=data['price'])
+            new_job = Job(client=user.profile, provider=provider_user, description=data['description'], address=data['address'], price=data['price'])
             new_job.save()
             response['message'] = "New job created."
             response['OK'] = True
         if action == 'update':
             data = request.data
-            if Job.objects.filter(id=pk).exists():
-                job = Job.objects.get(id=pk)
+            if Job.objects.filter(id=data['id']).exists():
+                job = Job.objects.get(id=data['id'])
                 job.description = data.get('description', job.description)
                 job.price = data.get('price', job.price)
                 job.address = data.get('address', job.address)
@@ -80,8 +67,8 @@ class JobView(APIView):
                 response['message'] = "Job not found."
                 return Response(status=status.HTTP_200_OK, data=response)
         if action == 'delete':
-            if Job.objects.filter(id=pk).exists():
-                job = Job.objects.get(id=pk)
+            if Job.objects.filter(id=data['id']).exists():
+                job = Job.objects.get(id=data['id'])
                 job.delete()
                 response['message'] = "Job Deleted."
                 response['OK'] = True
@@ -90,8 +77,8 @@ class JobView(APIView):
                 response['message'] = "Job not found."
                 return Response(status=status.HTTP_200_OK, data=response)
         if action == 'close':
-            if Job.objects.filter(id=pk).exists():
-                job = Job.objects.get(id=pk)
+            if Job.objects.filter(id=data['id']).exists():
+                job = Job.objects.get(id=data['id'])
                 job.closed = True
                 job.status = 'finished'
                 job.save()
@@ -103,71 +90,6 @@ class JobView(APIView):
                 return Response(status=status.HTTP_200_OK, data=response)
         return Response(status=status.HTTP_200_OK, data=response)
 
-class ClientView(APIView):
-    parser_classes = [MultiPartParser, FormParser]
-
-    def get(self, request, queryset=None, **kwargs):
-        client_id = self.kwargs.get('pk') 
-        client = Profile.objects.get(id=client_id)
-        data = ClientSerializer(client).data
-        return Response(status=status.HTTP_200_OK, data=data)
-
-    def post(self, request, queryset=None, **kwargs):
-        pk = self.kwargs.get('pk')
-        data = request.data
-        print("CLIENt DATA", data)
-        action = data['action']
-        response = {'OK': False}
-        if action == 'new':
-            username = data['name']
-            email = data['email']
-            if User.objects.filter(username=username).exists():
-                response['message'] = "Name is already taken."
-                return Response(status=status.HTTP_200_OK, data=response)
-            new_user = User(username=username, email=email)
-            new_user.first_name = username
-            new_user.set_password('temporaryPassword')
-            new_user.save()
-            profile = Profile.objects.get(user=new_user)
-            profile.phone = data.get('phone', profile.phone)
-            profile.address = data.get('address', profile.address)
-            profile.image = data.get('image', profile.image)
-            profile.save()
-            response['message'] = "New client created."
-            response['OK'] = True
-        if action == 'update':
-            if not data.get('id'):
-                response['message'] = "Client id required."
-                return Response(status=status.HTTP_200_OK, data=response)
-            if Profile.objects.filter(id=pk).exists():
-                profile = Profile.objects.get(id=pk)
-                profile.phone = data.get('phone', profile.phone)
-                profile.address = data.get('address', profile.address)
-                profile.image = data.get('image', profile.image)
-                profile.save()
-                user = profile.user
-                user.username = data['name']
-                user.first_name = data['name']
-                user.email = data.get('email', user.email)
-                user.save()
-                response['message'] = "Client Updated."
-                response['OK'] = True
-                return Response(status=status.HTTP_200_OK, data=response)
-            else:
-                response['message'] = "Client not found."
-                return Response(status=status.HTTP_200_OK, data=response)
-        if action == 'delete':
-            if Profile.objects.filter(id=pk).exists():
-                profile = Profile.objects.get(id=pk)
-                user = profile.user
-                user.delete()
-                response['message'] = "Client Deleted."
-                response['OK'] = True
-                return Response(status=status.HTTP_200_OK, data=response)
-            else:
-                response['message'] = "Client not found."
-                return Response(status=status.HTTP_200_OK, data=response)
-        return Response(status=status.HTTP_200_OK, data=response)
 
 class ItemView(APIView):
     parser_classes = [MultiPartParser, FormParser]
@@ -293,3 +215,85 @@ class SpentView(APIView):
                 response['message'] = "Spent not found."
                 return Response(status=status.HTTP_200_OK, data=response)
         return Response(status=status.HTTP_200_OK, data=response)
+
+class InvoiceView(APIView):
+
+    def get(self, request, queryset=None, **kwargs):
+        pk = self.kwargs.get('pk')
+        if Invoice.objects.filter(job_id=pk).exists():
+            invoice = Invoice.objects.get(job_id=pk)
+            provider = str(invoice.job.provider.pk).zfill(3)[:3]
+            last_invoice = Invoice.objects.filter(number__startswith='2').order_by('-number').first()
+            print(provider, last_invoice)
+            data = {"invoice": InvoiceSerializer(invoice).data}
+            charges = Charge.objects.filter(invoice=invoice)
+            charges_list = []
+            for charge in charges:
+                charge_data = ChargeSerializer(charge).data
+                charges_list.append(charge_data)
+            data['charges'] = charges_list
+            return Response(status=status.HTTP_200_OK, data=data)
+        else:
+            data = {'message': 'Invoice not created yet.'}
+            return Response(status=status.HTTP_202_ACCEPTED, data=data)
+    
+    def post(self, request, queryset=None, **kwargs):
+        pk = self.kwargs.get('pk')
+        data = request.data
+        job = Job.objects.get(id=pk)
+        client = User.objects.get(username=job.client)
+        due = int(data['price']) - int(data['paid'])
+        invoice = Invoice(job=job, bill_to=client, total=data['price'], paid=data['paid'], due=due)
+        invoice.save()
+        charges = data['charges']
+        if charges:
+            charges_list = []
+            for charge in charges:
+                new_charge = Charge(invoice=invoice, description=charge['description'], amount=charge['amount'])
+                new_charge.save()
+                charge_data = ChargeSerializer(new_charge).data
+                charges_list.append(charge_data)
+        data = {"invoice": InvoiceSerializer(invoice).data}
+        data['charges'] = charges_list
+        return Response(status=status.HTTP_200_OK, data=data)
+
+    def put(self, request, queryset=None, **kwargs):
+        pk = self.kwargs.get('pk')
+        data = request.data
+        job = Job.objects.get(id=pk)
+        invoice = Invoice.objects.get(job=job)
+        due = int(data['price']) - int(data['paid'])
+        job.total=data['price']
+        job.paid = data['paid']
+        job.due = due
+        charges = data['charges']
+        if charges:
+            charges_list = []
+            for charge in charges:
+                new_charge = Charge(invoice=invoice, description=charge['description'], amount=charge['amount'])
+                new_charge.save()
+                charge_data = ChargeSerializer(new_charge).data
+                charges_list.append(charge_data)
+        invoice.save()
+        data = {"invoice": InvoiceSerializer(invoice).data}
+        data['charges'] = charges_list
+        return Response(status=status.HTTP_200_OK, data=data)
+
+class ChargeView(APIView):
+
+    def get(self, request, queryset=None, **kwargs):
+        print("!")
+        pk = self.kwargs.get('pk')
+        if Invoice.objects.filter(id=pk).exists():
+            invoice = Invoice.objects.get(id=pk)
+            charges = Charge.objects.filter(invoice=invoice)
+            data = []
+            for charge in charges:
+                charge_data = ChargeSerializer(charge).data
+                data.append(charge_data)
+            print("DATA", data)
+            return Response(status=status.HTTP_200_OK, data=data)
+        else:
+            data = {'message': 'Invoice not created yet.'}
+            return Response(status=status.HTTP_404_NOT_FOUND, data=data)
+    

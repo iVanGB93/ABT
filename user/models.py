@@ -12,6 +12,7 @@ class Profile(models.Model):
     address = models.CharField(max_length=150, default='-')
     image = models.ImageField(_("Image"), upload_to=upload_to, default='userDefault.jpg')
     is_client = models.BooleanField(default=True)
+    provider = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='clients', null=True, blank=True)
 
     def __str__(self):
         return self.user.username
