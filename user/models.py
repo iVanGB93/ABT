@@ -6,13 +6,17 @@ from django.db import models
 def upload_to(instance, filename):
     return 'user/{filename}'.format(filename=filename)
 
+def upload_logo_to(instance, filename):
+    return 'logo/{filename}'.format(filename=filename)
+
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     phone = models.CharField(max_length=15, default='-')
     address = models.CharField(max_length=150, default='-')
     image = models.ImageField(_("Image"), upload_to=upload_to, default='userDefault.jpg')
+    business_name = models.CharField(max_length=150, default='Business Name')
+    business_logo = models.ImageField(_("Image"), upload_to=upload_logo_to, default='logoDefault.png')
     is_client = models.BooleanField(default=True)
-    provider = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='clients', null=True, blank=True)
 
     def __str__(self):
         return self.user.username

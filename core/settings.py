@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'web.apps.WebConfig',
     'user.apps.UserConfig',
+    'client.apps.ClientConfig',
     'job.apps.JobConfig',
     'item.apps.ItemConfig',
     'fontawesomefree',

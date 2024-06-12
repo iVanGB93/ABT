@@ -12,7 +12,7 @@ class JobSerializer(serializers.ModelSerializer):
         fields = ('id', 'status', 'client', 'description', 'address', 'price', 'date', 'image')
     
     def get_client(self, obj):
-        return obj.client.user.username
+        return obj.client.name
 
 class ClientSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()

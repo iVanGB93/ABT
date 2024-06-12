@@ -8,6 +8,7 @@ from job.api.serializers import JobSerializer, InvoiceSerializer, ItemListSerial
 from job.models import Job, Spent, Invoice, Charge
 from item.models import Item_List, Item
 from user.models import Profile
+from client.models import Client
 
 
 class JobsView(APIView):
@@ -36,18 +37,28 @@ class JobView(APIView):
         
     def post(self, request, queryset=None, **kwargs):
         provider = self.kwargs.get('pk')
-        provider_user = User.objects.get(username=provider)
         data = request.data
         action = data['action']
         response = {'OK': False}
+        if action == 'delete':
+            if Job.objects.filter(id=provider).exists():
+                job = Job.objects.get(id=provider)
+                job.delete()
+                response['message'] = "Job Deleted."
+                response['OK'] = True
+                return Response(status=status.HTTP_200_OK, data=response)
+            else:
+                response['message'] = "Job not found."
+                return Response(status=status.HTTP_200_OK, data=response)
+        provider_user = User.objects.get(username=provider)
         if action == 'new':
             data = request.data
-            username = data['name']
-            if not User.objects.filter(username=username).exists():
+            name = data['name']
+            if not Client.objects.filter(name=name).exists():
                 response['message'] = "Client does not exits."
                 return Response(status=status.HTTP_200_OK, data=response)
-            user = User.objects.get(username=username)
-            new_job = Job(client=user.profile, provider=provider_user, description=data['description'], address=data['address'], price=data['price'])
+            client = Client.objects.get(name=name)
+            new_job = Job(client=client, provider=provider_user, description=data['description'], address=data['address'], price=data['price'])
             new_job.save()
             response['message'] = "New job created."
             response['OK'] = True

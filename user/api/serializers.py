@@ -18,13 +18,13 @@ class RegisterSerializer(serializers.ModelSerializer):
         )
         return user
 
-class ClientSerializer(serializers.ModelSerializer):
+class AccountSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
     email = serializers.SerializerMethodField()
 
     class Meta:
         model = Profile
-        fields = ('id', 'user', 'phone', 'address', 'email', 'image')
+        fields = ('id', 'user', 'phone', 'address', 'email', 'image', 'business_name', 'business_logo')
     
     def get_user(self, obj):
         return obj.user.username

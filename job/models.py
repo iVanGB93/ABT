@@ -1,6 +1,6 @@
 from django.db import models
 from django.db.models.functions import Now
-from user.models import Profile
+from client.models import Client
 from django.contrib.auth.models import User
 
 def upload_to_job(instance, filename):
@@ -12,7 +12,8 @@ class Job(models.Model):
         'active': 'ACTIVE',
         'finished': 'FINISHED'
     }
-    client = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    provider = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='job', null=True, blank=True)
+    client = models.ForeignKey(Client, on_delete=models.CASCADE)
     status = models.CharField(max_length=15, choices=status_options, default='new')
     description = models.CharField(max_length=150)
     address = models.CharField(max_length=150)
@@ -20,7 +21,6 @@ class Job(models.Model):
     image = models.ImageField(upload_to=upload_to_job, default='jobDefault.jpg')
     date = models.DateTimeField(db_default=Now())
     closed = models.BooleanField(default=False)
-    provider = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='job', null=True, blank=True)
 
     def __str__(self):
             return f"{self.description} for {self.client}"
