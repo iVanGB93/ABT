@@ -12,7 +12,7 @@ class Job(models.Model):
         'active': 'ACTIVE',
         'finished': 'FINISHED'
     }
-    provider = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='job', null=True, blank=True)
+    provider = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='provider', null=True, blank=True)
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
     status = models.CharField(max_length=15, choices=status_options, default='new')
     description = models.CharField(max_length=150)
@@ -29,7 +29,7 @@ def upload_to_spent(instance, filename):
     return 'spents/{filename}'.format(filename=filename)
 
 class Spent(models.Model):
-    job = models.ForeignKey(Job, on_delete=models.CASCADE)
+    job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name='job')
     description = models.CharField(max_length=150)
     amount = models.IntegerField()
     image = models.ImageField(upload_to=upload_to_spent, default='spentDefault.jpg')
@@ -39,10 +39,10 @@ class Spent(models.Model):
         return self.description
     
 class Invoice(models.Model):
-    job = models.OneToOneField(Job, on_delete=models.CASCADE)
+    job = models.OneToOneField(Job, on_delete=models.CASCADE, related_name='invoice')
     number = models.CharField(max_length=7, editable=False, unique=True)
     date = models.DateTimeField(db_default=Now())
-    bill_to = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='invoice', null=True, blank=True)
+    bill_to = models.ForeignKey(Client, on_delete=models.SET_NULL, related_name='client', null=True, blank=True)
     total = models.BigIntegerField()
     paid = models.BigIntegerField()
     due = models.BigIntegerField()
@@ -64,6 +64,6 @@ class Invoice(models.Model):
         return f"Invoice {self.number}"
 
 class Charge(models.Model):
-    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE)
+    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE, related_name='charges')
     description = models.CharField(max_length=150)
     amount = models.IntegerField()

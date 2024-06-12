@@ -101,7 +101,6 @@ class JobView(APIView):
                 return Response(status=status.HTTP_200_OK, data=response)
         return Response(status=status.HTTP_200_OK, data=response)
 
-
 class ItemView(APIView):
     parser_classes = [MultiPartParser, FormParser]
 
@@ -252,9 +251,8 @@ class InvoiceView(APIView):
         pk = self.kwargs.get('pk')
         data = request.data
         job = Job.objects.get(id=pk)
-        client = User.objects.get(username=job.client)
         due = int(data['price']) - int(data['paid'])
-        invoice = Invoice(job=job, bill_to=client, total=data['price'], paid=data['paid'], due=due)
+        invoice = Invoice(job=job, bill_to=job.client, total=data['price'], paid=data['paid'], due=due)
         invoice.save()
         charges = data['charges']
         if charges:
@@ -274,11 +272,14 @@ class InvoiceView(APIView):
         job = Job.objects.get(id=pk)
         invoice = Invoice.objects.get(job=job)
         due = int(data['price']) - int(data['paid'])
-        job.total=data['price']
-        job.paid = data['paid']
-        job.due = due
+        invoice.total=data['price']
+        invoice.paid = data['paid']
+        invoice.due = due
         charges = data['charges']
         if charges:
+            actual_charges = invoice.charges.all()
+            for c in actual_charges:
+                c.delete()
             charges_list = []
             for charge in charges:
                 new_charge = Charge(invoice=invoice, description=charge['description'], amount=charge['amount'])
