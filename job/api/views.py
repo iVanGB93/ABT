@@ -40,6 +40,18 @@ class JobView(APIView):
         data = request.data
         action = data['action']
         response = {'OK': False}
+        if action == 'close':
+            if Job.objects.filter(id=data['id']).exists():
+                job = Job.objects.get(id=data['id'])
+                job.closed = True
+                job.status = 'finished'
+                job.save()
+                response['message'] = "Job Closed."
+                response['OK'] = True
+                return Response(status=status.HTTP_200_OK, data=response)
+            else:
+                response['message'] = "Job not found."
+                return Response(status=status.HTTP_200_OK, data=response)
         if action == 'delete':
             if Job.objects.filter(id=provider).exists():
                 job = Job.objects.get(id=provider)
@@ -72,28 +84,6 @@ class JobView(APIView):
                 job.image = data.get('image', job.image)
                 job.save()
                 response['message'] = "Job Updated."
-                response['OK'] = True
-                return Response(status=status.HTTP_200_OK, data=response)
-            else:
-                response['message'] = "Job not found."
-                return Response(status=status.HTTP_200_OK, data=response)
-        if action == 'delete':
-            if Job.objects.filter(id=data['id']).exists():
-                job = Job.objects.get(id=data['id'])
-                job.delete()
-                response['message'] = "Job Deleted."
-                response['OK'] = True
-                return Response(status=status.HTTP_200_OK, data=response)
-            else:
-                response['message'] = "Job not found."
-                return Response(status=status.HTTP_200_OK, data=response)
-        if action == 'close':
-            if Job.objects.filter(id=data['id']).exists():
-                job = Job.objects.get(id=data['id'])
-                job.closed = True
-                job.status = 'finished'
-                job.save()
-                response['message'] = "Job Closed."
                 response['OK'] = True
                 return Response(status=status.HTTP_200_OK, data=response)
             else:
