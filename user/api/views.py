@@ -45,6 +45,8 @@ class AccountView(APIView):
         profile.business_logo = data.get('business_logo', profile.business_logo)
         profile.phone = data.get('phone', profile.phone)
         profile.address = data.get('address', profile.address)
+        user.email = data.get('email', user.email)
+        user.save()
         profile.save()
         data = AccountSerializer(profile).data
         return Response(status=status.HTTP_200_OK, data=data)
