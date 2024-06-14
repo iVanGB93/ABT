@@ -9,14 +9,13 @@ from item.models import Item, Item_List
 def soon(request):
     return render(request, 'job/soon.html')
 
-def invoice_detail(request, id):
-    if Invoice.objects.filter(id=id).exists():
-        invoice = Invoice.objects.get(id=id)
+def invoice_detail(request, number):
+    if Invoice.objects.filter(number=number).exists():
+        invoice = Invoice.objects.get(number=number)
         content = {'invoice': invoice}
         return render(request, 'job/invoice-details.html', content)
     else:
-        content = {'message': 'No invoice found for your ID'}
-        print('asda')
+        content = {'message': 'No invoice number found.'}
         return render(request, 'job/invoice-details.html', content)
 
 def client_list(request):

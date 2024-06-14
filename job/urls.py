@@ -16,5 +16,5 @@ urlpatterns = [
     path('create/spent/<int:id>/', create_spent, name='create_spent'),
     path('detail/spent/<int:id>/', spent_detail, name='spent_detail'),
     path('delete/spent/<int:id>/', delete_spent, name='delete_spent'),
-    path('invoice/<int:id>/', invoice_detail, name='invoice_detail'),
+    path('invoice/<str:number>/', invoice_detail, name='invoice_detail'),
 ]

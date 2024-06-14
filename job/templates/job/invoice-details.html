@@ -22,24 +22,24 @@
             <p class="invoice-title">{{message}}</p>
         {% else %}
         <div class="header">
-            <img src=${base64Image} alt="logo-image" style="width: 150px; height: 150px"/>
+            <img src="{{ invoice.job.provider.profile.business_logo.url}}" alt="logo-image" style="width: 150px; height: 150px"/>
             <div class="business-section">
-                <p class="invoice-title">${businessName}</p>
-                <p class="business-details">address</p>
-                <p class="business-details">phone</p>
-                <p class="business-details">email</p>
-                <p class="invoice-number">Invoice #${invoice.number}</p>
-                <p class="business-details">${formatDate(new Date(invoice.date))}</p>
+                <p class="invoice-title">{{ invoice.job.provider.username }}</p>
+                <p class="business-details">{{ invoice.job.provider.profile.address }}</p>
+                <p class="business-details">{{ invoice.job.provider.profile.phone }}</p>
+                <p class="business-details">{{ invoice.job.provider.profile.email }}</p>
+                <p class="invoice-number">Invoice #{{invoice.number}}</p>
+                <p class="business-details">{{ invoice.date }}</p>
             </div>
         </div>
         <hr>
         <div class="details">
             <p><strong>Bill to:</strong></p>
             <div>
-                <p>${client.name}</p>
-                <p>${client.email}</p>
-                <p>${client.phone}</p>
-                <p>${client.address}</p>
+                <p>{{ invoice.bill_to.name }}</p>
+                <p>{{ invoice.bill_to.email }}</p>
+                <p>{{ invoice.bill_to.phone }}</p>
+                <p>{{ invoice.bill_to.address }}</p>
             </div>
         </div>
         <table class="table">
@@ -47,18 +47,19 @@
             <th>Description</th>
             <th>Amount</th>
             </tr>
-            ${charges.map((item: { description: any; amount: any; }) => `
+            {% for charge in invoice.charges.all %}
             <tr>
-                <td>${item.description}</td>
-                <td>$ ${item.amount}</td>
+                <td>{{ charge.description }}</td>
+                <td>{{ charge.amount }}</td>
             </tr>
-            `).join('')}
+            {% endfor %}
+           
         </table>
         <hr>
         <div class="footer">
-            <p><strong>Total:</strong> $ ${invoice.total}</p>
-            <p><strong>PAID:</strong> $ ${invoice.paid}</p>
-            <p><strong>Balance Due:</strong> $ ${invoice.due}</p>
+            <p><strong>Total:</strong> $ {{ invoice.total }}</p>
+            <p><strong>PAID:</strong> $ {{ invoice.paid }}</p>
+            <p><strong>Balance Due:</strong> $ {{ invoice.due }}</p>
         </div>
         <div class="footer">
             <a href="#">Pay Now</a>
