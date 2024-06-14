@@ -1,0 +1,68 @@
+<html>
+    <head>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .header { display: flex; justify-content: space-between; }
+        .invoice-title { font-size: 24px; font-weight: bold; }
+        .invoice-number { font-size: 20px; font-weight: bold; }
+        .business-section { text-align: end; }
+        .business-details { font-size: 16px; }
+        .details { display: flex; justify-content: space-between; margin-top: 20px; }
+        .details p { margin: 5px 0; }
+        .table { width: 100%; margin-top: 20px; border-collapse: collapse; }
+        .table th, .table td { border: 1px solid #ddd; padding: 8px; }
+        .table th { background-color: #f2f2f2; text-align: left; }
+        .footer { margin-top: 20px; text-align: end; }
+        hr {border: none;border-top: 2px solid black;margin: 20px 0;}
+        a {text-decoration: none; border-radius: 5px; background-color: blue; padding: 10px; color: #ddd;}
+    </style>
+    </head>
+    <body>
+        {% if message %}
+            <p class="invoice-title">{{message}}</p>
+        {% else %}
+        <div class="header">
+            <img src=${base64Image} alt="logo-image" style="width: 150px; height: 150px"/>
+            <div class="business-section">
+                <p class="invoice-title">${businessName}</p>
+                <p class="business-details">address</p>
+                <p class="business-details">phone</p>
+                <p class="business-details">email</p>
+                <p class="invoice-number">Invoice #${invoice.number}</p>
+                <p class="business-details">${formatDate(new Date(invoice.date))}</p>
+            </div>
+        </div>
+        <hr>
+        <div class="details">
+            <p><strong>Bill to:</strong></p>
+            <div>
+                <p>${client.name}</p>
+                <p>${client.email}</p>
+                <p>${client.phone}</p>
+                <p>${client.address}</p>
+            </div>
+        </div>
+        <table class="table">
+            <tr>
+            <th>Description</th>
+            <th>Amount</th>
+            </tr>
+            ${charges.map((item: { description: any; amount: any; }) => `
+            <tr>
+                <td>${item.description}</td>
+                <td>$ ${item.amount}</td>
+            </tr>
+            `).join('')}
+        </table>
+        <hr>
+        <div class="footer">
+            <p><strong>Total:</strong> $ ${invoice.total}</p>
+            <p><strong>PAID:</strong> $ ${invoice.paid}</p>
+            <p><strong>Balance Due:</strong> $ ${invoice.due}</p>
+        </div>
+        <div class="footer">
+            <a href="#">Pay Now</a>
+        </div>
+    {% endif %}
+    </body>
+</html>

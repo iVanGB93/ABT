@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from .models import Job, Spent
+from .models import Job, Spent, Invoice
 from .forms import JobForm, SpentForm
 from django.contrib.auth.models import User
 from user.models import Profile
@@ -8,6 +8,16 @@ from item.models import Item, Item_List
 
 def soon(request):
     return render(request, 'job/soon.html')
+
+def invoice_detail(request, id):
+    if Invoice.objects.filter(id=id).exists():
+        invoice = Invoice.objects.get(id=id)
+        content = {'invoice': invoice}
+        return render(request, 'job/invoice-details.html', content)
+    else:
+        content = {'message': 'No invoice found for your ID'}
+        print('asda')
+        return render(request, 'job/invoice-details.html', content)
 
 def client_list(request):
     clients = Profile.objects.filter(is_client=True)

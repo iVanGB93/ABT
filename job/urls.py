@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import job_list, create_job, job_detail, delete_job, create_spent, spent_detail, close_job, client_list, create_client, client_detail, delete_spent, soon
+from .views import job_list, invoice_detail, create_job, job_detail, delete_job, create_spent, spent_detail, close_job, client_list, create_client, client_detail, delete_spent, soon
 
 app_name = 'job'
 
@@ -16,4 +16,5 @@ urlpatterns = [
     path('create/spent/<int:id>/', create_spent, name='create_spent'),
     path('detail/spent/<int:id>/', spent_detail, name='spent_detail'),
     path('delete/spent/<int:id>/', delete_spent, name='delete_spent'),
+    path('invoice/<int:id>/', invoice_detail, name='invoice_detail'),
 ]
