@@ -72,7 +72,9 @@ class ClientView(APIView):
                 client.address = data.get('address', client.address)
                 client.image = data.get('image', client.image)
                 client.save()
+                client_data = ClientSerializer(client).data
                 response['message'] = "Client Updated."
+                response['client'] = client_data
                 response['OK'] = True
                 return Response(status=status.HTTP_200_OK, data=response)
             else:

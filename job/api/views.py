@@ -41,8 +41,8 @@ class JobView(APIView):
         action = data['action']
         response = {'OK': False}
         if action == 'close':
-            if Job.objects.filter(id=data['id']).exists():
-                job = Job.objects.get(id=data['id'])
+            if Job.objects.filter(id=provider).exists():
+                job = Job.objects.get(id=provider)
                 job.closed = True
                 job.status = 'finished'
                 job.save()
