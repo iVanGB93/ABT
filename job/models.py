@@ -29,7 +29,7 @@ def upload_to_spent(instance, filename):
     return 'spents/{filename}'.format(filename=filename)
 
 class Spent(models.Model):
-    job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name='job')
+    job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name='spent')
     description = models.CharField(max_length=150)
     amount = models.IntegerField()
     image = models.ImageField(upload_to=upload_to_spent, default='spentDefault.jpg')

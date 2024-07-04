@@ -4,7 +4,7 @@ from rest_framework import status
 from django.contrib.auth.models import User
 from rest_framework.parsers import MultiPartParser, FormParser
 
-from job.api.serializers import JobSerializer, InvoiceSerializer, ItemListSerializer, ItemSerializer, SpentSerializer, ChargeSerializer
+from job.api.serializers import JobSerializer, InvoiceSerializer, SpentSerializer, ChargeSerializer
 from job.models import Job, Spent, Invoice, Charge
 from item.models import Item_List, Item
 from user.models import Profile
@@ -91,65 +91,6 @@ class JobView(APIView):
                 return Response(status=status.HTTP_200_OK, data=response)
         return Response(status=status.HTTP_200_OK, data=response)
 
-class ItemView(APIView):
-    parser_classes = [MultiPartParser, FormParser]
-
-    def get(self, request, queryset=None, **kwargs):
-        pk = self.kwargs.get('pk')
-        if pk == 'all':
-            item_list = Item_List.objects.all()
-            data = []
-            for item in item_list:
-                data.append(ItemListSerializer(item).data)
-        else:
-            item_list = Item_List.objects.get(id=pk)
-            used_items = item_list.item_set.all()
-            data = []
-            for item in used_items:
-                job = item.job
-                data.append(JobSerializer(job).data)
-        return Response(status=status.HTTP_200_OK, data=data)
-    
-    def post(self, request, queryset=None, **kwargs):
-        pk = self.kwargs.get('pk')
-        data = request.data
-        print("ITEM DATA", data)
-        action = data['action']
-        response = {'OK': False}
-        if action == 'new':
-            new_item_list = Item_List(name=data['name'], amount=data['amount'], price=data['price'])
-            new_item_list.description = data.get('description', 'no description added')
-            new_item_list.image = data.get('image', new_item_list.image)
-            new_item_list.save()
-            response['message'] = "New Item created."
-            response['OK'] = True
-        if action == 'update':
-            if Item_List.objects.filter(id=pk).exists():
-                item_list = Item_List.objects.get(id=pk)
-                item_list.name = data.get('name', item_list.name)
-                item_list.description = data.get('description', item_list.description)
-                item_list.amount = data.get('amount', item_list.amount)
-                item_list.price = data.get('price', item_list.price)
-                item_list.image = data.get('image', item_list.image)
-                item_list.save()
-                response['message'] = "Item Updated."
-                response['OK'] = True
-                return Response(status=status.HTTP_200_OK, data=response)
-            else:
-                response['message'] = "Item not found."
-                return Response(status=status.HTTP_200_OK, data=response)
-        if action == 'delete':
-            if Item_List.objects.filter(id=pk).exists():
-                item_list = Item_List.objects.get(id=pk)
-                item_list.delete()
-                response['message'] = "Item Deleted."
-                response['OK'] = True
-                return Response(status=status.HTTP_200_OK, data=response)
-            else:
-                response['message'] = "Item not found."
-                return Response(status=status.HTTP_200_OK, data=response)
-        return Response(status=status.HTTP_200_OK, data=response)
-
 class SpentView(APIView):
     parser_classes = [MultiPartParser, FormParser]
 
@@ -162,11 +103,10 @@ class SpentView(APIView):
                 data.append(SpentSerializer(item).data)
         else:
             job = Job.objects.get(id=pk)
-            spents = job.spent_set.all()
+            spents = job.spent.all()
             data = []
-            for item in spents:
-                """ job = item.job """
-                data.append(SpentSerializer(item).data)
+            for spent in spents:
+                data.append(SpentSerializer(spent).data)
         return Response(status=status.HTTP_200_OK, data=data)
     
     def post(self, request, queryset=None, **kwargs):
@@ -177,7 +117,7 @@ class SpentView(APIView):
         response = {'OK': False}
         if action == 'new':
             job = Job.objects.get(id=data['job_id'])
-            new_spent = Spent(job=job, description=data['description'], amount=data['price'])
+            new_spent = Spent(job=job, description=data['description'], amount=data['amount'])
             if data['use_item'] == 'true':
                 item_list = Item_List.objects.get(name=data['description'])
                 item = Item(list=item_list, job=job, name=item_list.name, description=item_list.description, price=item_list.price)
@@ -189,6 +129,8 @@ class SpentView(APIView):
             else:
                 new_spent.image = data.get('image', new_spent.image)
             new_spent.save()
+            job.status = 'active'
+            job.save()
             response['message'] = "New Spent created."
             response['OK'] = True
         if action == 'update':
