@@ -46,8 +46,9 @@ class ItemsView(APIView):
             response['message'] = "New Item created."
             response['OK'] = True
         if action == 'update':
-            if Item_List.objects.filter(id=pk).exists():
-                item_list = Item_List.objects.get(id=pk)
+            item_id = data['id']
+            if Item_List.objects.filter(id=item_id).exists():
+                item_list = Item_List.objects.get(id=item_id)
                 item_list.name = data.get('name', item_list.name)
                 item_list.description = data.get('description', item_list.description)
                 item_list.amount = data.get('amount', item_list.amount)
