@@ -1,69 +1,164 @@
+<!DOCTYPE html>
 <html>
-    <head>
+<head>
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; }
-        .header { display: flex; justify-content: space-between; }
-        .invoice-title { font-size: 24px; font-weight: bold; }
-        .invoice-number { font-size: 20px; font-weight: bold; }
-        .business-section { text-align: end; }
-        .business-details { font-size: 16px; }
-        .details { display: flex; justify-content: space-between; margin-top: 20px; }
-        .details p { margin: 5px 0; }
-        .table { width: 100%; margin-top: 20px; border-collapse: collapse; }
-        .table th, .table td { border: 1px solid #ddd; padding: 8px; }
-        .table th { background-color: #f2f2f2; text-align: left; }
-        .footer { margin-top: 20px; text-align: end; }
-        hr {border: none;border-top: 2px solid black;margin: 20px 0;}
-        a {text-decoration: none; border-radius: 5px; background-color: blue; padding: 10px; color: #ddd;}
+        body {
+            font-family: 'Arial', sans-serif;
+            padding: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+            max-width: 1024px;
+            margin: auto;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .invoice-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+            margin: 10px;
+        }
+        .invoice-number {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 5px;
+        }
+        .business-section {
+            text-align: right;
+        }
+        .business-details {
+            font-size: 16px;
+            margin: 1px;
+        }
+        .details {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            background-color: #fff;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .details p {
+            margin: 5px 0;
+            text-align: right;
+        }
+        .table-div {
+            background-color: #fff;
+            padding: 20px;
+            min-height: 300px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .table {
+            width: 100%;
+            margin: auto;
+            border-collapse: collapse;
+            background-color: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .table th, .table td {
+            padding: 12px;
+        }
+        .table th { 
+            text-align: center;
+        }
+        .table th {
+            background-color: #f7f7f7;
+            color: #333;
+            font-weight: bold;
+        }
+        .table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .table tr:hover {
+            background-color: #f1f1f1;
+        }
+        .table td {
+            border-bottom: 1px solid #ddd;
+        }
+        .right-td {
+            text-align: right;
+        }
+        .footer {
+            margin-top: 20px;
+            text-align: right;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .footer p {
+            margin: 10px;
+        }
+        a {
+            text-decoration: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            padding: 10px 20px;
+            margin: 10px;
+            color: #fff;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+        a:hover {
+            background-color: #0056b3;
+        }
     </style>
-    </head>
-    <body>
-        {% if message %}
-            <p class="invoice-title">{{message}}</p>
-        {% else %}
-        <div class="header">
-            <img src="{{ invoice.job.provider.profile.business_logo.url}}" alt="logo-image" style="width: 150px; height: 150px"/>
-            <div class="business-section">
-                <p class="invoice-title">{{ invoice.job.provider.username }}</p>
-                <p class="business-details">{{ invoice.job.provider.profile.address }}</p>
-                <p class="business-details">{{ invoice.job.provider.profile.phone }}</p>
-                <p class="business-details">{{ invoice.job.provider.profile.email }}</p>
-                <p class="invoice-number">Invoice #{{invoice.number}}</p>
-                <p class="business-details">{{ invoice.date }}</p>
-            </div>
+</head>
+<body>
+    {% if message %}
+        <p class="invoice-title">{{message}}</p>
+    {% else %}
+    <div class="header">
+        <img src="{{ invoice.job.provider.profile.business_logo.url }}" alt="logo-image" style="width: 150px; height: 150px; border-radius: 8px;"/>
+        <div class="business-section">
+            <p class="invoice-title">{{ invoice.job.provider.profile.business_name }}</p>
+            <p class="business-details">{{ invoice.job.provider.profile.address }}</p>
+            <p class="business-details">{{ invoice.job.provider.profile.phone }}</p>
+            <p class="business-details">{{ invoice.job.provider.profile.email }}</p>
+            <p class="invoice-number">Invoice #{{invoice.number}}</p>
+            <p class="business-details">{{ invoice.date }}</p>
         </div>
-        <hr>
-        <div class="details">
-            <p><strong>Bill to:</strong></p>
-            <div>
-                <p>{{ invoice.bill_to.name }}</p>
-                <p>{{ invoice.bill_to.email }}</p>
-                <p>{{ invoice.bill_to.phone }}</p>
-                <p>{{ invoice.bill_to.address }}</p>
-            </div>
+    </div>
+    <div class="details">
+        <p><strong>Bill to:</strong></p>
+        <div>
+            <p>{{ invoice.bill_to.name }}</p>
+            <p>{{ invoice.bill_to.email }}</p>
+            <p>{{ invoice.bill_to.phone }}</p>
+            <p>{{ invoice.bill_to.address }}</p>
         </div>
+    </div>
+    <div class="table-div">
         <table class="table">
             <tr>
-            <th>Description</th>
-            <th>Amount</th>
+                <th>Description</th>
+                <th class="right-td">Amount</th>
             </tr>
             {% for charge in invoice.charges.all %}
             <tr>
                 <td>{{ charge.description }}</td>
-                <td>{{ charge.amount }}</td>
+                <td class="right-td">${{ charge.amount }}</td>
             </tr>
             {% endfor %}
-           
         </table>
-        <hr>
-        <div class="footer">
-            <p><strong>Total:</strong> $ {{ invoice.total }}</p>
-            <p><strong>PAID:</strong> $ {{ invoice.paid }}</p>
-            <p><strong>Balance Due:</strong> $ {{ invoice.due }}</p>
-        </div>
-        <div class="footer">
-            <a href="#">Pay Now</a>
-        </div>
+    </div>
+    <div class="footer">
+        <p><strong>Total:</strong> ${{ invoice.total }}</p>
+        <p><strong>PAID:</strong> ${{ invoice.paid }}</p>
+        <p><strong>Balance Due:</strong> ${{ invoice.due }}</p>
+        <a href="#">Pay Now</a>
+    </div>
     {% endif %}
-    </body>
+</body>
 </html>
