@@ -442,8 +442,8 @@ section {
 }
 .text-box h1 {
     font-family: 'Kode Mono';
-    font-size: 160px;
-    line-height: 120px;
+    font-size: 100px;
+    line-height: 80px;
     color: transparent;
     -webkit-text-stroke: 1px var(--white);
     background: url(../images/back-logo-name.png);
@@ -495,8 +495,8 @@ section {
         margin: 25px;
     }
     .text-box h1 {
-        font-size: 120px;
-        line-height: 100px;
+        font-size: 80px;
+        line-height: 60px;
     }
 }
 @media (max-width:768px){
@@ -536,8 +536,8 @@ section {
         margin: auto;
     }
     .text-box h1 {
-        font-size: 80px;
-        line-height: 60px;
+        font-size: 40px;
+        line-height: 20px;
     }
     .text-box .row-types p {
         font-size: 10px;
