@@ -2,11 +2,13 @@ from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 from PIL import Image
 from django.db import models
+from business.models import Business
 
 def upload_to(instance, filename):
     return 'client/{filename}'.format(filename=filename)
 
 class Client(models.Model):
+    business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='business_client')
     provider = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=15)
     last_name = models.CharField(max_length=30, default='no last name saved')

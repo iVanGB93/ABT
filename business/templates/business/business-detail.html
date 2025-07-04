@@ -1,0 +1,35 @@
+{% extends "business/base-business.html" %}
+{% load static %}
+{% block bar %}
+<p class="lead text-center fw-bold titulo">{{ business.name }}</p>
+{% endblock bar %}
+{% block content %}
+<div class="container py-4">
+    <div class="card shadow-sm border-0 mx-auto" style="max-width: 600px;">
+        <div class="card-body">
+            <h2 class="card-title mb-3 text-primary">
+                <i class="fa fa-building me-2"></i>{{ business.name }}
+            </h2>
+            <h5 class="card-subtitle mb-2 text-muted">
+                <i class="fa fa-map-marker-alt me-1"></i>{{ business.address }}
+            </h5>
+            <p class="card-text mb-3">{{ business.description }}</p>
+            <div class="mb-2">
+                <strong>Owners:</strong>
+                {% for owner in business.owners.all %}
+                    <span class="badge bg-info text-dark me-1">{{ owner.username }}</span>
+                {% empty %}
+                    <span class="text-muted">No owners</span>
+                {% endfor %}
+            </div>
+            <div class="mb-2">
+                <strong>Creado:</strong> {{ business.created_at|date:'d/m/Y H:i' }}
+            </div>
+            <div class="mb-2">
+                <strong>Última actualización:</strong> {{ business.updated_at|date:'d/m/Y H:i' }}
+            </div>
+        </div>
+    </div>
+</div>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+{% endblock content %}

@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'client.apps.ClientConfig',
     'job.apps.JobConfig',
     'item.apps.ItemConfig',
+    'business.apps.BusinessConfig',
     'fontawesomefree',
     'rest_framework',
     'rest_framework_simplejwt',

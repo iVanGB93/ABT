@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models.functions import Now
 from client.models import Client
 from django.contrib.auth.models import User
+from business.models import Business
 
 def upload_to_job(instance, filename):
     return 'jobs/{filename}'.format(filename=filename)
@@ -12,6 +13,7 @@ class Job(models.Model):
         'active': 'ACTIVE',
         'finished': 'FINISHED'
     }
+    business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='business_job')
     provider = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='provider', null=True, blank=True)
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
     status = models.CharField(max_length=15, choices=status_options, default='new')
