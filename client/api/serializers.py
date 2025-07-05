@@ -8,7 +8,7 @@ class ClientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Client
-        fields = ('id', 'provider', 'name', 'last_name', 'phone', 'address', 'email', 'image')
+        fields = ('id', 'provider', 'name', 'last_name', 'phone', 'address', 'email', 'image', 'business')
     
     def get_provider(self, obj):
         return obj.provider.username
