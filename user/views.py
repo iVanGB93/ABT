@@ -10,7 +10,8 @@ def loginView(request):
             user = authenticate(request, username=username, password=password)
             if user is not None:
                 login(request, user)
-                return redirect('web:index')
+                next_url = request.GET.get('next', 'web:index')
+                return redirect(next_url)
             else:
                 content = {'message': 'contraseña incorrecta'}
                 return render(request, 'user/login.html', content)
