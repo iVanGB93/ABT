@@ -1,0 +1,23 @@
+{% extends 'web/base.html' %}
+{% load static %}
+{% block head %}
+    <link rel="stylesheet" href="{% static 'web/css/style.css' %}">
+{% endblock head %}
+{% block body %}
+<div class="container home">
+    <section class="flex">
+        <form action="{% url 'user:register' %}" method="post">
+            {% if message %}
+            <h3>{{ message }}</h3>
+            {% endif %}
+            {% csrf_token %}
+            <input type="text" name="username" required maxlength="50" placeholder="Nombre de usuario" class="box">
+            <input type="email" name="email" required maxlength="100" placeholder="Correo electrónico" class="box">
+            <input type="password" name="password" required placeholder="Contraseña" class="box">
+            <input type="password" name="password2" required placeholder="Confirmar contraseña" class="box">
+            <input type="submit" value="Registrarse" class="btn">
+            <a href="{% url 'web:index' %}" class="btn">Atrás</a>
+        </form>
+    </section>
+</div>
+{% endblock body %}

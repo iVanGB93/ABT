@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils.crypto import get_random_string
 
 def upload_to_business(instance, filename):
     return 'businesses/{filename}'.format(filename=filename)
@@ -24,3 +25,57 @@ class Business(models.Model):
         verbose_name = 'Business'
         verbose_name_plural = 'Businesses'
         ordering = ['name']
+
+def upload_to_extra_income(instance, filename):
+    return 'extra_income/{filename}'.format(filename=filename)
+
+class ExtraIncome(models.Model):
+    business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='extra_income')
+    description = models.CharField(max_length=255)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    date = models.DateTimeField(auto_now_add=True)
+    image = models.ImageField(upload_to=upload_to_extra_income, blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.description} - {self.amount}"
+
+    class Meta:
+        verbose_name = 'Extra Income'
+        verbose_name_plural = 'Extra Incomes'
+        ordering = ['-date']
+
+def upload_to_extra_expense(instance, filename):
+    return 'extra_expense/{filename}'.format(filename=filename)
+
+class ExtraExpense(models.Model):
+    business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='extra_expenses')
+    description = models.CharField(max_length=255)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    date = models.DateTimeField(auto_now_add=True)
+    image = models.ImageField(upload_to=upload_to_extra_expense, blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.description} - {self.amount}"
+
+    class Meta:
+        verbose_name = 'Extra Expense'
+        verbose_name_plural = 'Extra Expenses'
+        ordering = ['-date']
+
+def invitationCode():    
+    while True:
+        code = get_random_string(length=8, allowed_chars="1234567890")
+        if Invitation.objects.filter(code=code).count() == 0:
+            break
+    return code
+
+class Invitation(models.Model):
+    business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='invitations')
+    inviter = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_invitations')
+    email = models.EmailField(max_length=254)
+    code = models.CharField(max_length=50, default=invitationCode, unique=True)
+    date_sent = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Invitation to {self.email} for {self.business.name}"
+

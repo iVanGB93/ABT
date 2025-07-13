@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from business.models import Business
+from business.models import Business, ExtraIncome, ExtraExpense
 
 
 class BusinessSerializer(serializers.ModelSerializer):
@@ -13,3 +13,13 @@ class BusinessSerializer(serializers.ModelSerializer):
     class Meta:
         model = Business
         fields = ('id', 'owners', 'name', 'phone', 'address', 'email', 'logo', 'website', 'description', 'created_at', 'updated_at')
+
+class ExtraIncomeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ExtraIncome
+        fields = ('id', 'business', 'description', 'amount', 'date')
+
+class ExtraExpenseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ExtraExpense
+        fields = ('id', 'business', 'description', 'amount', 'date')

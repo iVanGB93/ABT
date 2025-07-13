@@ -6,21 +6,22 @@ from django.contrib.auth.models import User
 
 from .serializers import ClientSerializer
 from client.models import Client
+from business.models import Business
 
 
 class ClientsView(APIView):
 
     def get(self, request, queryset=None, **kwargs):
-        provider = self.kwargs.get('pk')
-        if User.objects.filter(username=provider).exists():
-            provider_user = User.objects.get(username=provider)
-            clients = Client.objects.filter(provider=provider_user)
+        business_name = self.kwargs.get('pk')
+        if Business.objects.filter(name=business_name).exists():
+            business = Business.objects.get(name=business_name)
+            clients = Client.objects.filter(business=business)
             data = []
             for client in clients:
                 data.append(ClientSerializer(client).data)
             return Response(status=status.HTTP_200_OK, data=data)
         else:
-            data = {'message': 'Provider does not exist.'}
+            data = {'message': 'Business does not exist.'}
             return Response(status=status.HTTP_404_NOT_FOUND, data=data)
     
 class ClientView(APIView):

@@ -8,15 +8,15 @@ from django.contrib.auth.models import User
 from .serializers import ItemSerializer, ItemListSerializer
 from job.api.serializers import JobSerializer
 from item.models import Item, Item_List
+from business.models import Business
 
 class ItemsView(APIView):
     parser_classes = [MultiPartParser, FormParser]
 
     def get(self, request, queryset=None, **kwargs):
-        provider = self.kwargs.get('pk')
-        provider_user = User.objects.get(username=provider)
-        item_list = Item_List.objects.filter(provider=provider_user)
-        print(item_list)
+        business_name = self.kwargs.get('pk')
+        business = Business.objects.get(name=business_name)
+        item_list = Item_List.objects.filter(business=business)
         data = []
         for item in item_list:
             data.append(ItemListSerializer(item).data)

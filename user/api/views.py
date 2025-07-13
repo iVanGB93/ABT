@@ -39,7 +39,7 @@ class RegisterView(APIView):
                 else:
                     new_code = RegistrationCode(email=email)
                     new_code.save()
-                email = EmailMessage('Welcome to ABT', f'Here is your code for continuing registering {new_code.code}', None, [email])
+                email = EmailMessage('Welcome to ABT', f'Here is your code for continuing your registration "{new_code.code}"', None, [email])
                 EmailSending(email).start()
                 response['message'] = "A code was send to your email, please check it and continue."
                 response['code'] = new_code.code

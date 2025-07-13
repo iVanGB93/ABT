@@ -9,7 +9,7 @@ class JobSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Job
-        fields = ('id', 'status', 'client', 'description', 'address', 'price', 'date', 'image')
+        fields = ('id', 'status', 'client', 'description', 'address', 'price', 'date', 'image', 'business')
     
     def get_client(self, obj):
         return obj.client.name

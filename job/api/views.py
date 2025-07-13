@@ -9,14 +9,15 @@ from job.models import Job, Spent, Invoice, Charge
 from item.models import Item_List, Item
 from user.models import Profile
 from client.models import Client
+from business.models import Business
 
 
 class JobsView(APIView):
 
     def get(self, request, queryset=None, **kwargs):
-        provider = self.kwargs.get('pk')
-        provider_user = User.objects.get(username=provider)
-        jobs = Job.objects.filter(provider=provider_user)
+        bussines_name = self.kwargs.get('pk')
+        business = Business.objects.get(name=bussines_name)
+        jobs = Job.objects.filter(business=business)
         data = []
         for job in jobs:
             data.append(JobSerializer(job).data)

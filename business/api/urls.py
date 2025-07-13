@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import BusinessesView, BusinessView
+from .views import BusinessesView, BusinessView, ExtrasView
 
 app_name = 'business-api'
 
@@ -8,4 +8,5 @@ urlpatterns = [
     path('create/<str:pk>/', BusinessView.as_view(), name='business_create'),
     path('update/<str:pk>/', BusinessView.as_view(), name='business_update'),
     path('delete/<str:pk>/', BusinessView.as_view(), name='business_delete'),
+    path('extras/<str:pk>/', ExtrasView.as_view(), name='extras'),
 ]

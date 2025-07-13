@@ -1,0 +1,22 @@
+{% extends 'web/base.html' %}
+{% load static %}
+{% block body %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h3 class="mb-4 text-center text-primary">
+                        {{ invitation.inviter.username }} invited to become an owner of the business: </br>
+                         "{{ invitation.business.name }}" </br>
+                    </h3>
+                    <form action="{% url 'business:business_invitation' code=invitation.code %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success w-100">Accept Invitation</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock body %}

@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models.functions import Now
 from job.models import Job
 from django.contrib.auth.models import User
+from business.models import Business
 
 
 def upload_to_item_list(instance, filename):
@@ -14,7 +15,7 @@ class Item_List(models.Model):
     amount = models.IntegerField()
     image = models.ImageField(upload_to=upload_to_item_list, default='itemDefault.jpg')
     date = models.DateTimeField(db_default=Now())
-    provider = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='item_list', null=True, blank=True)
+    business = models.ForeignKey(Business, on_delete=models.SET_NULL, related_name='item_list', null=True, blank=True)
 
 
     def __str__(self):

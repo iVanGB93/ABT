@@ -1,0 +1,33 @@
+{% extends 'web/base.html' %}
+{% load static %}
+{% block body %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center">
+                    <h2 class="text-success mb-4">
+                        You are now an owner of <span class="fw-bold">{{ business.name }}</span>!
+                    </h2>
+                    <p class="lead mb-4">
+                        Congratulations, you have accepted the invitation.
+                    </p>
+                    <hr>
+                    <h4 class="mb-3 text-primary">
+                        Business Details
+                    </h4>
+                    <ul class="list-group list-group-flush mb-3 text-start">
+                        <li class="list-group-item"><strong>Name:</strong> {{ business.name }}</li>
+                        <li class="list-group-item"><strong>Address:</strong> {{ business.address }}</li>
+                        <li class="list-group-item"><strong>Phone:</strong> {{ business.phone }}</li>
+                        <li class="list-group-item"><strong>Email:</strong> {{ business.email }}</li>
+                        <li class="list-group-item"><strong>Description:</strong> {{ business.description }}</li>
+                    </ul>
+                    <!-- <a href="{% url 'business:business_list' %}" class="btn btn-success mt-3">Go to my businesses</a> -->
+                    <h3 class="mt-4">You can close this window now!!!</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
