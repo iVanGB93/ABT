@@ -10,8 +10,8 @@ def upload_to(instance, filename):
 class Client(models.Model):
     business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='business_client')
     provider = models.ForeignKey(User, on_delete=models.CASCADE)
-    name = models.CharField(max_length=15)
-    last_name = models.CharField(max_length=30, default='no last name saved')
+    name = models.CharField(max_length=80)
+    last_name = models.CharField(max_length=80, default='no last name saved')
     email = models.EmailField(max_length=80, default='no@email.saved')
     phone = models.CharField(max_length=15, default='no phone saved')
     address = models.CharField(max_length=150, default='no address saved')
