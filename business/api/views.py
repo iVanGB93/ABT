@@ -124,7 +124,6 @@ class BusinessView(APIView):
                                     email=owner_email,
                                 )
                                 invitation.save()
-                                print(f"Invitation created for {owner_email}")
                                 email = EmailMessage('ABT - Ownership invitation', f'{inviter.username} invited you to be owner of {business.name}. Go to "https://abt.qbared.com/business/invitation/{invitation.code}/" to accept. Use the code: {invitation.code}', None, [owner_email])
                                 EmailSending(email).start()
                             for owner_email in not_registered_emails:
@@ -135,7 +134,6 @@ class BusinessView(APIView):
                                     email=owner_email,
                                 )
                                 invitation.save()
-                                print(f"Sending invitation to {owner_email}")
                                 email = EmailMessage('ABT - Ownership invitation', f'{inviter.username} invited you to be owner of {business.name}, you are not registered yet. Please register at "https://abt.qbared.com/user/register/', None, [owner_email])
                                 EmailSending(email).start()
                         else:
@@ -199,13 +197,13 @@ class ExtrasView(APIView):
         business = Business.objects.get(name=business_name)
         if action == 'new':
             if type == 'income':
-                new_income = ExtraIncome(business=business, amount=data.get('amount', 0), description=data.get('description', ''))
+                new_income = ExtraIncome(business=business, amount=data.get('amount', 0), description=data.get('description', ''), image=data.get('image', None))
                 new_income.save()
                 response['message'] = "Extra income created."
                 response['OK'] = True
                 return Response(status=status.HTTP_201_CREATED, data=response)
             elif type == 'expense':
-                new_expense = ExtraExpense(business=business, amount=data.get('amount', 0), description=data.get('description', ''))
+                new_expense = ExtraExpense(business=business, amount=data.get('amount', 0), description=data.get('description', ''), image=data.get('image', None))
                 new_expense.save()
                 response['message'] = "Extra expense created."
                 response['OK'] = True
@@ -213,6 +211,36 @@ class ExtrasView(APIView):
             else:
                 response['message'] = "Invalid action."
                 return Response(status=status.HTTP_400_BAD_REQUEST, data=response)
+        if action == 'update':
+            print(data)
+            if type == 'income':
+                id = data.get('id')
+                if id and ExtraIncome.objects.filter(id=id).exists():
+                    extra_income = ExtraIncome.objects.get(id=id)
+                    extra_income.amount = data.get('amount', extra_income.amount)
+                    extra_income.description = data.get('description', extra_income.description)
+                    extra_income.image = data.get('image', extra_income.image)
+                    extra_income.save()
+                    response['message'] = "Extra income updated."
+                    response['OK'] = True
+                    return Response(status=status.HTTP_200_OK, data=response)
+                else:
+                    response['message'] = "Extra income not found."
+                    return Response(status=status.HTTP_404_NOT_FOUND, data=response)
+            elif type == 'expense':
+                id = data.get('id')
+                if id and ExtraExpense.objects.filter(id=id).exists():
+                    extra_expense = ExtraExpense.objects.get(id=id)
+                    extra_expense.amount = data.get('amount', extra_expense.amount)
+                    extra_expense.description = data.get('description', extra_expense.description)
+                    extra_expense.image = data.get('image', extra_expense.image)
+                    extra_expense.save()
+                    response['message'] = "Extra expense updated."
+                    response['OK'] = True
+                    return Response(status=status.HTTP_200_OK, data=response)
+                else:
+                    response['message'] = "Extra expense not found."
+                    return Response(status=status.HTTP_404_NOT_FOUND, data=response)
             
 
 class OwnersView(APIView):

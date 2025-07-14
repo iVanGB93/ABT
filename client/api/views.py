@@ -49,13 +49,14 @@ class ClientView(APIView):
                 response['message'] = "Client not found."
                 return Response(status=status.HTTP_200_OK, data=response)
         client_provider = User.objects.get(username=provider)
+        business = Business.objects.get(name=data['business'])
         if action == 'new':
             name = data['name']
             last_name = data.get('last_name', 'no last name saved')
             phone = data.get('phone', 'no phone saved')
             email = data.get('email', 'no email saved')
             address = data.get('address', 'no address saved')
-            new_client = Client(provider=client_provider, name=name, last_name=last_name, phone=phone, email=email, address=address)
+            new_client = Client(business=business, provider=client_provider, name=name, last_name=last_name, phone=phone, email=email, address=address)
             new_client.image = data.get('image', new_client.image)
             new_client.save()
             response['message'] = "New client created."

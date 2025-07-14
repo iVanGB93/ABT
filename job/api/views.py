@@ -64,6 +64,7 @@ class JobView(APIView):
                 response['message'] = "Job not found."
                 return Response(status=status.HTTP_200_OK, data=response)
         provider_user = User.objects.get(username=provider)
+        business = Business.objects.get(name=data['business'])
         if action == 'new':
             data = request.data
             name = data['name']
@@ -71,7 +72,7 @@ class JobView(APIView):
                 response['message'] = "Client does not exits."
                 return Response(status=status.HTTP_200_OK, data=response)
             client = Client.objects.get(name=name)
-            new_job = Job(client=client, provider=provider_user, description=data['description'], address=data['address'], price=data['price'])
+            new_job = Job(business=business, client=client, provider=provider_user, description=data['description'], address=data['address'], price=data['price'])
             new_job.save()
             response['message'] = "New job created."
             response['OK'] = True

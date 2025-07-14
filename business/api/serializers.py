@@ -17,9 +17,9 @@ class BusinessSerializer(serializers.ModelSerializer):
 class ExtraIncomeSerializer(serializers.ModelSerializer):
     class Meta:
         model = ExtraIncome
-        fields = ('id', 'business', 'description', 'amount', 'date')
+        fields = '__all__'
 
 class ExtraExpenseSerializer(serializers.ModelSerializer):
     class Meta:
         model = ExtraExpense
-        fields = ('id', 'business', 'description', 'amount', 'date')
+        fields = '__all__'
