@@ -19,7 +19,7 @@ class Job(models.Model):
     status = models.CharField(max_length=15, choices=status_options, default='new')
     description = models.CharField(max_length=150)
     address = models.CharField(max_length=150)
-    price = models.IntegerField()
+    price = models.FloatField()
     image = models.ImageField(upload_to=upload_to_job, default='jobDefault.jpg')
     date = models.DateTimeField(db_default=Now())
     closed = models.BooleanField(default=False)
