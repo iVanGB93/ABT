@@ -2,14 +2,13 @@
 /nginx_waitress
 
 
-/media/business/
-/media/extra_expenses/
+/media/businesses/
+/media/client/
+/media/extra_expense/
 /media/extra_income/
 /media/jobs/
 /media/logo/
 /media/user/
-/media/items/
-/media/spents/
 
 db.sqlite3
 
