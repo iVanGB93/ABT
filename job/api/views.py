@@ -73,6 +73,7 @@ class JobView(APIView):
                 return Response(status=status.HTTP_200_OK, data=response)
             client = Client.objects.get(name=name)
             new_job = Job(business=business, client=client, provider=provider_user, description=data['description'], address=data['address'], price=data['price'])
+            new_job.image = data.get('image', new_job.image)
             new_job.save()
             response['message'] = "New job created."
             response['OK'] = True

@@ -12,7 +12,8 @@ def soon(request):
 def invoice_detail(request, number):
     if Invoice.objects.filter(number=number).exists():
         invoice = Invoice.objects.get(number=number)
-        content = {'invoice': invoice}
+        job = invoice.job
+        content = {'invoice': invoice, 'job': job}
         return render(request, 'job/invoice-details.html', content)
     else:
         content = {'message': 'No invoice number found.'}
