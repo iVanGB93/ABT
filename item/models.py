@@ -3,10 +3,12 @@ from django.db.models.functions import Now
 from job.models import Job
 from django.contrib.auth.models import User
 from business.models import Business
+import os
 
 
 def upload_to_item_list(instance, filename):
-    return 'items/{filename}'.format(filename=filename)
+    filename = os.path.basename(filename)
+    return f'items/{instance.business.name}/{filename}'
 
 class Item_List(models.Model):
     name = models.CharField(max_length=100)
@@ -22,7 +24,8 @@ class Item_List(models.Model):
         return self.name + ' - ' + str(self.amount)
 
 def upload_to_item(instance, filename):
-    return 'items/{filename}'.format(filename=filename)
+    filename = os.path.basename(filename)
+    return f'items/{instance.list.name}/{filename}'
 
 class Item(models.Model):
     list = models.ForeignKey(Item_List, on_delete=models.CASCADE)
@@ -35,3 +38,7 @@ class Item(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class TestModel(models.Model):
+    image = models.ImageField(upload_to='test/', default='testDefault.jpg')

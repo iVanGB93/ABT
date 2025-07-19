@@ -3,9 +3,11 @@ from django.db.models.functions import Now
 from client.models import Client
 from django.contrib.auth.models import User
 from business.models import Business
+import os
 
 def upload_to_job(instance, filename):
-    return 'jobs/{filename}'.format(filename=filename)
+    filename = os.path.basename(filename)
+    return f'jobs/{instance.business.name}/{instance.client.name}/{filename}'
 
 class Job(models.Model):
     status_options = {
@@ -28,7 +30,8 @@ class Job(models.Model):
             return f"{self.description} for {self.client}"
     
 def upload_to_spent(instance, filename):
-    return 'spents/{filename}'.format(filename=filename)
+    filename = os.path.basename(filename)
+    return f'spents/{instance.job.business.name}/{instance.job.client.name}/{filename}'
 
 class Spent(models.Model):
     job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name='spent')

@@ -4,21 +4,22 @@ from PIL import Image
 from django.db import models
 from django.utils.crypto import get_random_string
 from django.db.models.functions import Now
-
+from io import BytesIO
+import os
 
 def upload_to(instance, filename):
-    return 'user/{filename}'.format(filename=filename)
+    filename = os.path.basename(filename)
+    return f'user/{instance.user.username}/{filename}'
 
 def upload_logo_to(instance, filename):
-    return 'logo/{filename}'.format(filename=filename)
+    filename = os.path.basename(filename)
+    return f'logo/{instance.user.username}/{filename}'
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     phone = models.CharField(max_length=15, default='-')
     address = models.CharField(max_length=150, default='-')
     image = models.ImageField(_("Image"), upload_to=upload_to, default='userDefault.jpg')
-    business_name = models.CharField(max_length=150, default='Business Name')
-    business_logo = models.ImageField(_("Image"), upload_to=upload_logo_to, default='logoDefault.png')
     is_client = models.BooleanField(default=True)
 
     def __str__(self):
@@ -27,12 +28,17 @@ class Profile(models.Model):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
 
-        img = Image.open(self.image.path)
-
-        if img.height > 300 or img.width > 300:
-           output_size = (300, 300)
-           img.thumbnail(output_size)
-           img.save(self.image.path)
+        if self.image:
+            self.image.open()
+            img = Image.open(self.image)
+            if img.height > 300 or img.width > 300:
+                output_size = (300, 300)
+                img.thumbnail(output_size)
+                buffer = BytesIO()
+                img.save(buffer, format=img.format)
+                buffer.seek(0)
+                self.image.save(self.image.name, buffer, save=False)
+                super().save(*args, **kwargs)
 
 
 def generarHash():    

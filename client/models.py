@@ -3,9 +3,13 @@ from django.utils.translation import gettext_lazy as _
 from PIL import Image
 from django.db import models
 from business.models import Business
+from io import BytesIO
+import os
+
 
 def upload_to(instance, filename):
-    return 'client/{filename}'.format(filename=filename)
+    filename = os.path.basename(filename)
+    return f'client/{instance.business.name}/{instance.name}/{filename}'
 
 class Client(models.Model):
     business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='business_client')
@@ -23,9 +27,14 @@ class Client(models.Model):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
 
-        img = Image.open(self.image.path)
-
-        if img.height > 300 or img.width > 300:
-           output_size = (300, 300)
-           img.thumbnail(output_size)
-           img.save(self.image.path)
+        if self.image:
+            self.image.open()
+            img = Image.open(self.image)
+            if img.height > 300 or img.width > 300:
+                output_size = (300, 300)
+                img.thumbnail(output_size)
+                buffer = BytesIO()
+                img.save(buffer, format=img.format)
+                buffer.seek(0)
+                self.image.save(self.image.name, buffer, save=False)
+                super().save(*args, **kwargs)

@@ -1,9 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.crypto import get_random_string
+import os
 
 def upload_to_business(instance, filename):
-    return 'businesses/{filename}'.format(filename=filename)
+    filename = os.path.basename(filename)
+    return f'business/{instance.name}/{filename}'
 
 class Business(models.Model):
     owners = models.ManyToManyField(User, related_name='businesses')
@@ -27,7 +29,8 @@ class Business(models.Model):
         ordering = ['name']
 
 def upload_to_extra_income(instance, filename):
-    return 'extra_income/{filename}'.format(filename=filename)
+    filename = os.path.basename(filename)
+    return f'extra_income/{instance.business.name}/{filename}'
 
 class ExtraIncome(models.Model):
     business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='extra_income')
@@ -45,7 +48,8 @@ class ExtraIncome(models.Model):
         ordering = ['-date']
 
 def upload_to_extra_expense(instance, filename):
-    return 'extra_expense/{filename}'.format(filename=filename)
+    filename = os.path.basename(filename)
+    return f'extra_expense/{instance.business.name}/{filename}'
 
 class ExtraExpense(models.Model):
     business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='extra_expenses')
@@ -75,6 +79,7 @@ class Invitation(models.Model):
     email = models.EmailField(max_length=254)
     code = models.CharField(max_length=50, default=invitationCode, unique=True)
     date_sent = models.DateTimeField(auto_now_add=True)
+    used = models.BooleanField(default=False)
 
     def __str__(self):
         return f"Invitation to {self.email} for {self.business.name}"
