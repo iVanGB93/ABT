@@ -52,11 +52,41 @@ def upload_to_extra_expense(instance, filename):
     return f'extra_expense/{instance.business.name}/{filename}'
 
 class ExtraExpense(models.Model):
+    CATEGORY_CHOICES = [
+        ('office_supplies', 'Office Supplies'),
+        ('utilities', 'Utilities'),
+        ('marketing', 'Marketing'),
+        ('other', 'Other'),
+        ('travel', 'Travel'),
+        ('maintenance', 'Maintenance'),
+        ('salaries', 'Salaries'),
+        ('taxes', 'Taxes'),
+        ('medical_insurance', 'Medical Insurance'),
+        ('insurance', 'Insurance'),
+        ('equipment', 'Equipment'),
+        ('software', 'Software'),
+        ('legal_fees', 'Legal Fees'),
+        ('training', 'Training'),
+        ('research', 'Research'),
+        ('licenses', 'Licenses'),
+        ('repairs', 'Repairs'),
+        ('shipping', 'Shipping'),
+        ('warranty', 'Warranty'),
+        ('fines', 'Fines'),
+        ('commissions', 'Commissions'),
+        ('bank_fees', 'Bank Fees'),
+        ('interest', 'Interest'),
+        ('fuel', 'Fuel'),
+        ('meals', 'Meals'),
+    ]
     business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='extra_expenses')
     description = models.CharField(max_length=255)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateTimeField(auto_now_add=True)
     image = models.ImageField(upload_to=upload_to_extra_expense, blank=True, null=True)
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='other')
+    tax_deductible = models.BooleanField(default=False)
+
 
     def __str__(self):
         return f"{self.description} - {self.amount}"

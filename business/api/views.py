@@ -203,7 +203,11 @@ class ExtrasView(APIView):
                 response['OK'] = True
                 return Response(status=status.HTTP_201_CREATED, data=response)
             elif type == 'expense':
-                new_expense = ExtraExpense(business=business, amount=data.get('amount', 0), description=data.get('description', ''), image=data.get('image', None))
+                deductable = data.get('deductable', True)
+                if deductable == 'False':
+                    deductable = False
+                print(deductable, data.get('category', 'other'))
+                new_expense = ExtraExpense(business=business, amount=data.get('amount', 0), description=data.get('description', ''), image=data.get('image', None), category=data.get('category', 'other'), tax_deductible=deductable)
                 new_expense.save()
                 response['message'] = "Extra expense created."
                 response['OK'] = True
@@ -212,7 +216,6 @@ class ExtrasView(APIView):
                 response['message'] = "Invalid action."
                 return Response(status=status.HTTP_400_BAD_REQUEST, data=response)
         if action == 'update':
-            print(data)
             if type == 'income':
                 id = data.get('id')
                 if id and ExtraIncome.objects.filter(id=id).exists():
@@ -234,6 +237,7 @@ class ExtrasView(APIView):
                     extra_expense.amount = data.get('amount', extra_expense.amount)
                     extra_expense.description = data.get('description', extra_expense.description)
                     extra_expense.image = data.get('image', extra_expense.image)
+                    extra_expense.category = data.get('category', extra_expense.category)
                     extra_expense.save()
                     response['message'] = "Extra expense updated."
                     response['OK'] = True
