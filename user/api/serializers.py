@@ -24,7 +24,7 @@ class AccountSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profile
-        fields = ('id', 'user', 'phone', 'address', 'email', 'image', 'business_name', 'business_logo')
+        fields = ('id', 'user', 'phone', 'address', 'email', 'image', 'is_client')
     
     def get_user(self, obj):
         return obj.user.username

@@ -55,8 +55,10 @@ class RegisterView(APIView):
         new_user.save()
         code = RegistrationCode.objects.get(email=email)
         code.user = new_user
-        code.dateEnd = timezone.now()
+        code.used = timezone.now()
+        code.active = False
         code.save()
+        response['OK'] = True
         response['message'] = "Account created."
         return Response(status=status.HTTP_201_CREATED, data=response)
 
@@ -72,13 +74,13 @@ class AccountView(APIView):
     
     def post(self, request, queryset=None, **kwargs):
         data = request.data
+        print(data)
         user = self.kwargs.get('pk')
         user = User.objects.get(username=user)
         profile = Profile.objects.get(user=user)
-        profile.business_name = data.get('business_name', profile.business_name)
-        profile.business_logo = data.get('business_logo', profile.business_logo)
         profile.phone = data.get('phone', profile.phone)
         profile.address = data.get('address', profile.address)
+        profile.image = data.get('image', profile.image)
         user.email = data.get('email', user.email)
         user.save()
         profile.save()

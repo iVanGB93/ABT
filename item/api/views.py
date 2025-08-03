@@ -24,12 +24,13 @@ class ItemsView(APIView):
     
     def post(self, request, queryset=None, **kwargs):
         response = {'OK': False}
-        provider = self.kwargs.get('pk')
+        business_name = self.kwargs.get('pk')
+        business = Business.objects.get(name=business_name)
         data = request.data
         action = data['action']
         if action == 'delete':
-            if Item_List.objects.filter(id=provider).exists():
-                item_list = Item_List.objects.get(id=provider)
+            if Item_List.objects.filter(id=data['id']).exists():
+                item_list = Item_List.objects.get(id=data['id'])
                 item_list.delete()
                 response['message'] = "Item Deleted."
                 response['OK'] = True
@@ -37,9 +38,8 @@ class ItemsView(APIView):
             else:
                 response['message'] = "Item not found."
                 return Response(status=status.HTTP_200_OK, data=response)
-        provider_user = User.objects.get(username=provider)
         if action == 'new':
-            new_item_list = Item_List(provider=provider_user, name=data['name'], amount=data['amount'], price=data['price'])
+            new_item_list = Item_List(business=business, name=data['name'], amount=data['amount'], price=data['price'])
             new_item_list.description = data.get('description', 'no description added')
             new_item_list.image = data.get('image', new_item_list.image)
             new_item_list.save()
@@ -90,6 +90,9 @@ class ItemView(APIView):
         action = data['action']
         response = {'OK': False}
         if action == 'new':
+            if Item_List.objects.filter(name=data['name']).exists():
+                response['message'] = "Item already exists."
+                return Response(status=status.HTTP_200_OK, data=response)
             new_item_list = Item_List(name=data['name'], amount=data['amount'], price=data['price'])
             new_item_list.description = data.get('description', 'no description added')
             new_item_list.image = data.get('image', new_item_list.image)

@@ -17,8 +17,8 @@ def upload_logo_to(instance, filename):
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    phone = models.CharField(max_length=15, default='-')
-    address = models.CharField(max_length=150, default='-')
+    phone = models.CharField(max_length=15, default='')
+    address = models.CharField(max_length=150, default='')
     image = models.ImageField(_("Image"), upload_to=upload_to, default='userDefault.jpg')
     is_client = models.BooleanField(default=True)
 
@@ -52,8 +52,10 @@ class RegistrationCode(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
     email=models.EmailField()
     code=models.IntegerField(default=generarHash, unique=True)
-    dateStart = models.DateTimeField(db_default=Now())
-    dateEnd = models.DateTimeField(null=True)
+    created = models.DateTimeField(db_default=Now())
+    active = models.BooleanField(default=True)
+    used = models.DateTimeField(null=True)
+
 
     def __str__(self):
         return self.email

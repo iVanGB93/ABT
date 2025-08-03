@@ -197,17 +197,20 @@ class ExtrasView(APIView):
         business = Business.objects.get(name=business_name)
         if action == 'new':
             if type == 'income':
-                new_income = ExtraIncome(business=business, amount=data.get('amount', 0), description=data.get('description', ''), image=data.get('image', None))
+                new_income = ExtraIncome(business=business, amount=data.get('amount', 0), description=data.get('description', ''))
+                new_income.image = data.get('image', new_income.image)
                 new_income.save()
                 response['message'] = "Extra income created."
                 response['OK'] = True
                 return Response(status=status.HTTP_201_CREATED, data=response)
             elif type == 'expense':
-                deductable = data.get('deductable', True)
-                if deductable == 'False':
-                    deductable = False
-                print(deductable, data.get('category', 'other'))
-                new_expense = ExtraExpense(business=business, amount=data.get('amount', 0), description=data.get('description', ''), image=data.get('image', None), category=data.get('category', 'other'), tax_deductible=deductable)
+                deductible = data.get('deductible', 'true')
+                if deductible == 'false':
+                    deductible = False
+                else:
+                    deductible = True
+                new_expense = ExtraExpense(business=business, amount=data.get('amount', 0), description=data.get('description', ''), category=data.get('category', 'other'), tax_deductible=deductible)
+                new_expense.image = data.get('image', new_expense.image)
                 new_expense.save()
                 response['message'] = "Extra expense created."
                 response['OK'] = True
@@ -238,6 +241,12 @@ class ExtrasView(APIView):
                     extra_expense.description = data.get('description', extra_expense.description)
                     extra_expense.image = data.get('image', extra_expense.image)
                     extra_expense.category = data.get('category', extra_expense.category)
+                    deductible = data.get('deductible', 'true')
+                    if deductible == 'false':
+                        deductible = False
+                    else:
+                        deductible = True
+                    extra_expense.tax_deductible = deductible
                     extra_expense.save()
                     response['message'] = "Extra expense updated."
                     response['OK'] = True

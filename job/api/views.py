@@ -122,7 +122,7 @@ class SpentView(APIView):
             job = Job.objects.get(id=data['job_id'])
             new_spent = Spent(job=job, description=data['description'], amount=data['amount'])
             if data['use_item'] == 'true':
-                item_list = Item_List.objects.get(name=data['description'])
+                item_list = Item_List.objects.get(id=data['item_id'])
                 item = Item(list=item_list, job=job, name=item_list.name, description=item_list.description, price=item_list.price)
                 item.image = data.get('image', item_list.image)
                 new_spent.image = data.get('image', item.image)
