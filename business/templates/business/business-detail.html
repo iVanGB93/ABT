@@ -1,35 +1,485 @@
 {% extends "business/base-business.html" %}
 {% load static %}
+
+{% block page_title %}{{ business.name }}{% endblock page_title %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'business/css/business-detail.css' %}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock head %}
+
 {% block bar %}
-<p class="lead text-center fw-bold titulo">{{ business.name }}</p>
+<h1 class="business-title">
+    <i class="fas fa-building"></i>
+    {{ business.name }}
+</h1>
 {% endblock bar %}
+
 {% block content %}
-<div class="container py-4">
-    <div class="card shadow-sm border-0 mx-auto" style="max-width: 600px;">
-        <div class="card-body">
-            <h2 class="card-title mb-3 text-primary">
-                <i class="fa fa-building me-2"></i>{{ business.name }}
-            </h2>
-            <h5 class="card-subtitle mb-2 text-muted">
-                <i class="fa fa-map-marker-alt me-1"></i>{{ business.address }}
-            </h5>
-            <p class="card-text mb-3">{{ business.description }}</p>
-            <div class="mb-2">
-                <strong>Owners:</strong>
-                {% for owner in business.owners.all %}
-                    <span class="badge bg-info text-dark me-1">{{ owner.username }}</span>
-                {% empty %}
-                    <span class="text-muted">No owners</span>
+<div class="business-detail-container">
+    <!-- Financial Dashboard Section -->
+    <div class="financial-dashboard" data-aos="fade-up">
+        <div class="dashboard-header">
+            <h2><i class="fas fa-chart-line"></i> Financial Overview</h2>
+            <div class="period-selector">
+                <select id="periodSelect" class="form-select">
+                    <option value="month">This Month</option>
+                    <option value="quarter">This Quarter</option>
+                    <option value="year">This Year</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Financial KPIs -->
+        <div class="financial-kpis">
+            <div class="kpi-card income" data-aos="fade-up" data-aos-delay="100">
+                <div class="kpi-icon">
+                    <i class="fas fa-arrow-up"></i>
+                </div>
+                <div class="kpi-content">
+                    <h3>${{ total_income|floatformat:2|default:"0.00" }}</h3>
+                    <p>Total Income</p>
+                    <div class="income-breakdown">
+                        <small>Jobs: ${{ job_income|floatformat:2 }} | Extra: ${{ extra_income|floatformat:2 }}</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="kpi-card expense" data-aos="fade-up" data-aos-delay="200">
+                <div class="kpi-icon">
+                    <i class="fas fa-arrow-down"></i>
+                </div>
+                <div class="kpi-content">
+                    <h3>${{ total_expenses|floatformat:2|default:"0.00" }}</h3>
+                    <p>Total Expenses</p>
+                    <span class="kpi-trend negative">
+                        <i class="fas fa-arrow-down"></i> 8%
+                    </span>
+                </div>
+            </div>
+
+            <div class="kpi-card profit" data-aos="fade-up" data-aos-delay="300">
+                <div class="kpi-icon">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <div class="kpi-content">
+                    <h3>${{ net_profit|floatformat:2|default:"0.00" }}</h3>
+                    <p>Net Profit</p>
+                    <span class="kpi-trend {% if net_profit >= 0 %}positive{% else %}negative{% endif %}">
+                        <i class="fas fa-arrow-{% if net_profit >= 0 %}up{% else %}down{% endif %}"></i> 
+                        {% if net_profit >= 0 %}15%{% else %}5%{% endif %}
+                    </span>
+                </div>
+            </div>
+
+            <div class="kpi-card balance" data-aos="fade-up" data-aos-delay="400">
+                <div class="kpi-icon">
+                    <i class="fas fa-briefcase"></i>
+                </div>
+                <div class="kpi-content">
+                    <h3>{{ total_jobs }}</h3>
+                    <p>Total Jobs</p>
+                    <div class="jobs-breakdown">
+                        <small>{{ completed_jobs_count }} completed | {{ pending_jobs_count }} pending</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="charts-section">
+            <div class="chart-container" data-aos="fade-right" data-aos-delay="200">
+                <h3><i class="fas fa-chart-bar"></i> Income vs Expenses</h3>
+                <canvas id="incomeExpenseChart"></canvas>
+            </div>
+            
+            <div class="chart-container" data-aos="fade-left" data-aos-delay="300">
+                <h3><i class="fas fa-chart-pie"></i> Expense Categories</h3>
+                <canvas id="expenseCategoriesChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Business Stats Grid -->
+        <div class="business-stats-grid" data-aos="fade-up" data-aos-delay="400">
+            <div class="stat-card clients">
+                <div class="stat-header">
+                    <h3><i class="fas fa-users"></i> Clients</h3>
+                    {% if total_clients > 0 %}
+                        <a href="#" class="view-all-btn">View All</a>
+                    {% endif %}
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number">{{ total_clients }}</div>
+                    <div class="stat-details">
+                        {% if total_clients > 0 %}
+                            <span class="active-count">{{ total_clients }} total clients</span>
+                        {% else %}
+                            <span class="no-data">No clients yet</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="stat-actions">
+                    <a href="#" class="btn-add">
+                        <i class="fas fa-plus"></i> Add Client
+                    </a>
+                </div>
+            </div>
+
+            <div class="stat-card jobs">
+                <div class="stat-header">
+                    <h3><i class="fas fa-briefcase"></i> Jobs</h3>
+                    <a href="{% url 'job:job_list' business.id %}" class="view-all-btn">View All</a>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number">{{ total_jobs }}</div>
+                    <div class="stat-details">
+                        <div class="job-status-grid">
+                            <span class="status completed">{{ completed_jobs_count }} completed</span>
+                            <span class="status pending">{{ pending_jobs_count }} pending</span>
+                            <span class="status progress">{{ in_progress_jobs_count }} in progress</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-actions">
+                    <a href="{% url 'job:add_job' business.id %}" class="btn-add">
+                        <i class="fas fa-plus"></i> Add Job
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Transactions including Jobs -->
+        <div class="recent-transactions" data-aos="fade-up" data-aos-delay="500">
+            <h3><i class="fas fa-clock"></i> Recent Activity</h3>
+            <div class="transactions-list">
+                <!-- Recent Jobs Income -->
+                {% for job in recent_jobs %}
+                <div class="transaction-item job-income">
+                    <div class="transaction-icon">
+                        <i class="fas fa-briefcase"></i>
+                    </div>
+                    <div class="transaction-details">
+                        <h4>{{ job.name }} (Job Completed)</h4>
+                        <p>{{ job.date|date:"M d, Y" }} • Client: {{ job.client.name }}</p>  <!-- ✅ Cambiado de updated_at a date -->
+                    </div>
+                    <div class="transaction-amount positive">
+                        +${{ job.price|floatformat:2 }}
+                    </div>
+                </div>
+                {% endfor %}
+
+                <!-- Recent Extra Income -->
+                {% for income in recent_incomes %}
+                <div class="transaction-item income">
+                    <div class="transaction-icon">
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    <div class="transaction-details">
+                        <h4>{{ income.description }}</h4>
+                        <p>{{ income.date|date:"M d, Y" }} • Extra Income</p>
+                    </div>
+                    <div class="transaction-amount positive">
+                        +${{ income.amount|floatformat:2 }}
+                    </div>
+                </div>
+                {% endfor %}
+
+                <!-- Recent Expenses -->
+                {% for expense in recent_expenses %}
+                <div class="transaction-item expense">
+                    <div class="transaction-icon">
+                        <i class="fas fa-minus"></i>
+                    </div>
+                    <div class="transaction-details">
+                        <h4>{{ expense.description }}</h4>
+                        <p>{{ expense.date|date:"M d, Y" }} • {{ expense.get_category_display }}</p>
+                    </div>
+                    <div class="transaction-amount negative">
+                        -${{ expense.amount|floatformat:2 }}
+                    </div>
+                </div>
                 {% endfor %}
             </div>
-            <div class="mb-2">
-                <strong>Creado:</strong> {{ business.created_at|date:'d/m/Y H:i' }}
+            
+            <div class="transactions-actions">
+                <a href="{% url 'business:add_income' business.id %}" class="btn-success">
+                    <i class="fas fa-plus"></i> Add Income
+                </a>
+                <a href="{% url 'business:add_expense' business.id %}" class="btn-warning">
+                    <i class="fas fa-minus"></i> Add Expense
+                </a>
+                <a href="{% url 'job:add_job' business.id %}" class="btn-primary">
+                    <i class="fas fa-briefcase"></i> Add Job
+                </a>
+                <a href="{% url 'business:financial_report' business.id %}" class="btn-info">
+                    <i class="fas fa-file-alt"></i> Full Report
+                </a>
             </div>
-            <div class="mb-2">
-                <strong>Última actualización:</strong> {{ business.updated_at|date:'d/m/Y H:i' }}
+        </div>
+    </div>
+
+    <!-- Business Info Section -->
+    <div class="business-detail-card" data-aos="fade-up" data-aos-delay="600">
+        <!-- Business Header -->
+        <div class="detail-header">
+            <div class="detail-header-content">
+                <div class="business-icon-large">
+                    <i class="fas fa-building"></i>
+                </div>
+                <h1 class="business-name-large">{{ business.name }}</h1>
+                <p class="business-address-large">
+                    <i class="fas fa-map-marker-alt"></i>
+                    {{ business.address|default:"No address provided" }}
+                </p>
+            </div>
+        </div>
+
+        <!-- Business Content -->
+        <div class="detail-content">
+            <div class="detail-grid">
+                <!-- Business Information -->
+                <div class="detail-section" data-aos="fade-right" data-aos-delay="200">
+                    <h3>
+                        <div class="section-icon">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        Business Information
+                    </h3>
+                    <div class="detail-info">
+                        <div class="info-item">
+                            <div class="info-icon">
+                                <i class="fas fa-align-left"></i>
+                            </div>
+                            <div class="info-content">
+                                <h4>Description</h4>
+                                <p>{{ business.description|default:"No description available" }}</p>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-icon">
+                                <i class="fas fa-calendar-plus"></i>
+                            </div>
+                            <div class="info-content">
+                                <h4>Created</h4>
+                                <p>{{ business.created_at|date:'F j, Y \a\t g:i A' }}</p>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-icon">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                            <div class="info-content">
+                                <h4>Last Updated</h4>
+                                <p>{{ business.updated_at|date:'F j, Y \a\t g:i A' }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Owners Section -->
+                <div class="detail-section" data-aos="fade-left" data-aos-delay="300">
+                    <h3>
+                        <div class="section-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        Business Owners
+                    </h3>
+                    {% if business.owners.all %}
+                        <div class="owners-grid">
+                            {% for owner in business.owners.all %}
+                                <div class="owner-card">
+                                    <div class="owner-avatar-large">
+                                        {% if owner.profile.image %}
+                                            <img src="{{ owner.profile.image.url }}" alt="{{ owner.username }}">
+                                        {% else %}
+                                            <div class="owner-placeholder-large">
+                                                {{ owner.username|first|upper }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="owner-name">{{ owner.get_full_name|default:owner.username }}</div>
+                                    <div class="owner-username">@{{ owner.username }}</div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="no-owners-state">
+                            <i class="fas fa-user-slash"></i>
+                            <h4>No Owners Assigned</h4>
+                            <p>This business doesn't have any owners yet.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="detail-actions" data-aos="fade-up" data-aos-delay="400">
+                <a href="{% url 'business:business_edit' business.id %}" class="btn-primary-large">
+                    <i class="fas fa-edit"></i>
+                    Edit Business
+                </a>
+                <a href="{% url 'business:business_delete' business.id %}" class="btn-danger-large" 
+                   onclick="return confirm('Are you sure you want to delete this business? This action cannot be undone.')">
+                    <i class="fas fa-trash-alt"></i>
+                    Delete Business
+                </a>
             </div>
         </div>
     </div>
 </div>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</div>
 {% endblock content %}
+
+{% block script %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Datos desde Django incluyendo trabajos
+    const monthlyIncome = JSON.parse('{{ monthly_income|default:"[0,0,0,0,0,0]"|escapejs }}');
+    const monthlyJobIncome = JSON.parse('{{ monthly_job_income|default:"[0,0,0,0,0,0]"|escapejs }}');
+    const monthlyExpenses = JSON.parse('{{ monthly_expenses|default:"[0,0,0,0,0,0]"|escapejs }}');
+    const expenseCategoriesLabels = JSON.parse('{{ expense_categories_labels|default:"[]"|escapejs }}');
+    const expenseCategoriesData = JSON.parse('{{ expense_categories_data|default:"[]"|escapejs }}');
+    
+    console.log('Monthly Income:', monthlyIncome);
+    console.log('Monthly Job Income:', monthlyJobIncome);
+    console.log('Monthly Expenses:', monthlyExpenses);
+    console.log('Categories Labels:', expenseCategoriesLabels);
+    console.log('Categories Data:', expenseCategoriesData);
+    
+    // Income vs Expense Chart (incluyendo trabajos)
+    const incomeExpenseCtx = document.getElementById('incomeExpenseChart');
+    if (incomeExpenseCtx) {
+        new Chart(incomeExpenseCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Total Income',
+                    data: monthlyIncome,
+                    backgroundColor: '#10b981',
+                    borderColor: '#059669',
+                    borderWidth: 1,
+                    borderRadius: 8,
+                }, {
+                    label: 'Job Income',
+                    data: monthlyJobIncome,
+                    backgroundColor: '#06b6d4',
+                    borderColor: '#0891b2',
+                    borderWidth: 1,
+                    borderRadius: 8,
+                }, {
+                    label: 'Expenses',
+                    data: monthlyExpenses,
+                    backgroundColor: '#f59e0b',
+                    borderColor: '#d97706',
+                    borderWidth: 1,
+                    borderRadius: 8,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20
+                        }
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': $' + context.parsed.y.toFixed(2);
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: '#f3f4f6'
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + value.toFixed(0);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Expense Categories Chart
+    const expenseCategoriesCtx = document.getElementById('expenseCategoriesChart');
+    if (expenseCategoriesCtx && expenseCategoriesLabels.length > 0) {
+        new Chart(expenseCategoriesCtx, {
+            type: 'doughnut',
+            data: {
+                labels: expenseCategoriesLabels,
+                datasets: [{
+                    data: expenseCategoriesData,
+                    backgroundColor: [
+                        '#2563eb', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6',
+                        '#06b6d4', '#f97316', '#84cc16', '#ec4899', '#64748b'
+                    ],
+                    borderColor: '#ffffff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 15
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                return context.label + ': $' + context.parsed.toFixed(2) + ' (' + percentage + '%)';
+                            }
+                        }
+                    }
+                },
+                cutout: '60%'
+            }
+        });
+    } else {
+        // Mostrar mensaje cuando no hay datos de categorías
+        const chartContainer = expenseCategoriesCtx.parentElement;
+        chartContainer.innerHTML = `
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 200px; color: #6b7280;">
+                <i class="fas fa-chart-pie" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                <p>No expense categories data available</p>
+            </div>
+        `;
+    }
+    
+    // Period selector functionality
+    const periodSelect = document.getElementById('periodSelect');
+    if (periodSelect) {
+        periodSelect.addEventListener('change', function() {
+            // Por ahora solo mostrar en consola, puedes implementar filtrado via AJAX
+            console.log('Period changed to:', this.value);
+            // Aquí puedes hacer una llamada AJAX para actualizar los datos
+        });
+    }
+});
+</script>
+{% endblock script %}

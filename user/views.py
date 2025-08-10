@@ -40,3 +40,30 @@ def registerView(request):
 def logoutView(request):
     logout(request)
     return redirect('web:index')
+
+def profileView(request):
+    return render(request, 'user/profile.html')
+
+def editProfileView(request):
+    if request.method == 'POST':
+        user = request.user
+        user.first_name = request.POST.get('first_name', user.first_name)
+        user.last_name = request.POST.get('last_name', user.last_name)
+        user.email = request.POST.get('email', user.email)
+        user.save()
+        return redirect('user:profile')
+    return render(request, 'user/edit-profile.html')
+
+def changePasswordView(request):
+    if request.method == 'POST':
+        user = request.user
+        current_password = request.POST.get('current_password')
+        new_password = request.POST.get('new_password')
+        if user.check_password(current_password):
+            user.set_password(new_password)
+            user.save()
+            return redirect('user:profile')
+        else:
+            content = {'message': 'Current password is incorrect'}
+            return render(request, 'user/change-password.html', content)
+    return render(request, 'user/change-password.html')

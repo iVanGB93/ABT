@@ -5,53 +5,59 @@
         <meta charset="UTF-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">   
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <!-- <link rel="icon" href="{% static 'web/images/logo.svg' %}"/> -->
-        <meta name="description" content="coming...">
+        <meta name="description" content="Advance Business Tools - Modern business management platform">
         <meta name="author" content="iVan">
-        <title>Advance Business Tools</title>
+        <title>{% block title %}Advance Business Tools{% endblock title %}</title>
+        
+        <!-- Bootstrap -->
         <link rel="stylesheet" href="{% static 'web/bootstrap v5.3/css/bootstrap.min.css' %}">
-        <link rel="stylesheet" href="{% static 'web/css/allStyles.css' %}">
-        <!-- FontAwesomeFree -->
+        
+        <!-- Google Fonts -->
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+        
+        <!-- FontAwesome -->
         <link href="{% static 'fontawesomefree/css/fontawesome.css' %}" rel="stylesheet" type="text/css">
         <link href="{% static 'fontawesomefree/css/brands.css' %}" rel="stylesheet" type="text/css">
         <link href="{% static 'fontawesomefree/css/solid.css' %}" rel="stylesheet" type="text/css">
-        <script src="{% static 'fontawesomefree/js/fontawesome.js' %}"></script>
-        <script src="{% static 'fontawesomefree/js/solid.js' %}"></script>
-        <script src="{% static 'fontawesomefree/js/brands.js' %}"></script>
-        <!-- AOS -->
+        
+        <!-- AOS Animation -->
         <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+        <!-- Custom Styles -->
+        <link rel="stylesheet" href="{% static 'web/css/allStyles.css' %}">
+        
         {% block head %}
         {% endblock head %}
     </head>
     <body>
         {% block body %}
         {% endblock body %}
-    <script src="{% static 'web/bootstrap v5.3/js/bootstrap.bundle.min.js' %}"></script>
-    <!-- AOS -->
-    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-    {% if message %}
-    {{ message|json_script:"message" }}
-    {{ icon|json_script:"icon" }}
-    <script>
-        var mensaje = JSON.parse(document.getElementById('message').textContent);
-        var icon = JSON.parse(document.getElementById('icon').textContent);
-        var resultado = 'Upss!';
-        var botonColor = '#d33';
-        if (icon === 'success') {
-            var resultado = 'Listo!';
-            var botonColor = '#007000';
-        }
-        window.onload = function(){
-            Swal.fire({
-                title: resultado,
-                text: message,
-                icon: icon,
-                confirmButtonColor: botonColor,
-            }) 
-        }             
-    </script>
-    {% endif %}
-    {% block script %}
-    {% endblock script %}
-</body>
+        
+        <!-- Scripts -->
+        <script src="{% static 'web/bootstrap v5.3/js/bootstrap.bundle.min.js' %}"></script>
+        <script src="{% static 'fontawesomefree/js/fontawesome.js' %}"></script>
+        <script src="{% static 'fontawesomefree/js/solid.js' %}"></script>
+        <script src="{% static 'fontawesomefree/js/brands.js' %}"></script>
+        <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+        <script src="{% static 'web/js/main.js' %}"></script>
+
+        <!-- Initialize AOS -->
+        <script>
+            AOS.init({
+                duration: 1000,
+                once: true
+            });
+        </script>
+        
+        {% if messages %}
+            {% for message in messages %}
+                <script>
+                    // Handle Django messages if you're using them
+                    console.log('{{ message }}');
+                </script>
+            {% endfor %}
+        {% endif %}
+        
+        {% block script %}
+        {% endblock script %}
+    </body>
 </html>

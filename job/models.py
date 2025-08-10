@@ -15,9 +15,9 @@ class Job(models.Model):
         'active': 'ACTIVE',
         'finished': 'FINISHED'
     }
-    business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='business_job')
-    provider = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='provider', null=True, blank=True)
-    client = models.ForeignKey(Client, on_delete=models.CASCADE)
+    business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='jobs')
+    provider = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='jobs', null=True, blank=True)
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='jobs')
     status = models.CharField(max_length=15, choices=status_options, default='new')
     description = models.CharField(max_length=150)
     address = models.CharField(max_length=150)

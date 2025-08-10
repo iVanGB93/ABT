@@ -12,7 +12,7 @@ def upload_to(instance, filename):
     return f'client/{instance.business.name}/{instance.name}/{filename}'
 
 class Client(models.Model):
-    business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='business_client')
+    business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='clients')
     provider = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=80)
     last_name = models.CharField(max_length=80, default='no last name saved')

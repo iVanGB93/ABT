@@ -1,0 +1,850 @@
+{% extends "business/base-business.html" %}
+{% load static %}
+
+{% block page_title %}Financial Report - {{ business.name }}{% endblock page_title %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'business/css/business-detail.css' %}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    .financial-report-container {
+        padding: 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+    
+    .report-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        color: white;
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        text-align: center;
+        box-shadow: 0 10px 40px rgba(37, 99, 235, 0.2);
+    }
+    
+    .report-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0 0 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+    
+    .report-header p {
+        margin: 0;
+        opacity: 0.9;
+        font-size: 1.1rem;
+    }
+    
+    .period-filters {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        border: 1px solid var(--border-light);
+    }
+    
+    .filter-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .period-buttons {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+    
+    .period-btn {
+        padding: 0.75rem 1.5rem;
+        border: 2px solid var(--border-light);
+        border-radius: 10px;
+        background: var(--bg-light);
+        color: var(--text-dark);
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+    }
+    
+    .period-btn:hover {
+        border-color: var(--primary-color);
+        background: rgba(37, 99, 235, 0.05);
+        color: var(--primary-color);
+        text-decoration: none;
+        transform: translateY(-1px);
+    }
+    
+    .period-btn.active {
+        background: var(--primary-color);
+        border-color: var(--primary-color);
+        color: white;
+    }
+    
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .metric-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        border: 1px solid var(--border-light);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        transition: transform 0.3s ease;
+    }
+    
+    .metric-card:hover {
+        transform: translateY(-2px);
+    }
+    
+    .metric-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+    
+    .metric-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+    }
+    
+    .metric-icon.income {
+        background: linear-gradient(135deg, #10b981, #059669);
+    }
+    
+    .metric-icon.expense {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+    }
+    
+    .metric-icon.profit {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    }
+    
+    .metric-icon.tax {
+        background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    }
+    
+    .metric-info h3 {
+        margin: 0;
+        font-size: 0.9rem;
+        color: var(--text-light);
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .metric-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin: 0.25rem 0 0;
+        color: var(--text-dark);
+    }
+    
+    .metric-value.negative {
+        color: #dc2626;
+    }
+    
+    .metric-value.positive {
+        color: #16a34a;
+    }
+    
+    .charts-section {
+        display: grid;
+        grid-template-columns: 1fr 400px;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .chart-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        border: 1px solid var(--border-light);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    }
+    
+    .chart-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--border-light);
+    }
+    
+    .chart-header h3 {
+        margin: 0;
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+    
+    .chart-container {
+        position: relative;
+        height: 300px;
+    }
+    
+    .transactions-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
+    
+    .transaction-card {
+        background: white;
+        border-radius: 15px;
+        border: 1px solid var(--border-light);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
+    
+    .transaction-header {
+        padding: 1.5rem;
+        border-bottom: 2px solid var(--border-light);
+    }
+    
+    .transaction-header.income {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05));
+    }
+    
+    .transaction-header.expense {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(217, 119, 6, 0.05));
+    }
+    
+    .transaction-header h3 {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .transaction-list {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    
+    .transaction-item {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--border-light);
+        transition: background 0.2s ease;
+    }
+    
+    .transaction-item:hover {
+        background: var(--bg-light);
+    }
+    
+    .transaction-item:last-child {
+        border-bottom: none;
+    }
+    
+    .transaction-details {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .transaction-info h4 {
+        margin: 0 0 0.25rem;
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+    
+    .transaction-meta {
+        font-size: 0.85rem;
+        color: var(--text-light);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .transaction-amount {
+        font-size: 1.1rem;
+        font-weight: 700;
+    }
+    
+    .transaction-amount.income {
+        color: #16a34a;
+    }
+    
+    .transaction-amount.expense {
+        color: #dc2626;
+    }
+    
+    .category-badge {
+        background: var(--primary-color);
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    
+    .tax-deductible {
+        background: #8b5cf6;
+        color: white;
+        padding: 0.2rem 0.4rem;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        font-weight: 500;
+        margin-left: 0.5rem;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1.5rem;
+        color: var(--text-light);
+    }
+    
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    .export-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        justify-content: center;
+    }
+    
+    .btn-export {
+        padding: 0.75rem 1.5rem;
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-export:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+        color: white;
+        text-decoration: none;
+    }
+    
+    /* Responsive */
+    @media (max-width: 1200px) {
+        .charts-section {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .financial-report-container {
+            padding: 1rem;
+        }
+        
+        .transactions-section {
+            grid-template-columns: 1fr;
+        }
+        
+        .period-buttons {
+            justify-content: center;
+        }
+        
+        .period-btn {
+            flex: 1;
+            text-align: center;
+            min-width: 80px;
+        }
+        
+        .metrics-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock head %}
+
+{% block bar %}
+<h1 class="business-title">
+    <i class="fas fa-chart-bar"></i>
+    Financial Report - {{ business.name }}
+</h1>
+{% endblock bar %}
+
+{% block content %}
+<div class="financial-report-container">
+    <!-- Report Header -->
+    <div class="report-header">
+        <h1>
+            <i class="fas fa-chart-line"></i>
+            Financial Report
+        </h1>
+        <p>
+            {% if period == 'week' %}Last 7 days
+            {% elif period == 'month' %}Current month
+            {% elif period == 'quarter' %}Current quarter
+            {% elif period == 'year' %}Current year
+            {% else %}Last 30 days{% endif %}
+            • From {{ start_date|date:"M d, Y" }} to {{ "now"|date:"M d, Y" }}
+        </p>
+    </div>
+    
+    <!-- Period Filters -->
+    <div class="period-filters">
+        <div class="filter-title">
+            <i class="fas fa-calendar"></i>
+            Time Period
+        </div>
+        <div class="period-buttons">
+            <a href="?period=week" class="period-btn {% if period == 'week' %}active{% endif %}">
+                <i class="fas fa-calendar-week"></i> Week
+            </a>
+            <a href="?period=month" class="period-btn {% if period == 'month' %}active{% endif %}">
+                <i class="fas fa-calendar-alt"></i> Month
+            </a>
+            <a href="?period=quarter" class="period-btn {% if period == 'quarter' %}active{% endif %}">
+                <i class="fas fa-calendar"></i> Quarter
+            </a>
+            <a href="?period=year" class="period-btn {% if period == 'year' %}active{% endif %}">
+                <i class="fas fa-calendar-check"></i> Year
+            </a>
+        </div>
+    </div>
+    
+    <!-- Key Metrics -->
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <div class="metric-header">
+                <div class="metric-icon income">
+                    <i class="fas fa-arrow-up"></i>
+                </div>
+                <div class="metric-info">
+                    <h3>Total Income</h3>
+                    <div class="metric-value positive">${{ total_income|floatformat:2 }}</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="metric-card">
+            <div class="metric-header">
+                <div class="metric-icon expense">
+                    <i class="fas fa-arrow-down"></i>
+                </div>
+                <div class="metric-info">
+                    <h3>Total Expenses</h3>
+                    <div class="metric-value negative">${{ total_expenses|floatformat:2 }}</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="metric-card">
+            <div class="metric-header">
+                <div class="metric-icon profit">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="metric-info">
+                    <h3>Net Profit</h3>
+                    <div class="metric-value {% if net_profit >= 0 %}positive{% else %}negative{% endif %}">
+                        ${{ net_profit|floatformat:2 }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="metric-card">
+            <div class="metric-header">
+                <div class="metric-icon tax">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                </div>
+                <div class="metric-info">
+                    <h3>Tax Deductible</h3>
+                    <div class="metric-value">${{ total_tax_deductible|floatformat:2 }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Charts Section -->
+    <div class="charts-section">
+        <div class="chart-card">
+            <div class="chart-header">
+                <i class="fas fa-chart-bar"></i>
+                <h3>Income vs Expenses</h3>
+            </div>
+            <div class="chart-container">
+                <canvas id="incomeExpenseChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="chart-card">
+            <div class="chart-header">
+                <i class="fas fa-chart-pie"></i>
+                <h3>Expenses by Category</h3>
+            </div>
+            <div class="chart-container">
+                <canvas id="expenseCategoryChart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Transactions Lists -->
+    <div class="transactions-section">
+        <!-- Income List -->
+        <div class="transaction-card">
+            <div class="transaction-header income">
+                <h3>
+                    <i class="fas fa-plus-circle"></i>
+                    Recent Income ({{ incomes.count }})
+                </h3>
+            </div>
+            <div class="transaction-list">
+                {% if incomes %}
+                    {% for income in incomes %}
+                    <div class="transaction-item">
+                        <div class="transaction-details">
+                            <div class="transaction-info">
+                                <h4>{{ income.description }}</h4>
+                                <div class="transaction-meta">
+                                    <i class="fas fa-calendar"></i>
+                                    {{ income.date|date:"M d, Y" }}
+                                </div>
+                            </div>
+                            <div class="transaction-amount income">
+                                +${{ income.amount|floatformat:2 }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>No income recorded for this period</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Expenses List -->
+        <div class="transaction-card">
+            <div class="transaction-header expense">
+                <h3>
+                    <i class="fas fa-minus-circle"></i>
+                    Recent Expenses ({{ expenses.count }})
+                </h3>
+            </div>
+            <div class="transaction-list">
+                {% if expenses %}
+                    {% for expense in expenses %}
+                    <div class="transaction-item">
+                        <div class="transaction-details">
+                            <div class="transaction-info">
+                                <h4>{{ expense.description }}</h4>
+                                <div class="transaction-meta">
+                                    <i class="fas fa-calendar"></i>
+                                    {{ expense.date|date:"M d, Y" }}
+                                    <span class="category-badge">{{ expense.get_category_display }}</span>
+                                    {% if expense.tax_deductible %}
+                                        <span class="tax-deductible">Tax Deductible</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="transaction-amount expense">
+                                -${{ expense.amount|floatformat:2 }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>No expenses recorded for this period</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Export Actions -->
+    <div class="export-actions">
+        <a href="#" class="btn-export" onclick="exportToPDF()">
+            <i class="fas fa-file-pdf"></i>
+            Export to PDF
+        </a>
+        <a href="#" class="btn-export" onclick="exportToCSV()">
+            <i class="fas fa-file-csv"></i>
+            Export to CSV
+        </a>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Income vs Expenses Chart
+    const incomeExpenseCtx = document.getElementById('incomeExpenseChart').getContext('2d');
+    new Chart(incomeExpenseCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Income', 'Expenses', 'Net Profit'],
+            datasets: [{
+                data: [{{ total_income }}, {{ total_expenses }}, {{ net_profit }}],
+                backgroundColor: [
+                    'rgba(16, 185, 129, 0.8)',
+                    'rgba(245, 158, 11, 0.8)',
+                    {% if net_profit >= 0 %}'rgba(37, 99, 235, 0.8)'{% else %}'rgba(220, 38, 38, 0.8)'{% endif %}
+                ],
+                borderColor: [
+                    'rgb(16, 185, 129)',
+                    'rgb(245, 158, 11)',
+                    {% if net_profit >= 0 %}'rgb(37, 99, 235)'{% else %}'rgb(220, 38, 38)'{% endif %}
+                ],
+                borderWidth: 2,
+                borderRadius: 8,
+                borderSkipped: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: 'white',
+                    bodyColor: 'white',
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    borderWidth: 1,
+                    cornerRadius: 8,
+                    callbacks: {
+                        label: function(context) {
+                            return context.label + ': $' + context.parsed.y.toLocaleString();
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)',
+                        drawBorder: false
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return '$' + value.toLocaleString();
+                        },
+                        font: {
+                            size: 12
+                        },
+                        color: '#6b7280'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        font: {
+                            size: 12,
+                            weight: '600'
+                        },
+                        color: '#374151'
+                    }
+                }
+            },
+            animation: {
+                duration: 1000,
+                easing: 'easeOutQuart'
+            },
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            }
+        }
+    });
+
+    // Expense Categories Chart - ARREGLADO
+    const expenseCategoryLabels = {{ expense_categories_labels|safe }};
+    const expenseCategoryData = {{ expense_categories_data|safe }};
+    
+    if (expenseCategoryLabels.length > 0 && expenseCategoryData.length > 0) {
+        const expenseCategoryCtx = document.getElementById('expenseCategoryChart').getContext('2d');
+        new Chart(expenseCategoryCtx, {
+            type: 'doughnut',
+            data: {
+                labels: expenseCategoryLabels,
+                datasets: [{
+                    data: expenseCategoryData,
+                    backgroundColor: [
+                        'rgba(245, 158, 11, 0.8)',
+                        'rgba(34, 197, 94, 0.8)',
+                        'rgba(99, 102, 241, 0.8)',
+                        'rgba(239, 68, 68, 0.8)',
+                        'rgba(168, 85, 247, 0.8)',
+                        'rgba(6, 182, 212, 0.8)',
+                        'rgba(251, 146, 60, 0.8)',
+                        'rgba(156, 163, 175, 0.8)',
+                        'rgba(236, 72, 153, 0.8)',
+                        'rgba(14, 165, 233, 0.8)'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff',
+                    hoverBorderWidth: 3,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '50%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true,
+                            font: {
+                                size: 12
+                            },
+                            color: '#374151'
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: 'white',
+                        bodyColor: 'white',
+                        borderColor: 'rgba(255, 255, 255, 0.1)',
+                        borderWidth: 1,
+                        cornerRadius: 8,
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return `${label}: $${value.toLocaleString()} (${percentage}%)`;
+                            }
+                        }
+                    }
+                },
+                animation: {
+                    animateRotate: true,
+                    animateScale: true,
+                    duration: 1000
+                },
+                interaction: {
+                    intersect: false
+                }
+            }
+        });
+    } else {
+        // Mostrar mensaje cuando no hay datos de categorías
+        const chartContainer = document.getElementById('expenseCategoryChart').parentElement;
+        chartContainer.innerHTML = `
+            <div style="display: flex; align-items: center; justify-content: center; height: 300px; color: #9ca3af;">
+                <div style="text-align: center;">
+                    <i class="fas fa-chart-pie" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                    <p style="margin: 0; font-size: 1rem;">No expense data available for this period</p>
+                    <p style="margin: 0.5rem 0 0; font-size: 0.875rem; opacity: 0.7;">Add some expenses to see the breakdown</p>
+                </div>
+            </div>
+        `;
+    }
+});
+
+// Export functions
+function exportToPDF() {
+    // Aquí podrías implementar jsPDF más tarde
+    alert('PDF export functionality will be implemented soon!\n\nThis will include:\n• Financial summary\n• Charts as images\n• Transaction details\n• Professional formatting');
+}
+
+function exportToCSV() {
+    try {
+        // Crear datos CSV
+        const csvData = [];
+        csvData.push(['Type', 'Description', 'Amount', 'Date', 'Category', 'Tax Deductible']);
+        
+        // Agregar ingresos
+        {% for income in incomes %}
+        csvData.push([
+            'Income', 
+            '{{ income.description|escapejs }}', 
+            '{{ income.amount }}', 
+            '{{ income.date|date:"Y-m-d" }}', 
+            '', 
+            'No'
+        ]);
+        {% endfor %}
+        
+        // Agregar gastos
+        {% for expense in expenses %}
+        csvData.push([
+            'Expense', 
+            '{{ expense.description|escapejs }}', 
+            '{{ expense.amount }}', 
+            '{{ expense.date|date:"Y-m-d" }}', 
+            '{{ expense.get_category_display|escapejs }}',
+            '{% if expense.tax_deductible %}Yes{% else %}No{% endif %}'
+        ]);
+        {% endfor %}
+        
+        // Agregar resumen al final
+        csvData.push([]);
+        csvData.push(['SUMMARY', '', '', '', '', '']);
+        csvData.push(['Total Income', '', '{{ total_income }}', '', '', '']);
+        csvData.push(['Total Expenses', '', '{{ total_expenses }}', '', '', '']);
+        csvData.push(['Net Profit', '', '{{ net_profit }}', '', '', '']);
+        csvData.push(['Tax Deductible', '', '{{ total_tax_deductible }}', '', '', '']);
+        
+        // Convertir a CSV
+        const csvContent = csvData.map(row => 
+            row.map(field => `"${field.toString().replace(/"/g, '""')}"`).join(',')
+        ).join('\n');
+        
+        // Crear y descargar archivo
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `financial_report_{{ period }}_{{ "now"|date:"Y-m-d" }}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Mostrar mensaje de éxito
+        setTimeout(() => {
+            alert('✅ CSV file downloaded successfully!\n\nThe file includes all transactions and summary data for the selected period.');
+        }, 100);
+        
+    } catch (error) {
+        console.error('Error exporting CSV:', error);
+        alert('❌ Error exporting CSV file. Please try again.');
+    }
+}
+</script>
+{% endblock content %}

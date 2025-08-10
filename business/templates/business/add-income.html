@@ -1,0 +1,393 @@
+{% extends "business/base-business.html" %}
+{% load static %}
+
+{% block page_title %}Add Income - {{ business.name }}{% endblock page_title %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'business/css/business-detail.css' %}">
+<style>
+    .add-income-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    
+    .form-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        border: 1px solid var(--border-light);
+        overflow: hidden;
+    }
+    
+    .form-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        color: white;
+        padding: 2rem;
+        text-align: center;
+    }
+    
+    .form-header h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin: 0 0 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+    
+    .form-header p {
+        margin: 0;
+        opacity: 0.9;
+        font-size: 1rem;
+    }
+    
+    .form-content {
+        padding: 2.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 2rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .form-input {
+        width: 100%;
+        padding: 1rem 1.25rem;
+        border: 2px solid var(--border-light);
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: var(--bg-light);
+        font-family: inherit;
+        box-sizing: border-box;
+    }
+    
+    .form-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        background: white;
+    }
+    
+    .form-input::placeholder {
+        color: var(--text-light);
+    }
+    
+    .form-textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+    
+    .currency-input {
+        position: relative;
+    }
+    
+    .currency-input::before {
+        content: '$';
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-light);
+        font-weight: 600;
+        z-index: 1;
+    }
+    
+    .currency-input .form-input {
+        padding-left: 2.5rem;
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2.5rem;
+    }
+    
+    .btn {
+        flex: 1;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+        font-family: inherit;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(37, 99, 235, 0.3);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-secondary {
+        background: var(--bg-light);
+        color: var(--text-dark);
+        border: 2px solid var(--border-light);
+    }
+    
+    .btn-secondary:hover {
+        background: white;
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+        transform: translateY(-1px);
+        text-decoration: none;
+    }
+    
+    .quick-amounts {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+    }
+    
+    .quick-amount {
+        padding: 0.5rem;
+        background: var(--bg-light);
+        border: 2px solid var(--border-light);
+        border-radius: 8px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+    
+    .quick-amount:hover {
+        border-color: var(--primary-color);
+        background: rgba(37, 99, 235, 0.05);
+        color: var(--primary-color);
+    }
+    
+    .alert {
+        padding: 1rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        font-weight: 500;
+    }
+    
+    .alert-success {
+        background: #f0fdf4;
+        color: #16a34a;
+        border: 1px solid #bbf7d0;
+    }
+    
+    .alert-error {
+        background: #fef2f2;
+        color: #dc2626;
+        border: 1px solid #fecaca;
+    }
+    
+    /* Animation */
+    .form-card {
+        animation: slideUp 0.6s ease-out;
+    }
+    
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .add-income-container {
+            padding: 1rem;
+        }
+        
+        .form-content {
+            padding: 1.5rem;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+        
+        .quick-amounts {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+</style>
+{% endblock head %}
+
+{% block bar %}
+<h1 class="business-title">
+    <i class="fas fa-plus-circle"></i>
+    Add Income to {{ business.name }}
+</h1>
+{% endblock bar %}
+
+{% block content %}
+<div class="add-income-container">
+    <div class="form-card">
+        <div class="form-header">
+            <h1>
+                <i class="fas fa-money-bill-wave"></i>
+                Add New Income
+            </h1>
+            <p>Record a new income source for your business</p>
+        </div>
+        
+        <div class="form-content">
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    <i class="fas fa-{% if message.tags == 'error' %}exclamation-circle{% elif message.tags == 'success' %}check-circle{% else %}info-circle{% endif %}"></i>
+                    {{ message }}
+                </div>
+                {% endfor %}
+            {% endif %}
+            
+            <form method="post" id="incomeForm">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="description">
+                        <i class="fas fa-file-alt"></i>
+                        Description
+                    </label>
+                    <input 
+                        type="text" 
+                        id="description" 
+                        name="description" 
+                        class="form-input" 
+                        placeholder="e.g., Client payment, Product sale, Service fee"
+                        required
+                        maxlength="200"
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label for="amount">
+                        <i class="fas fa-dollar-sign"></i>
+                        Amount
+                    </label>
+                    <div class="currency-input">
+                        <input 
+                            type="number" 
+                            id="amount" 
+                            name="amount" 
+                            class="form-input" 
+                            placeholder="0.00"
+                            step="0.01"
+                            min="0.01"
+                            required
+                        >
+                    </div>
+                    
+                    <div class="quick-amounts">
+                        <div class="quick-amount" data-amount="50">$50</div>
+                        <div class="quick-amount" data-amount="100">$100</div>
+                        <div class="quick-amount" data-amount="250">$250</div>
+                        <div class="quick-amount" data-amount="500">$500</div>
+                        <div class="quick-amount" data-amount="1000">$1K</div>
+                        <div class="quick-amount" data-amount="2500">$2.5K</div>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus"></i>
+                        Add Income
+                    </button>
+                    <a href="{% url 'business:business_detail' business.id %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i>
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const amountInput = document.getElementById('amount');
+    const quickAmounts = document.querySelectorAll('.quick-amount');
+    const form = document.getElementById('incomeForm');
+    
+    // Quick amount selection
+    quickAmounts.forEach(button => {
+        button.addEventListener('click', function() {
+            const amount = this.dataset.amount;
+            amountInput.value = amount;
+            amountInput.focus();
+            
+            // Visual feedback
+            quickAmounts.forEach(btn => btn.style.background = '');
+            this.style.background = 'rgba(37, 99, 235, 0.1)';
+            this.style.borderColor = 'var(--primary-color)';
+            this.style.color = 'var(--primary-color)';
+        });
+    });
+    
+    // Focus on first input
+    document.getElementById('description').focus();
+    
+    // Form validation
+    form.addEventListener('submit', function(e) {
+        const description = document.getElementById('description').value.trim();
+        const amount = parseFloat(document.getElementById('amount').value);
+        
+        if (!description) {
+            e.preventDefault();
+            alert('Please enter a description for this income.');
+            document.getElementById('description').focus();
+            return;
+        }
+        
+        if (isNaN(amount) || amount <= 0) {
+            e.preventDefault();
+            alert('Please enter a valid amount greater than 0.');
+            document.getElementById('amount').focus();
+            return;
+        }
+        
+        // Show loading state
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding Income...';
+        submitBtn.disabled = true;
+    });
+    
+    // Real-time amount validation
+    amountInput.addEventListener('input', function() {
+        const value = parseFloat(this.value);
+        if (isNaN(value) || value <= 0) {
+            this.style.borderColor = '#ef4444';
+        } else {
+            this.style.borderColor = '#10b981';
+        }
+    });
+});
+</script>
+{% endblock content %}

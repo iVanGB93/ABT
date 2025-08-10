@@ -1,132 +1,257 @@
 {% extends "web/base.html" %}
 {% load static %}
+
+{% block title %}Home - Advance Business Tools{% endblock title %}
+
 {% block head %}
     <link rel="stylesheet" href="{% static 'web/css/style.css' %}">
 {% endblock head %}
+
 {% block body %}
-<header class="header" data-aos="fade-down">
-    <section class="flex">
+<!-- Header -->
+<header class="header" id="header">
+    <div class="flex">
         <a href="#" class="logo">Advance Business Tools</a>
         <nav class="navbar">
-            <a href="#">Services</a>
+            <a href="#features">Features</a>
             <a href="#about">About</a>
             <a href="#contact">Contact</a>
             {% if user.is_authenticated %}
-            <a href="{% url 'business:business_list' %}">Panel</a>
+            <a href="{% url 'business:business_list' %}">Dashboard</a>
             {% else %}
             <a href="{% url 'user:login' %}">Login</a>
             {% endif %}
         </nav>
         <div id="menu-btn"><i class="fas fa-bars"></i></div>
-    </section>
-</header>
-<div class="container-home" data-aos="zoom-out">
-    <div class="text-box" data-aos="zoom-in" data-aos-delay="500">
-        <h1>Advance Business Tools</h1>
     </div>
-</div>
-<div class="container about" id="about" style="min-width: 100vw;">
-    <h1 class="heading" data-aos="zoom-out">about us</h1>
-    <section>
-        <div class="details">
-            <div class="box" data-aos="zoom-in">
-                <h3>why choose us?</h3>
-                <p>some text...</p>
-                <a href="#contact" class="btn">contact us</a>
+</header>
+
+<!-- Hero Section -->
+<section class="hero" data-aos="fade-up">
+    <div class="hero-content">
+        <h1>Advance Business Tools</h1>
+        <p>Empower your business with modern, efficient, and scalable tools. Manage clients, jobs, and finances all in one secure, cloud-based platform.</p>
+        {% if user.is_authenticated %}
+            <a href="{% url 'business:business_list' %}" class="cta-btn">Go to Dashboard</a>
+        {% else %}
+            <a href="{% url 'user:login' %}" class="cta-btn">Get Started Today</a>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features" id="features">
+    <div class="container">
+        <div class="section-title" data-aos="fade-up">
+            <h2>Why Choose Our Platform?</h2>
+            <p>Discover the powerful features that make managing your business easier and more efficient than ever before.</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
+                <div class="feature-icon">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <h3>Lightning Fast</h3>
+                <p>Get instant access to your business data and respond to clients quickly with our optimized cloud platform.</p>
+            </div>
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
+                <div class="feature-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h3>Secure & Reliable</h3>
+                <p>Your data is protected with enterprise-level security and backed up automatically across multiple servers.</p>
+            </div>
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="300">
+                <div class="feature-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3>Client Focused</h3>
+                <p>Built with your clients in mind, ensuring satisfaction and long-term business relationships.</p>
             </div>
         </div>
-        <div class="grid">
-            <div class="box" data-aos="fade-up">
-                <img src="{% static 'web/images/rapid-response.jpg' %}" alt="">
-                <h3>We are fast!!!</h3>
-                <p>Explicar</p>
+    </div>
+</section>
+
+<!-- About Section -->
+<section class="about" id="about">
+    <div class="container">
+        <div class="about-content" data-aos="fade-up">
+            <div class="about-text">
+                <h2>Transform Your Business Operations</h2>
+                <p>Advance Business Tools is dedicated to helping businesses grow and succeed by providing a comprehensive suite of modern management solutions.</p>
+                <p>Our cloud-based platform is secure, scalable, and intuitive, making it the perfect choice for businesses of all sizes looking to streamline their operations and boost productivity.</p>
+                <div class="about-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">500+</div>
+                        <div class="stat-label">Happy Clients</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">99.9%</div>
+                        <div class="stat-label">Uptime</div>
+                    </div>
+                </div>
             </div>
-            <div class="box" data-aos="fade-up" data-aos-delay="400">
-                <img src="{% static 'web/images/good-quality.jpg' %}" alt="">
-                <h3>Excellent Service!!!</h3>
-                <p>Explicar</p>
-            </div>
-            <div class="box" data-aos="fade-up" data-aos-delay="600">
-                <img src="{% static 'web/images/satisfaction.jpg' %}" alt="">
-                <h3>Motive 3</h3>
-                <p>Explicar</p>
-            </div>
-        </div>
-    </section>
-</div>
-<div class="container reviews" style="min-width: 100vw;">
-    <h1 class="heading" data-aos="zoom-out">client's reviews</h1>
-    <section class="grid">
-        <div class="box" data-aos="fade-up">
-            <img src="{% static 'web/images/jhon.png' %}" alt="">
-            <h3>Jhon Doe</h3>
-            <p>vkfdvmomfvoaimcoaismca</p>
-            <div class="stars">
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star-half-alt"></i>
+            <div class="about-image">
+                <img src="{% static 'web/images/dashboard-preview.jpg' %}" alt="Dashboard Preview">
             </div>
         </div>
-        <div class="box" data-aos="fade-up">
-            <img src="{% static 'web/images/jhon.png' %}" alt="">
-            <h3>Jhon Doe</h3>
-            <p>vkfdvmomfvoaimcoaismca</p>
-            <div class="stars">
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star-half-alt"></i>
+    </div>
+</section>
+
+<!-- Reviews Section -->
+<section class="reviews">
+    <div class="container">
+        <div class="section-title" data-aos="fade-up">
+            <h2>What Our Clients Say</h2>
+            <p>Don't just take our word for it. Here's what real businesses say about their experience with our platform.</p>
+        </div>
+        <div class="reviews-grid">
+            <div class="review-card" data-aos="fade-up" data-aos-delay="100">
+                <div class="review-content">
+                    Advance Business Tools completely transformed how we manage our client relationships and projects. The intuitive interface and powerful features have saved us countless hours.
+                </div>
+                <div class="reviewer">
+                    <img src="{% static 'web/images/jhon.png' %}" alt="John Doe">
+                    <div class="reviewer-info">
+                        <h4>John Doe</h4>
+                        <div class="stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="review-card" data-aos="fade-up" data-aos-delay="200">
+                <div class="review-content">
+                    The dashboard is incredibly user-friendly and the support team is outstanding. Our business efficiency has improved dramatically since we started using this platform.
+                </div>
+                <div class="reviewer">
+                    <img src="{% static 'web/images/jhon.png' %}" alt="Jane Smith">
+                    <div class="reviewer-info">
+                        <h4>Jane Smith</h4>
+                        <div class="stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="review-card" data-aos="fade-up" data-aos-delay="300">
+                <div class="review-content">
+                    Secure, feature-rich, and easy to use. Advance Business Tools is exactly what every growing business needs to stay organized and professional.
+                </div>
+                <div class="reviewer">
+                    <img src="{% static 'web/images/jhon.png' %}" alt="Carlos Ruiz">
+                    <div class="reviewer-info">
+                        <h4>Carlos Ruiz</h4>
+                        <div class="stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="box" data-aos="fade-up">
-            <img src="{% static 'web/images/jhon.png' %}" alt="">
-            <h3>Jhon Doe</h3>
-            <p>vkfdvmomfvoaimcoaismca</p>
-            <div class="stars">
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star-half-alt"></i>
-            </div>
+    </div>
+</section>
+
+<!-- Contact Section -->
+<section class="contact" id="contact">
+    <div class="container">
+        <div class="section-title" data-aos="fade-up">
+            <h2>Get In Touch</h2>
+            <p>Ready to transform your business? Contact us today and let's discuss how we can help you succeed.</p>
         </div>
-    </section>
-</div>
-<div class="container contact" id="contact" style="min-width: 100vw;">
-    <h1 class="heading" data-aos="zoom-out">Contact Us</h1>
-    <section>
-        <div class="row">
-            <iframe data-aos="flip-left" class="map" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14378.873873155413!2d-80.4215239!3d25.7137438!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x88d9c089772334c1%3A0x636c4b65a7b38794!2sKendale%20Lakes%2C%20FL!5e0!3m2!1sen!2sus!4v1709327487388!5m2!1sen!2sus" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-            <form data-aos="flip-right" action="">
-                <h3>Get in Touch</h3>
-                <input type="text" name="name" required maxlength="50" placeholder="enter your name" class="box">
-                <input type="email" name="email" required maxlength="50" placeholder="enter your email" class="box">
-                <input type="number" name="number" required maxlength="50" placeholder="enter your number" class="box">
-                <textarea class="box" name="message" id="" cols="30" rows="10"></textarea>
-                <input type="submit" class="btn" value="send message">
+        <div class="contact-content">
+            <div class="contact-info" data-aos="fade-right">
+                <h3>Let's Start a Conversation</h3>
+                <p>We're here to help you take your business to the next level. Reach out to us and discover how our platform can streamline your operations.</p>
+                <div class="contact-details">
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <div>
+                            <h4>Phone</h4>
+                            <a href="tel:+17863844191">+1 (786) 384-4191</a>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div>
+                            <h4>Email</h4>
+                            <a href="mailto:contact@abt.com">contact@abt.com</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <form class="contact-form" data-aos="fade-left" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone">
+                </div>
+                <div class="form-group">
+                    <label for="message">Message</label>
+                    <textarea id="message" name="message" rows="5" required></textarea>
+                </div>
+                <button type="submit" class="submit-btn">Send Message</button>
             </form>
         </div>
-        <div class="grid">
-            <div class="box" data-aos="fade-up">
-                <i class="fas fa-phone"></i>
-                <h3>Phone Number</h3>
-                <a href="tel:+1 786 384 4191">+1 786 384 4191</a>
-            </div>
-            <div class="box" data-aos="fade-up">
-                <i class="fas fa-envelope"></i>
-                <h3>Email Address</h3>
-                <a href="mailto:asda@asdas.com">asdasd@asdas.com</a>
-            </div>
-        </div>
-        <div class="credit">
-            &copy; copyright @ 2024 by <span>iVan</span> | all rights reserved
-        </div>
-    </section>
-</div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="container">
+        <p>&copy; {{ now|date:"Y" }} Advance Business Tools. Built with ❤️ by <span style="color: var(--secondary-color);">iVan</span>. All rights reserved.</p>
+    </div>
+</footer>
 {% endblock body %}
+
 {% block script %}
-<script src="{% static 'web/js/script.js' %}"></script>
+<script>
+    // Smooth scrolling for navigation links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+
+    // Header scroll effect
+    window.addEventListener('scroll', function() {
+        const header = document.getElementById('header');
+        if (window.scrollY > 100) {
+            header.classList.add('scrolled');
+        } else {
+            header.classList.remove('scrolled');
+        }
+    });
+</script>
 {% endblock script %}

@@ -1,0 +1,658 @@
+{% extends "web/base.html" %}
+{% load static %}
+
+{% block title %}My Profile - Advance Business Tools{% endblock title %}
+
+{% block head %}
+<style>
+    /* Profile Container */
+    .profile-container {
+        min-height: 100vh;
+        background: linear-gradient(135deg, var(--bg-light), white);
+        padding: 2rem 0;
+    }
+    
+    .container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+    
+    /* Profile Header */
+    .profile-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        border-radius: 20px;
+        padding: 2.5rem;
+        color: white;
+        margin-bottom: 3rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .profile-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 200px;
+        height: 200px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        transform: translate(50px, -50px);
+    }
+    
+    .profile-header-content {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        position: relative;
+        z-index: 2;
+    }
+    
+    .profile-avatar {
+        position: relative;
+    }
+    
+    .avatar-image {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        object-fit: cover;
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        font-weight: 700;
+        color: white;
+    }
+    
+    .avatar-placeholder {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        font-weight: 700;
+        color: white;
+    }
+    
+    .profile-info h1 {
+        font-size: 2.25rem;
+        font-weight: 700;
+        margin: 0 0 0.5rem;
+    }
+    
+    .profile-info p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin: 0;
+    }
+    
+    .profile-stats {
+        display: flex;
+        gap: 2rem;
+        margin-top: 1.5rem;
+    }
+    
+    .stat-item {
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        display: block;
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.8;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    /* Content Grid */
+    .profile-content {
+        display: grid;
+        grid-template-columns: 1fr 400px;
+        gap: 2rem;
+    }
+    
+    /* Profile Card */
+    .profile-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid var(--border-light);
+        overflow: hidden;
+    }
+    
+    .card-header {
+        padding: 1.5rem;
+        background: var(--bg-light);
+        border-bottom: 1px solid var(--border-light);
+        display: flex;
+        justify-content: between;
+        align-items: center;
+    }
+    
+    .card-header h3 {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .btn-edit {
+        background: var(--primary-color);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 0.875rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-edit:hover {
+        background: var(--primary-dark);
+        color: white;
+        text-decoration: none;
+        transform: translateY(-1px);
+    }
+    
+    .card-content {
+        padding: 1.5rem;
+    }
+    
+    /* Profile Details */
+    .detail-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .detail-label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-light);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .detail-value {
+        font-size: 1rem;
+        color: var(--text-dark);
+        font-weight: 500;
+        min-height: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .detail-value.empty {
+        color: var(--text-light);
+        font-style: italic;
+    }
+    
+    /* Businesses Section */
+    .business-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        border: 1px solid var(--border-light);
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: inherit;
+    }
+    
+    .business-item:hover {
+        border-color: var(--primary-color);
+        background: rgba(37, 99, 235, 0.02);
+        text-decoration: none;
+        color: inherit;
+        transform: translateY(-1px);
+    }
+    
+    .business-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.25rem;
+    }
+    
+    .business-info h4 {
+        margin: 0 0 0.25rem;
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+    
+    .business-info p {
+        margin: 0;
+        font-size: 0.875rem;
+        color: var(--text-light);
+    }
+    
+    .business-arrow {
+        margin-left: auto;
+        color: var(--text-light);
+        font-size: 1.125rem;
+    }
+    
+    /* Recent Activity */
+    .activity-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-light);
+    }
+    
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+    
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1rem;
+    }
+    
+    .activity-icon.income {
+        background: linear-gradient(135deg, #10b981, #059669);
+    }
+    
+    .activity-icon.expense {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+    }
+    
+    .activity-icon.business {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    }
+    
+    .activity-info h5 {
+        margin: 0 0 0.25rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+    
+    .activity-info p {
+        margin: 0;
+        font-size: 0.75rem;
+        color: var(--text-light);
+    }
+    
+    .activity-time {
+        margin-left: auto;
+        font-size: 0.75rem;
+        color: var(--text-light);
+    }
+    
+    /* Empty States */
+    .empty-state {
+        text-align: center;
+        padding: 2rem;
+        color: var(--text-light);
+    }
+    
+    .empty-state i {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    .empty-state p {
+        margin: 0;
+        font-size: 0.875rem;
+    }
+    
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        font-family: inherit;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        color: white;
+        text-decoration: none;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(37, 99, 235, 0.3);
+    }
+    
+    .btn-secondary {
+        background: var(--bg-light);
+        color: var(--text-dark);
+        border: 2px solid var(--border-light);
+    }
+    
+    .btn-secondary:hover {
+        background: white;
+        color: var(--text-dark);
+        text-decoration: none;
+        border-color: var(--text-light);
+    }
+    
+    /* Responsive */
+    @media (max-width: 1024px) {
+        .profile-content {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .container {
+            padding: 0 1rem;
+        }
+        
+        .profile-header {
+            padding: 1.5rem;
+        }
+        
+        .profile-header-content {
+            flex-direction: column;
+            text-align: center;
+            gap: 1.5rem;
+        }
+        
+        .profile-stats {
+            justify-content: center;
+        }
+        
+        .profile-info h1 {
+            font-size: 1.75rem;
+        }
+        
+        .avatar-image, .avatar-placeholder {
+            width: 100px;
+            height: 100px;
+            font-size: 2.5rem;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock head %}
+
+{% block body %}
+<div class="profile-container">
+    <div class="container">
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <div class="profile-header-content">
+                <div class="profile-avatar">
+                    {% if user.profile.image %}
+                        <img src="{{ user.profile.image.url }}" alt="{{ user.username }}" class="avatar-image">
+                    {% else %}
+                        <div class="avatar-placeholder">
+                            {{ user.username|first|upper }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="profile-info">
+                    <h1>
+                        {% if user.get_full_name %}
+                            {{ user.get_full_name }}
+                        {% else %}
+                            {{ user.username }}
+                        {% endif %}
+                    </h1>
+                    <p>{{ user.email }}</p>
+                    
+                    <div class="profile-stats">
+                        <div class="stat-item">
+                            <span class="stat-number">{{ user.businesses.count }}</span>
+                            <span class="stat-label">Business{{ user.businesses.count|pluralize:"es" }}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">{{ user.date_joined|timesince }}</span>
+                            <span class="stat-label">Member Since</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Content -->
+        <div class="profile-content">
+            <!-- Main Profile Details -->
+            <div>
+                <!-- Personal Information -->
+                <div class="profile-card">
+                    <div class="card-header">
+                        <h3>
+                            <i class="fas fa-user"></i>
+                            Personal Information
+                        </h3>
+                        <a href="{% url 'user:edit_profile' %}" class="btn-edit">
+                            <i class="fas fa-edit"></i>
+                            Edit
+                        </a>
+                    </div>
+                    <div class="card-content">
+                        <div class="detail-group">
+                            <div class="detail-label">
+                                <i class="fas fa-user"></i>
+                                Username
+                            </div>
+                            <div class="detail-value">{{ user.username }}</div>
+                        </div>
+
+                        <div class="detail-group">
+                            <div class="detail-label">
+                                <i class="fas fa-id-card"></i>
+                                Full Name
+                            </div>
+                            <div class="detail-value {% if not user.get_full_name %}empty{% endif %}">
+                                {% if user.get_full_name %}
+                                    {{ user.get_full_name }}
+                                {% else %}
+                                    Not provided
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="detail-group">
+                            <div class="detail-label">
+                                <i class="fas fa-envelope"></i>
+                                Email Address
+                            </div>
+                            <div class="detail-value">
+                                {{ user.email }}
+                                {% if user.email %}
+                                    {% if user.is_active %}
+                                        <span style="color: #16a34a; font-size: 0.875rem;">
+                                            <i class="fas fa-check-circle"></i>
+                                            Verified
+                                        </span>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="detail-group">
+                            <div class="detail-label">
+                                <i class="fas fa-calendar-alt"></i>
+                                Member Since
+                            </div>
+                            <div class="detail-value">{{ user.date_joined|date:"F d, Y" }}</div>
+                        </div>
+
+                        <div class="detail-group">
+                            <div class="detail-label">
+                                <i class="fas fa-clock"></i>
+                                Last Login
+                            </div>
+                            <div class="detail-value">
+                                {% if user.last_login %}
+                                    {{ user.last_login|timesince }} ago
+                                {% else %}
+                                    Never
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <a href="{% url 'user:edit_profile' %}" class="btn btn-primary">
+                        <i class="fas fa-edit"></i>
+                        Edit Profile
+                    </a>
+                    <a href="{% url 'user:change_password' %}" class="btn btn-secondary">
+                        <i class="fas fa-key"></i>
+                        Change Password
+                    </a>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div>
+                <!-- My Businesses -->
+                <div class="profile-card">
+                    <div class="card-header">
+                        <h3>
+                            <i class="fas fa-building"></i>
+                            My Businesses
+                        </h3>
+                        <a href="{% url 'business:create_business' %}" class="btn-edit">
+                            <i class="fas fa-plus"></i>
+                            New
+                        </a>
+                    </div>
+                    <div class="card-content">
+                        {% if user.businesses.all %}
+                            {% for business in user.businesses.all %}
+                            <a href="{% url 'business:business_detail' business.id %}" class="business-item">
+                                <div class="business-icon">
+                                    <i class="fas fa-building"></i>
+                                </div>
+                                <div class="business-info">
+                                    <h4>{{ business.name }}</h4>
+                                    <p>{{ business.address|truncatechars:30 }}</p>
+                                </div>
+                                <div class="business-arrow">
+                                    <i class="fas fa-chevron-right"></i>
+                                </div>
+                            </a>
+                            {% endfor %}
+                        {% else %}
+                            <div class="empty-state">
+                                <i class="fas fa-building"></i>
+                                <p>No businesses created yet</p>
+                                <a href="{% url 'business:create_business' %}" style="color: var(--primary-color); text-decoration: none; font-weight: 600; margin-top: 0.5rem; display: inline-block;">
+                                    Create your first business
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="profile-card">
+                    <div class="card-header">
+                        <h3>
+                            <i class="fas fa-clock"></i>
+                            Recent Activity
+                        </h3>
+                    </div>
+                    <div class="card-content">
+                        {% comment %}
+                        <!-- Aquí podrías agregar actividad reciente cuando implementes el sistema de actividades -->
+                        <div class="activity-item">
+                            <div class="activity-icon business">
+                                <i class="fas fa-building"></i>
+                            </div>
+                            <div class="activity-info">
+                                <h5>Created new business</h5>
+                                <p>Tech Solutions LLC</p>
+                            </div>
+                            <div class="activity-time">2h ago</div>
+                        </div>
+
+                        <div class="activity-item">
+                            <div class="activity-icon income">
+                                <i class="fas fa-plus"></i>
+                            </div>
+                            <div class="activity-info">
+                                <h5>Added income</h5>
+                                <p>$5,000 - Project payment</p>
+                            </div>
+                            <div class="activity-time">1d ago</div>
+                        </div>
+
+                        <div class="activity-item">
+                            <div class="activity-icon expense">
+                                <i class="fas fa-minus"></i>
+                            </div>
+                            <div class="activity-info">
+                                <h5>Added expense</h5>
+                                <p>$250 - Office supplies</p>
+                            </div>
+                            <div class="activity-time">3d ago</div>
+                        </div>
+                        {% endcomment %}
+
+                        <div class="empty-state">
+                            <i class="fas fa-history"></i>
+                            <p>No recent activity</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock body %}

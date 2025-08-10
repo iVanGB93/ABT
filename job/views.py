@@ -1,4 +1,6 @@
 from django.shortcuts import render, redirect
+
+import business
 from .models import Job, Spent, Invoice
 from .forms import JobForm, SpentForm
 from django.contrib.auth.models import User
@@ -46,13 +48,14 @@ def client_detail(request, id):
     content = {'client': client}
     return render(request, 'job/client-detail.html', content)
 
-def job_list(request):
-    jobs = Job.objects.all()
+def job_list(request, pk):
+    jobs = Job.objects.filter(business_id=pk)
     content = {'jobs': jobs}
     return render(request, 'job/job-list.html', content)
 
-def create_job(request):
+def create_job(request, pk):
     form = JobForm
+    business = business.objects.get(id=pk)
     content = {'form': form}
     if request.method == 'POST':
         copydata = request.POST.copy()

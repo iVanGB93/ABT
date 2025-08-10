@@ -1,0 +1,515 @@
+{% extends "business/base-business.html" %}
+{% load static %}
+
+{% block page_title %}Add Expense - {{ business.name }}{% endblock page_title %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'business/css/business-detail.css' %}">
+<style>
+    .add-expense-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    
+    .form-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        border: 1px solid var(--border-light);
+        overflow: hidden;
+    }
+    
+    .form-header {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: white;
+        padding: 2rem;
+        text-align: center;
+    }
+    
+    .form-header h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin: 0 0 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+    
+    .form-header p {
+        margin: 0;
+        opacity: 0.9;
+        font-size: 1rem;
+    }
+    
+    .form-content {
+        padding: 2.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 2rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .form-input, .form-select {
+        width: 100%;
+        padding: 1rem 1.25rem;
+        border: 2px solid var(--border-light);
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: var(--bg-light);
+        font-family: inherit;
+        box-sizing: border-box;
+    }
+    
+    .form-input:focus, .form-select:focus {
+        outline: none;
+        border-color: #f59e0b;
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+        background: white;
+    }
+    
+    .form-input::placeholder {
+        color: var(--text-light);
+    }
+    
+    .currency-input {
+        position: relative;
+    }
+    
+    .currency-input::before {
+        content: '$';
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-light);
+        font-weight: 600;
+        z-index: 1;
+    }
+    
+    .currency-input .form-input {
+        padding-left: 2.5rem;
+    }
+    
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem;
+        background: var(--bg-light);
+        border-radius: 12px;
+        border: 2px solid var(--border-light);
+        transition: all 0.3s ease;
+    }
+    
+    .checkbox-group:hover {
+        border-color: #f59e0b;
+        background: rgba(245, 158, 11, 0.05);
+    }
+    
+    .checkbox-group input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        accent-color: #f59e0b;
+        cursor: pointer;
+    }
+    
+    .checkbox-group label {
+        margin: 0;
+        cursor: pointer;
+        font-weight: 500;
+    }
+    
+    .tax-info {
+        background: #fef3c7;
+        border: 1px solid #fcd34d;
+        border-radius: 8px;
+        padding: 0.75rem;
+        margin-top: 0.5rem;
+        font-size: 0.85rem;
+        color: #92400e;
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2.5rem;
+    }
+    
+    .btn {
+        flex: 1;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+        font-family: inherit;
+    }
+    
+    .btn-warning {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: white;
+    }
+    
+    .btn-warning:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(245, 158, 11, 0.3);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-secondary {
+        background: var(--bg-light);
+        color: var(--text-dark);
+        border: 2px solid var(--border-light);
+    }
+    
+    .btn-secondary:hover {
+        background: white;
+        border-color: #f59e0b;
+        color: #f59e0b;
+        transform: translateY(-1px);
+        text-decoration: none;
+    }
+    
+    .quick-amounts {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+    }
+    
+    .quick-amount {
+        padding: 0.5rem;
+        background: var(--bg-light);
+        border: 2px solid var(--border-light);
+        border-radius: 8px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+    
+    .quick-amount:hover {
+        border-color: #f59e0b;
+        background: rgba(245, 158, 11, 0.05);
+        color: #f59e0b;
+    }
+    
+    .category-icon {
+        margin-right: 0.5rem;
+    }
+    
+    .alert {
+        padding: 1rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        font-weight: 500;
+    }
+    
+    .alert-success {
+        background: #f0fdf4;
+        color: #16a34a;
+        border: 1px solid #bbf7d0;
+    }
+    
+    .alert-error {
+        background: #fef2f2;
+        color: #dc2626;
+        border: 1px solid #fecaca;
+    }
+    
+    /* Animation */
+    .form-card {
+        animation: slideUp 0.6s ease-out;
+    }
+    
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .add-expense-container {
+            padding: 1rem;
+        }
+        
+        .form-content {
+            padding: 1.5rem;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+        
+        .quick-amounts {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+</style>
+{% endblock head %}
+
+{% block bar %}
+<h1 class="business-title">
+    <i class="fas fa-minus-circle"></i>
+    Add Expense to {{ business.name }}
+</h1>
+{% endblock bar %}
+
+{% block content %}
+<div class="add-expense-container">
+    <div class="form-card">
+        <div class="form-header">
+            <h1>
+                <i class="fas fa-receipt"></i>
+                Add New Expense
+            </h1>
+            <p>Record a new business expense and track your spending</p>
+        </div>
+        
+        <div class="form-content">
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    <i class="fas fa-{% if message.tags == 'error' %}exclamation-circle{% elif message.tags == 'success' %}check-circle{% else %}info-circle{% endif %}"></i>
+                    {{ message }}
+                </div>
+                {% endfor %}
+            {% endif %}
+            
+            <form method="post" id="expenseForm">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="description">
+                        <i class="fas fa-file-alt"></i>
+                        Description
+                    </label>
+                    <input 
+                        type="text" 
+                        id="description" 
+                        name="description" 
+                        class="form-input" 
+                        placeholder="e.g., Office supplies, Travel expenses, Software subscription"
+                        required
+                        maxlength="200"
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label for="amount">
+                        <i class="fas fa-dollar-sign"></i>
+                        Amount
+                    </label>
+                    <div class="currency-input">
+                        <input 
+                            type="number" 
+                            id="amount" 
+                            name="amount" 
+                            class="form-input" 
+                            placeholder="0.00"
+                            step="0.01"
+                            min="0.01"
+                            required
+                        >
+                    </div>
+                    
+                    <div class="quick-amounts">
+                        <div class="quick-amount" data-amount="25">$25</div>
+                        <div class="quick-amount" data-amount="50">$50</div>
+                        <div class="quick-amount" data-amount="100">$100</div>
+                        <div class="quick-amount" data-amount="250">$250</div>
+                        <div class="quick-amount" data-amount="500">$500</div>
+                        <div class="quick-amount" data-amount="1000">$1K</div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="category">
+                        <i class="fas fa-tags"></i>
+                        Category
+                    </label>
+                    <select id="category" name="category" class="form-select" required>
+                        <option value="">Select a category...</option>
+                        {% for value, display in category_choices %}
+                        <option value="{{ value }}">
+                            {{ display }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <i class="fas fa-file-invoice-dollar"></i>
+                        Tax Information
+                    </label>
+                    <div class="checkbox-group">
+                        <input 
+                            type="checkbox" 
+                            id="is_tax_deductible" 
+                            name="is_tax_deductible"
+                        >
+                        <label for="is_tax_deductible">
+                            This expense is tax deductible
+                        </label>
+                    </div>
+                    <div class="tax-info">
+                        <i class="fas fa-info-circle"></i>
+                        Check this box if this expense can be deducted from your business taxes. 
+                        Consult your accountant if you're unsure.
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-plus"></i>
+                        Add Expense
+                    </button>
+                    <a href="{% url 'business:business_detail' business.id %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i>
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const amountInput = document.getElementById('amount');
+    const quickAmounts = document.querySelectorAll('.quick-amount');
+    const form = document.getElementById('expenseForm');
+    const categorySelect = document.getElementById('category');
+    
+    // Category icons mapping
+    const categoryIcons = {
+        'office_supplies': 'fas fa-paperclip',
+        'travel': 'fas fa-plane',
+        'meals': 'fas fa-utensils',
+        'utilities': 'fas fa-lightbulb',
+        'rent': 'fas fa-home',
+        'insurance': 'fas fa-shield-alt',
+        'marketing': 'fas fa-bullhorn',
+        'equipment': 'fas fa-tools',
+        'software': 'fas fa-laptop-code',
+        'professional_services': 'fas fa-user-tie',
+        'other': 'fas fa-ellipsis-h'
+    };
+    
+    // Update category options with icons
+    function updateCategoryOptions() {
+        const options = categorySelect.querySelectorAll('option[value]');
+        options.forEach(option => {
+            const value = option.value;
+            if (value && categoryIcons[value]) {
+                const icon = `<i class="${categoryIcons[value]} category-icon"></i>`;
+                // Note: Can't add HTML to option text, so we'll handle this differently
+            }
+        });
+    }
+    
+    // Quick amount selection
+    quickAmounts.forEach(button => {
+        button.addEventListener('click', function() {
+            const amount = this.dataset.amount;
+            amountInput.value = amount;
+            amountInput.focus();
+            
+            // Visual feedback
+            quickAmounts.forEach(btn => {
+                btn.style.background = '';
+                btn.style.borderColor = '';
+                btn.style.color = '';
+            });
+            this.style.background = 'rgba(245, 158, 11, 0.1)';
+            this.style.borderColor = '#f59e0b';
+            this.style.color = '#f59e0b';
+        });
+    });
+    
+    // Focus on first input
+    document.getElementById('description').focus();
+    
+    // Form validation
+    form.addEventListener('submit', function(e) {
+        const description = document.getElementById('description').value.trim();
+        const amount = parseFloat(document.getElementById('amount').value);
+        const category = document.getElementById('category').value;
+        
+        if (!description) {
+            e.preventDefault();
+            alert('Please enter a description for this expense.');
+            document.getElementById('description').focus();
+            return;
+        }
+        
+        if (isNaN(amount) || amount <= 0) {
+            e.preventDefault();
+            alert('Please enter a valid amount greater than 0.');
+            document.getElementById('amount').focus();
+            return;
+        }
+        
+        if (!category) {
+            e.preventDefault();
+            alert('Please select a category for this expense.');
+            document.getElementById('category').focus();
+            return;
+        }
+        
+        // Show loading state
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding Expense...';
+        submitBtn.disabled = true;
+    });
+    
+    // Real-time amount validation
+    amountInput.addEventListener('input', function() {
+        const value = parseFloat(this.value);
+        if (isNaN(value) || value <= 0) {
+            this.style.borderColor = '#ef4444';
+        } else {
+            this.style.borderColor = '#10b981';
+        }
+    });
+    
+    // Category change handler
+    categorySelect.addEventListener('change', function() {
+        if (this.value) {
+            this.style.borderColor = '#10b981';
+        }
+    });
+});
+</script>
+{% endblock content %}
