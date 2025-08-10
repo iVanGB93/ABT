@@ -6,13 +6,14 @@ from item.models import Item_List, Item
 
 class JobSerializer(serializers.ModelSerializer):
     client = serializers.SerializerMethodField()
+    client_id = serializers.IntegerField(source='client.id', read_only=True)
 
     class Meta:
         model = Job
-        fields = ('id', 'status', 'client', 'description', 'address', 'price', 'date', 'image', 'business')
+        fields = ('id', 'client_id', 'status', 'client', 'description', 'address', 'price', 'date', 'image', 'business')
     
     def get_client(self, obj):
-        return obj.client.name
+        return obj.client.name + " " + obj.client.last_name
 
 class ClientSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
