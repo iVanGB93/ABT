@@ -20,6 +20,8 @@ class Client(models.Model):
     phone = models.CharField(max_length=15, default='no phone saved')
     address = models.CharField(max_length=150, default='no address saved')
     image = models.ImageField(_("Image"), upload_to=upload_to, default='userDefault.jpg')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.provider.username + self.name

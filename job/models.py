@@ -10,20 +10,29 @@ def upload_to_job(instance, filename):
     return f'jobs/{instance.business.name}/{instance.client.name}/{filename}'
 
 class Job(models.Model):
-    status_options = {
-        'new': 'NEW',
-        'active': 'ACTIVE',
-        'finished': 'FINISHED'
-    }
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),           # Awaiting client approval/start
+        ('confirmed', 'Confirmed'),       # Client approved, ready to start
+        ('in_progress', 'In Progress'),   # Currently being worked on
+        ('on_hold', 'On Hold'),          # Temporarily paused
+        ('review', 'Under Review'),       # Completed, awaiting client review
+        ('completed', 'Completed'),       # Finished and approved
+        ('cancelled', 'Cancelled'),       # Job was cancelled
+        ('invoiced', 'Invoiced'),        # Invoice has been sent
+        ('paid', 'Paid'),                # Payment received
+    ]
     business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='jobs')
     provider = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='jobs', null=True, blank=True)
     client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='jobs')
-    status = models.CharField(max_length=15, choices=status_options, default='new')
+    status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='pending')
     description = models.CharField(max_length=150)
     address = models.CharField(max_length=150)
     price = models.FloatField()
     image = models.ImageField(upload_to=upload_to_job, default='jobDefault.jpg')
-    date = models.DateTimeField(db_default=Now())
+    created_at = models.DateTimeField(db_default=Now())
+    updated_at = models.DateTimeField(db_default=Now())
+    scheduled_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
     closed = models.BooleanField(default=False)
 
     def __str__(self):
