@@ -45,7 +45,7 @@ class JobView(APIView):
             if Job.objects.filter(id=provider).exists():
                 job = Job.objects.get(id=provider)
                 job.closed = True
-                job.status = 'finished'
+                job.status = 'completed'
                 job.save()
                 response['message'] = "Job Closed."
                 response['OK'] = True
@@ -115,7 +115,6 @@ class SpentView(APIView):
     def post(self, request, queryset=None, **kwargs):
         pk = self.kwargs.get('pk')
         data = request.data
-        print("SPENT DATA", pk, data)
         action = data['action']
         response = {'OK': False}
         if action == 'new':
@@ -132,7 +131,7 @@ class SpentView(APIView):
             else:
                 new_spent.image = data.get('image', new_spent.image)
             new_spent.save()
-            job.status = 'active'
+            job.status = 'in_progress'
             job.save()
             response['message'] = "New Spent created."
             response['OK'] = True

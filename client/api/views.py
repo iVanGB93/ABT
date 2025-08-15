@@ -50,7 +50,7 @@ class ClientView(APIView):
                 return Response(status=status.HTTP_200_OK, data=response)
         client_provider = User.objects.get(username=provider)
         business = Business.objects.get(name=data['business'])
-        if action == 'new':
+        if action == 'create':
             name = data['name']
             last_name = data.get('last_name', 'no last name saved')
             phone = data.get('phone', 'no phone saved')
