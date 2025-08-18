@@ -1,3 +1,4 @@
+from django.db.models.functions import Now
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
@@ -46,6 +47,7 @@ class JobView(APIView):
                 job = Job.objects.get(id=provider)
                 job.closed = True
                 job.status = 'completed'
+                job.completed_at = Now()
                 job.save()
                 response['message'] = "Job Closed."
                 response['OK'] = True
@@ -85,6 +87,9 @@ class JobView(APIView):
                 job.price = data.get('price', job.price)
                 job.address = data.get('address', job.address)
                 job.image = data.get('image', job.image)
+                if data.get('scheduled_at'):
+                    job.scheduled_at = data.get('scheduled_at', job.scheduled_at)
+                    job.status = 'in_progress'
                 job.save()
                 response['message'] = "Job Updated."
                 response['OK'] = True
