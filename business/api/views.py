@@ -5,8 +5,8 @@ from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.contrib.auth.models import User
 
-from .serializers import BusinessSerializer, ExtraIncomeSerializer, ExtraExpenseSerializer
-from business.models import Business, ExtraIncome, ExtraExpense, Invitation
+from .serializers import BusinessSerializer, ExtraIncomeSerializer, ExtraExpenseSerializer, PaymentMethodTypeSerializer, PaymentMethodSerializer
+from business.models import Business, ExtraIncome, ExtraExpense, Invitation, PaymentMethodType
 import threading
 import json
 
@@ -67,7 +67,8 @@ class BusinessView(APIView):
             phone = data.get('phone', 'no phone saved')
             email = data.get('email', 'no email saved')
             address = data.get('address', 'no address saved')
-            new_business = Business(name=name, description=description, phone=phone, email=email, address=address)
+            address2 = data.get('address2', 'no extra address saved')
+            new_business = Business(name=name, description=description, phone=phone, email=email, address=address, address2=address2)
             new_business.logo = data.get('image', new_business.logo)
             if data.get('owners'):
                 owners = data['owners']
@@ -103,6 +104,7 @@ class BusinessView(APIView):
                 business.email = data.get('email', business.email)
                 business.phone = data.get('phone', business.phone)
                 business.address = data.get('address', business.address)
+                business.address2 = data.get('address2', business.address2)
                 business.logo = data.get('image', business.logo)
                 owners = data.get('owners', [])
                 if isinstance(owners, str):
@@ -255,7 +257,6 @@ class ExtrasView(APIView):
                     response['message'] = "Extra expense not found."
                     return Response(status=status.HTTP_404_NOT_FOUND, data=response)
             
-
 class OwnersView(APIView):
     parser_classes = [MultiPartParser, FormParser]
 
@@ -303,3 +304,78 @@ class OwnersView(APIView):
                 response['message'] = "User not found."
                 return Response(status=status.HTTP_404_NOT_FOUND, data=response)
     
+
+class PaymentMethodTypeView(APIView):
+
+    def get(self, request, *args, **kwargs):
+        types = PaymentMethodType.objects.all()
+        serializer = PaymentMethodTypeSerializer(types, many=True)
+        return Response(status=status.HTTP_200_OK, data=serializer.data)
+
+class PaymentMethodView(APIView):
+
+    def get(self, request, *args, **kwargs):
+        response = {'OK': False}
+        business_id = self.kwargs.get('pk')
+        if Business.objects.filter(id=business_id).exists():
+            business = Business.objects.get(id=business_id)
+            payment_methods = business.payment_methods.all()
+            serializer = PaymentMethodSerializer(payment_methods, many=True)
+            response['OK'] = True
+            response['data'] = serializer.data
+            return Response(status=status.HTTP_200_OK, data=serializer.data)
+        else:
+            response['message'] = 'Business not found.'
+            return Response(status=status.HTTP_404_NOT_FOUND, data=response)
+
+    def post(self, request, *args, **kwargs):
+        response = {'OK': False}
+        business_id = self.kwargs.get('pk')
+        if Business.objects.filter(id=business_id).exists():
+            business = Business.objects.get(id=business_id)
+            data = request.data
+            payment_method_type_id = data.get('payment_type_id')
+            payment_method_type = PaymentMethodType.objects.get(id=payment_method_type_id)
+            data['business'] = business.pk
+            data['payment_type'] = payment_method_type.pk
+            serializer = PaymentMethodSerializer(data=data)
+            if serializer.is_valid():
+                payment_method = serializer.save(business=business)
+                response['OK'] = True
+                response['data'] = PaymentMethodSerializer(payment_method).data
+                return Response(status=status.HTTP_201_CREATED, data=response)
+            response['message'] = 'Invalid data.'
+            return Response(status=status.HTTP_203_NON_AUTHORITATIVE_INFORMATION, data=response)
+        response['message'] = 'Business not found.'
+        return Response(status=status.HTTP_203_NON_AUTHORITATIVE_INFORMATION, data=response)
+
+    def put(self, request, *args, **kwargs):
+        business_id = self.kwargs.get('pk')
+        if Business.objects.filter(id=business_id).exists():
+            business = Business.objects.get(id=business_id)
+            payment_method_id = request.data.get('id')
+            if not payment_method_id:
+                return Response(status=status.HTTP_400_BAD_REQUEST, data={'message': 'Payment method ID is required.'})
+            if business.payment_methods.filter(id=payment_method_id).exists():
+                payment_method = business.payment_methods.get(id=payment_method_id)
+                serializer = PaymentMethodSerializer(payment_method, data=request.data, partial=True)
+                if serializer.is_valid():
+                    updated_payment_method = serializer.save()
+                    return Response(status=status.HTTP_200_OK, data=PaymentMethodSerializer(updated_payment_method).data)
+                return Response(status=status.HTTP_400_BAD_REQUEST, data=serializer.errors)
+            return Response(status=status.HTTP_404_NOT_FOUND, data={'message': 'Payment method not found for this business.'})
+        return Response(status=status.HTTP_404_NOT_FOUND, data={'message': 'Business not found.'})
+
+    def delete(self, request, *args, **kwargs):
+        business_id = self.kwargs.get('pk')
+        if Business.objects.filter(id=business_id).exists():
+            business = Business.objects.get(id=business_id)
+            payment_method_id = self.kwargs.get('payment_method_id')
+            if not payment_method_id:
+                return Response(status=status.HTTP_400_BAD_REQUEST, data={'message': 'Payment method ID is required.'})
+            if business.payment_methods.filter(id=payment_method_id).exists():
+                payment_method = business.payment_methods.get(id=payment_method_id)
+                payment_method.delete()
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response(status=status.HTTP_404_NOT_FOUND, data={'message': 'Payment method not found for this business.'})
+        return Response(status=status.HTTP_404_NOT_FOUND, data={'message': 'Business not found.'})

@@ -19,6 +19,7 @@ class JobSerializer(serializers.ModelSerializer):
             'client', 
             'description', 
             'address', 
+            'address2',
             'price', 
             'image', 
             'created_at',

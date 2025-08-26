@@ -5,7 +5,7 @@ from rest_framework import status
 from django.contrib.auth.models import User
 from rest_framework.parsers import MultiPartParser, FormParser
 
-from job.api.serializers import JobSerializer, InvoiceSerializer, SpentSerializer, ChargeSerializer
+from job.api.serializers import JobSerializer, ItemSerializer, InvoiceSerializer, SpentSerializer, ChargeSerializer
 from job.models import Job, Spent, Invoice, Charge
 from item.models import Item_List, Item
 from user.models import Profile
@@ -74,7 +74,7 @@ class JobView(APIView):
                 response['message'] = "Client does not exits."
                 return Response(status=status.HTTP_200_OK, data=response)
             client = Client.objects.get(name=name)
-            new_job = Job(business=business, client=client, provider=provider_user, description=data['description'], address=data['address'], price=data['price'])
+            new_job = Job(business=business, client=client, provider=provider_user, description=data['description'], address=data['address'], address2=data.get('address2', 'no extra address saved'), price=data['price'])
             new_job.image = data.get('image', new_job.image)
             new_job.save()
             response['message'] = "New job created."
@@ -86,6 +86,7 @@ class JobView(APIView):
                 job.description = data.get('description', job.description)
                 job.price = data.get('price', job.price)
                 job.address = data.get('address', job.address)
+                job.address2 = data.get('address2', job.address2)
                 job.image = data.get('image', job.image)
                 if data.get('scheduled_at'):
                     job.scheduled_at = data.get('scheduled_at', job.scheduled_at)
@@ -112,9 +113,12 @@ class SpentView(APIView):
         else:
             job = Job.objects.get(id=pk)
             spents = job.spent.all()
+            items = job.items.all()
             data = []
             for spent in spents:
                 data.append(SpentSerializer(spent).data)
+            for item in items:
+                data.append(ItemSerializer(item).data)
         return Response(status=status.HTTP_200_OK, data=data)
     
     def post(self, request, queryset=None, **kwargs):
@@ -124,18 +128,19 @@ class SpentView(APIView):
         response = {'OK': False}
         if action == 'new':
             job = Job.objects.get(id=data['job_id'])
-            new_spent = Spent(job=job, description=data['description'], amount=data['amount'])
             if data['use_item'] == 'true':
                 item_list = Item_List.objects.get(id=data['item_id'])
-                item = Item(list=item_list, job=job, name=item_list.name, description=item_list.description, price=item_list.price)
-                item.image = data.get('image', item_list.image)
-                new_spent.image = data.get('image', item.image)
-                item.save()
-                item_list.amount = item_list.amount - 1
+                amount = int(data.get('amount', 1))
+                for i in range(amount):
+                    item = Item(list=item_list, job=job, name=item_list.name, description=item_list.description, price=item_list.price)
+                    item.image = data.get('image', item_list.image)
+                    item.save()
+                item_list.amount = item_list.amount - amount
                 item_list.save()
             else:
+                new_spent = Spent(job=job, description=data['description'], amount=data['price'])
                 new_spent.image = data.get('image', new_spent.image)
-            new_spent.save()
+                new_spent.save()
             job.status = 'in_progress'
             job.save()
             response['message'] = "New Spent created."

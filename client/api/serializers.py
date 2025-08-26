@@ -16,6 +16,7 @@ class ClientSerializer(serializers.ModelSerializer):
             'last_name', 
             'phone', 
             'address', 
+            'address2',
             'email', 
             'image', 
             'created_at', 

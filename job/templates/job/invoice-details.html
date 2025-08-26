@@ -2,6 +2,7 @@
     <head>
       <meta charset="UTF-8" />
       <link href="https://fonts.googleapis.com/css?family=Montserrat:700,400|Roboto:400,500&display=swap" rel="stylesheet">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
       <style>
         body {
           font-family: 'Roboto', 'Montserrat', Arial, sans-serif;
@@ -170,6 +171,64 @@
           width: 120px;
           height: 120px;
         }
+        .payment-methods {
+          margin-top: 24px;
+          padding-top: 24px;
+          border-top: 2px solid #eaf3ff;
+        }
+        .payment-title {
+          color: #4f8cff;
+          font-size: 1.2rem;
+          font-weight: 700;
+          margin-bottom: 16px;
+          text-align: center;
+        }
+        .payment-buttons {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 12px;
+          justify-content: center;
+          margin-bottom: 20px;
+        }
+        .pay-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 12px 20px;
+          border-radius: 8px;
+          text-decoration: none;
+          font-size: 0.95rem;
+          font-weight: 600;
+          transition: all 0.3s ease;
+          cursor: pointer;
+          border: none;
+          color: white;
+        }
+        .pay-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        /* Colores específicos por método */
+        .paypal { background: linear-gradient(135deg, #0070ba, #003087); }
+        .stripe { background: linear-gradient(135deg, #635bff, #4c44d4); }
+        .zelle { background: linear-gradient(135deg, #6d1ed4, #5a189a); }
+        .venmo { background: linear-gradient(135deg, #3d95ce, #2b7bb4); }
+        .cashapp { background: linear-gradient(135deg, #00d632, #00b82c); }
+        .bank { background: linear-gradient(135deg, #1f2937, #111827); }
+        .crypto { background: linear-gradient(135deg, #f7931a, #e6820a); }
+        .generic { background: linear-gradient(135deg, #6b7280, #4b5563); }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+          .payment-buttons {
+            flex-direction: column;
+          }
+          
+          .pay-btn {
+            justify-content: center;
+            width: 100%;
+          }
+        }
       </style>
     </head>
     <body>
@@ -222,14 +281,82 @@
             <span class="summary-label">Balance Due:</span>
             <span class="summary-value">${{invoice.due}}</span>
           </div>
-          <!-- <a class="pay-btn" href="https://abt.qbared.com/jobs/invoice/{{ invoice.number }}/">Pay Now</a>
-          <div class="qr-section">
-            <span class="qr-label">Or scan to pay:</span>
-            <img class="qr-img" src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(
-              invoice.payUrl || `https://abt.qbared.com/jobs/invoice/{{ invoice.number }}/`,
-            )}" alt="QR Pay" />
-          </div> -->
+        </div>
+        <div class="payment-methods">
+          {% if invoice.job.business.payment_methods.all %}
+            <h4 class="payment-title">Payment Methods:</h4>
+            <div class="payment-buttons">
+              {% for payment_method in invoice.job.business.payment_methods.all %}
+                {% if payment_method.payment_type.name == "PayPal" and payment_method.account_username %}
+                  <a class="pay-btn paypal" href="https://paypal.me/{{ payment_method.account_username }}/{{ invoice.due }}USD" target="_blank">
+                    <i class="fab fa-paypal"></i>
+                    Pay with PayPal
+                  </a>
+                {% elif payment_method.payment_type.name == "Stripe" %}
+                  <a class="pay-btn stripe" href="https://checkout.stripe.com/pay/{{ payment_method.account_details }}#{{ invoice.number }}" target="_blank">
+                    <i class="fab fa-cc-stripe"></i>
+                    Pay with Card
+                  </a>
+                {% elif payment_method.payment_type.name == "Zelle" %}
+                  <div class="pay-btn zelle" onclick="copyToClipboard('{{ payment_method.account_phone }}')">
+                    <i class="fas fa-mobile-alt"></i>
+                    Zelle: {{ payment_method.account_phone }}
+                  </div>
+                {% elif payment_method.payment_type.name == "Venmo" %}
+                  <a class="pay-btn venmo" href="https://venmo.com/{{ payment_method.account_details }}?txn=pay&amount={{ invoice.due }}&note=Invoice%20{{ invoice.number }}" target="_blank">
+                    <i class="fas fa-mobile-alt"></i>
+                    Pay with Venmo
+                  </a>
+                {% elif payment_method.payment_type.name == "Cash App" %}
+                  <a class="pay-btn cashapp" href="https://cash.app/${{ payment_method.account_details }}/{{ invoice.due }}" target="_blank">
+                    <i class="fas fa-dollar-sign"></i>
+                    Pay with Cash App
+                  </a>
+                {% elif payment_method.payment_type.name == "Bank Transfer" %}
+                  <div class="pay-btn bank" onclick="showBankDetails('{{ payment_method.account_details }}')">
+                    <i class="fas fa-university"></i>
+                    Bank Transfer
+                  </div>
+                {% elif payment_method.payment_type.name == "Crypto" %}
+                  <div class="pay-btn crypto" onclick="showCryptoDetails('{{ payment_method.account_details }}')">
+                    <i class="fab fa-bitcoin"></i>
+                    Pay with Crypto
+                  </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+
+            <!-- QR Code Section -->
+            <div class="qr-section">
+              <span class="qr-label">Or scan to pay:</span>
+              <img class="qr-img" src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data={{ request.build_absolute_uri }}" alt="QR Pay" />
+            </div>
+          {% endif %}
         </div>
       </div>
+      <script>
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    alert('Account details copied to clipboard: ' + text);
+  }).catch(() => {
+    // Fallback para navegadores viejos
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textArea);
+    alert('Account details copied: ' + text);
+  });
+}
+
+function showBankDetails(details) {
+  alert('Bank Transfer Details:\n' + details + '\n\nPlease include invoice #{{ invoice.number }} in the reference.');
+}
+
+function showCryptoDetails(address) {
+  alert('Cryptocurrency Address:\n' + address + '\n\nAmount: ${{ invoice.due }}\nReference: Invoice {{ invoice.number }}');
+}
+</script>
     </body>
   </html>

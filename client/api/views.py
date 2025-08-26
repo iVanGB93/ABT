@@ -56,7 +56,8 @@ class ClientView(APIView):
             phone = data.get('phone', 'no phone saved')
             email = data.get('email', 'no email saved')
             address = data.get('address', 'no address saved')
-            new_client = Client(business=business, provider=client_provider, name=name, last_name=last_name, phone=phone, email=email, address=address)
+            address2 = data.get('address2', 'no extra address saved')
+            new_client = Client(business=business, provider=client_provider, name=name, last_name=last_name, phone=phone, email=email, address=address, address2=address2)
             new_client.image = data.get('image', new_client.image)
             new_client.save()
             response['message'] = "New client created."
@@ -72,6 +73,7 @@ class ClientView(APIView):
                 client.email = data.get('email', client.email)
                 client.phone = data.get('phone', client.phone)
                 client.address = data.get('address', client.address)
+                client.address2 = data.get('address2', client.address2)
                 client.image = data.get('image', client.image)
                 client.save()
                 client_data = ClientSerializer(client).data

@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 from PIL import Image
 from django.db import models
-from business.models import Business
+from business.models import Business, BusinessPaymentMethod
 from io import BytesIO
 import os
 
@@ -19,9 +19,17 @@ class Client(models.Model):
     email = models.EmailField(max_length=80, default='no@email.saved')
     phone = models.CharField(max_length=15, default='no phone saved')
     address = models.CharField(max_length=150, default='no address saved')
+    address2 = models.CharField(max_length=50, default='no extra address saved')
     image = models.ImageField(_("Image"), upload_to=upload_to, default='userDefault.jpg')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    preferred_payment_method = models.ForeignKey(
+        BusinessPaymentMethod,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='preferred_clients'
+    )
 
     def __str__(self):
         return self.provider.username + self.name

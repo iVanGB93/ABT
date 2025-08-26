@@ -2,7 +2,7 @@ from django.db import models
 from django.db.models.functions import Now
 from client.models import Client
 from django.contrib.auth.models import User
-from business.models import Business
+from business.models import Business, BusinessPaymentMethod
 import os
 
 def upload_to_job(instance, filename):
@@ -27,6 +27,7 @@ class Job(models.Model):
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='pending')
     description = models.CharField(max_length=150)
     address = models.CharField(max_length=150)
+    address2 = models.CharField(max_length=50, default='no extra address saved')
     price = models.FloatField()
     image = models.ImageField(upload_to=upload_to_job, default='jobDefault.jpg')
     created_at = models.DateTimeField(db_default=Now())
@@ -34,9 +35,27 @@ class Job(models.Model):
     scheduled_at = models.DateTimeField(null=True, blank=True)
     completed_at = models.DateTimeField(null=True, blank=True)
     closed = models.BooleanField(default=False)
+    payment_method_used = models.ForeignKey(
+        BusinessPaymentMethod,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='paid_jobs'
+    )
+    payment_status = models.CharField(
+        max_length=20,
+        choices=[
+            ('pending', 'Pending'),
+            ('partial', 'Partial'),
+            ('paid', 'Paid'),
+            ('overdue', 'Overdue'),
+        ],
+        default='pending'
+    )
 
     def __str__(self):
             return f"{self.description} for {self.client}"
+    
     
 def upload_to_spent(instance, filename):
     filename = os.path.basename(filename)
@@ -45,7 +64,7 @@ def upload_to_spent(instance, filename):
 class Spent(models.Model):
     job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name='spent')
     description = models.CharField(max_length=150)
-    amount = models.IntegerField()
+    price = models.FloatField()
     image = models.ImageField(upload_to=upload_to_spent, default='spentDefault.jpg')
     date = models.DateTimeField(db_default=Now())
 

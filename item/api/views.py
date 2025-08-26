@@ -62,7 +62,19 @@ class ItemsView(APIView):
                 response['message'] = "Item not found."
                 return Response(status=status.HTTP_200_OK, data=response)
         return Response(status=status.HTTP_200_OK, data=response)
-    
+
+    def delete(self, request, queryset=None, **kwargs):
+        pk = self.kwargs.get('pk')
+        response = {'OK': False}
+        if Item.objects.filter(id=pk).exists():
+            item = Item.objects.get(id=pk)
+            item.delete()
+            response['message'] = "Item Deleted."
+            response['OK'] = True
+        else:
+            response['message'] = "Item not found."
+        return Response(status=status.HTTP_200_OK, data=response)
+
 
 class ItemView(APIView):
     parser_classes = [MultiPartParser, FormParser]
