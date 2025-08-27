@@ -287,7 +287,7 @@
             <h4 class="payment-title">Payment Methods:</h4>
             <div class="payment-buttons">
               {% for payment_method in invoice.job.business.payment_methods.all %}
-                {% if payment_method.payment_type.name == "PayPal" and payment_method.account_username %}
+                {% if payment_method.payment_type.code == "paypal-personal" and payment_method.account_username %}
                   <a class="pay-btn paypal" href="https://paypal.me/{{ payment_method.account_username }}/{{ invoice.due }}USD" target="_blank">
                     <i class="fab fa-paypal"></i>
                     Pay with PayPal
@@ -297,7 +297,7 @@
                     <i class="fab fa-cc-stripe"></i>
                     Pay with Card
                   </a>
-                {% elif payment_method.payment_type.name == "Zelle" %}
+                {% elif payment_method.payment_type.code == "zelle-phone" %}
                   <div class="pay-btn zelle" onclick="copyToClipboard('{{ payment_method.account_phone }}')">
                     <i class="fas fa-mobile-alt"></i>
                     Zelle: {{ payment_method.account_phone }}
@@ -307,8 +307,8 @@
                     <i class="fas fa-mobile-alt"></i>
                     Pay with Venmo
                   </a>
-                {% elif payment_method.payment_type.name == "Cash App" %}
-                  <a class="pay-btn cashapp" href="https://cash.app/${{ payment_method.account_details }}/{{ invoice.due }}" target="_blank">
+                {% elif payment_method.payment_type.name == "Cash App" and payment_method.account_username %}
+                  <a class="pay-btn cashapp" href="https://cash.app/${{ payment_method.account_username }}/{{ invoice.due }}USD" target="_blank">
                     <i class="fas fa-dollar-sign"></i>
                     Pay with Cash App
                   </a>
@@ -327,10 +327,10 @@
             </div>
 
             <!-- QR Code Section -->
-            <div class="qr-section">
+            <!-- <div class="qr-section">
               <span class="qr-label">Or scan to pay:</span>
               <img class="qr-img" src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data={{ request.build_absolute_uri }}" alt="QR Pay" />
-            </div>
+            </div> -->
           {% endif %}
         </div>
       </div>
