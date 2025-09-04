@@ -6,36 +6,86 @@
 {% block head %}
 <link rel="stylesheet" href="{% static 'business/css/business-dashboard.css' %}">
 <link rel="stylesheet" href="{% static 'business/css/business-detail.css' %}">
+<link rel="stylesheet" href="{% static 'business/css/business-toolbar.css' %}">
 {% endblock head %}
 
 {% block body %}
-<!-- Business Navigation Header -->
-<div class="business-nav-header">
-    <div class="container">
-        <div class="nav-content">
-            <div class="business-info">
-                {% block bar %}
-                <h1 class="business-title">
+<!-- Enhanced Business Toolbar -->
+<div class="business-toolbar">
+    <div class="toolbar-container">
+        <div class="toolbar-content">
+            <!-- Brand Section -->
+            <div class="toolbar-brand">
+                <div class="brand-logo">
                     <i class="fas fa-building"></i>
-                    Business Dashboard
-                </h1>
-                {% endblock bar %}
+                </div>
+                <div class="brand-info">
+                    {% block toolbar_title %}
+                    <h1>Business Dashboard</h1>
+                    <p>{{ user.get_full_name|default:user.username }}</p>
+                    {% endblock toolbar_title %}
+                </div>
             </div>
-            <div class="nav-actions">
-                <a href="{% url 'business:business_list' %}" class="btn-outline">
-                    <i class="fas fa-arrow-left"></i>
-                    Back to Businesses
-                </a>
-                <div class="user-menu">
-                    <button class="user-btn">
-                        <i class="fas fa-user-circle"></i>
-                        {{ user.username }}
+
+            <!-- Navigation Links -->
+            <nav class="toolbar-nav">
+                <ul class="nav-links">
+                    <li><a href="{% url 'business:business_list' %}" class="{% if request.resolver_match.url_name == 'business_list' %}active{% endif %}">
+                        <i class="fas fa-th-large"></i> Dashboard
+                    </a></li>
+                    <li><a href="{% url 'business:business_list' %}" class="{% if 'business' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="fas fa-building"></i> Businesses
+                    </a></li>
+                    <li><a href="#" onclick="showComingSoon('Analytics')">
+                        <i class="fas fa-chart-line"></i> Analytics
+                    </a></li>
+                    <li><a href="#" onclick="showComingSoon('Reports')">
+                        <i class="fas fa-file-alt"></i> Reports
+                    </a></li>
+                </ul>
+            </nav>
+
+            <!-- Action Section -->
+            <div class="toolbar-actions">
+                <!-- Search -->
+                <div class="search-container">
+                    <input type="text" class="search-input" placeholder="Search businesses..." id="businessSearch">
+                    <button class="search-btn" onclick="performSearch()">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <a href="{% url 'business:create_business' %}" class="quick-btn primary">
+                        <i class="fas fa-plus"></i> New Business
+                    </a>
+                    <button class="notifications-btn" onclick="showComingSoon('Notifications')">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">3</span>
+                    </button>
+                </div>
+
+                <!-- User Profile Menu -->
+                <div class="user-profile-menu">
+                    <button class="profile-btn" onclick="toggleProfileDropdown()">
+                        <div class="profile-avatar">
+                            {{ user.username|first|upper }}
+                        </div>
+                        <span>{{ user.username }}</span>
                         <i class="fas fa-chevron-down"></i>
                     </button>
-                    <div class="user-dropdown">
+                    <div class="profile-dropdown" id="profileDropdown">
                         <a href="{% url 'user:profile' %}">
-                            <i class="fas fa-user"></i> Profile
+                            <i class="fas fa-user"></i> My Profile
                         </a>
+                        <a href="#" onclick="showComingSoon('Settings')">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                        <a href="#" onclick="showComingSoon('Help')">
+                            <i class="fas fa-question-circle"></i> Help & Support
+                        </a>
+                        <div class="divider"></div>
                         <a href="{% url 'user:logout' %}">
                             <i class="fas fa-sign-out-alt"></i> Logout
                         </a>
@@ -56,20 +106,57 @@
 {% block script %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // User menu toggle
-    const userBtn = document.querySelector('.user-btn');
-    const userDropdown = document.querySelector('.user-dropdown');
-    
-    if (userBtn && userDropdown) {
-        userBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            userDropdown.classList.toggle('show');
+    // Profile dropdown functionality
+    window.toggleProfileDropdown = function() {
+        const dropdown = document.getElementById('profileDropdown');
+        dropdown.classList.toggle('show');
+    };
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        const profileMenu = document.querySelector('.user-profile-menu');
+        const dropdown = document.getElementById('profileDropdown');
+        
+        if (!profileMenu.contains(e.target)) {
+            dropdown.classList.remove('show');
+        }
+    });
+
+    // Search functionality
+    window.performSearch = function() {
+        const searchInput = document.getElementById('businessSearch');
+        const query = searchInput.value.trim();
+        
+        if (query) {
+            // Simple search implementation - you can enhance this
+            window.location.href = `{% url 'business:business_list' %}?search=${encodeURIComponent(query)}`;
+        }
+    };
+
+    // Enter key search
+    document.getElementById('businessSearch').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            performSearch();
+        }
+    });
+
+    // Coming soon notifications
+    window.showComingSoon = function(feature) {
+        // Simple alert - you can replace with a modal
+        alert(`${feature} feature is coming soon! Stay tuned for updates.`);
+    };
+
+    // Smooth transitions for interactive elements
+    const interactiveElements = document.querySelectorAll('.quick-btn, .nav-links a, .profile-btn');
+    interactiveElements.forEach(el => {
+        el.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
         });
         
-        document.addEventListener('click', function() {
-            userDropdown.classList.remove('show');
+        el.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
         });
-    }
+    });
 });
 </script>
 {% endblock script %}

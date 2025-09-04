@@ -8,12 +8,10 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {% endblock head %}
 
-{% block bar %}
-<h1 class="business-title">
-    <i class="fas fa-building"></i>
-    {{ business.name }}
-</h1>
-{% endblock bar %}
+{% block toolbar_title %}
+<h1>{{ business.name }}</h1>
+<p>Business Details & Analytics</p>
+{% endblock toolbar_title %}
 
 {% block content %}
 <div class="business-detail-container">

@@ -20,7 +20,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django.contrib.sites',  # Required for get_current_site
+    'django.contrib.sites',
     'web.apps.WebConfig',
     'user.apps.UserConfig',
     'client.apps.ClientConfig',
@@ -164,37 +164,31 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }
 
-#configuracion de correo
-# Check email provider preference
+# EMAIL CONFIGURATION
 email_provider = config('EMAIL_PROVIDER', default='gmail')
 
 if email_provider == 'sendgrid':
-    # SendGrid configuration (works well with Railway)
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
     EMAIL_HOST = 'smtp.sendgrid.net'
-    EMAIL_HOST_USER = 'apikey'  # Always 'apikey' for SendGrid
+    EMAIL_HOST_USER = 'apikey'
     EMAIL_HOST_PASSWORD = config('SENDGRID_API_KEY')
     EMAIL_PORT = 587
     EMAIL_USE_TLS = True
     DEFAULT_FROM_EMAIL = config('SENDGRID_FROM_EMAIL', default='noreply@abt.qbared.com')
     SERVER_EMAIL = DEFAULT_FROM_EMAIL
 elif email_provider == 'resend':
-    # Resend configuration using HTTP API (Railway-compatible)
     EMAIL_BACKEND = 'core.email_backends.ResendAPIBackend'
     DEFAULT_FROM_EMAIL = config('RESEND_FROM_EMAIL', default='noreply@abt.qbared.com')
     SERVER_EMAIL = DEFAULT_FROM_EMAIL
 elif email_provider == 'mailgun':
-    # Mailgun configuration using HTTP API (Railway-compatible)
     EMAIL_BACKEND = 'core.email_backends.MailgunAPIBackend'
     DEFAULT_FROM_EMAIL = config('MAILGUN_FROM_EMAIL', default='noreply@abt.qbared.com')
     SERVER_EMAIL = DEFAULT_FROM_EMAIL
 elif email_provider == 'console':
-    # Console backend for development/testing
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
     DEFAULT_FROM_EMAIL = 'noreply@abt.qbared.com'
     SERVER_EMAIL = DEFAULT_FROM_EMAIL
 else:
-    # Gmail configuration (works locally but may fail on Railway)
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
     EMAIL_HOST = 'smtp.gmail.com'
     EMAIL_USE_TLS = True

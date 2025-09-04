@@ -248,14 +248,14 @@ def business_detail(request, pk):
     completed_jobs_count = 0
     pending_jobs_count = 0
     in_progress_jobs_count = 0
-    completed_jobs = Job.objects.filter(business=business, status='finished')
+    completed_jobs = Job.objects.filter(business=business, status='completed')
     for job in completed_jobs:
         job_income += float(job.price)  # CONVERTIR A FLOAT AQUÍ
     
     total_jobs = Job.objects.filter(business=business).count()
-    completed_jobs_count = Job.objects.filter(business=business, status='finished').count()
-    pending_jobs_count = Job.objects.filter(business=business, status='new').count()
-    in_progress_jobs_count = Job.objects.filter(business=business, status='active').count()
+    completed_jobs_count = Job.objects.filter(business=business, status='completed').count()
+    pending_jobs_count = Job.objects.filter(business=business, status='pending').count()
+    in_progress_jobs_count = Job.objects.filter(business=business, status='in_progress').count()
     
     # Ahora todas las variables son float, no habrá problemas de tipo
     total_income = extra_income + job_income
@@ -263,7 +263,7 @@ def business_detail(request, pk):
     
     # Transacciones recientes
     recent_incomes = business.extra_income.order_by('-date')[:3]
-    recent_jobs = completed_jobs.order_by('-date')[:3] if completed_jobs else []
+    recent_jobs = completed_jobs.order_by('-created_at')[:3] if completed_jobs else []
     recent_expenses = business.extra_expenses.order_by('-date')[:5]
     
     # Datos para gráficos (últimos 6 meses)
@@ -305,9 +305,9 @@ def business_detail(request, pk):
         month_job_income = 0.0
         month_jobs = Job.objects.filter(
             business=business,
-            status='finished',  # Cambié 'completed' por 'finished' para consistencia
-            date__gte=month_start,
-            date__lte=month_end
+            status='completed',  # Usar el status correcto del modelo
+            created_at__gte=month_start,
+            created_at__lte=month_end
         )
         for job in month_jobs:
             month_job_income += float(job.price)  # CONVERTIR A FLOAT

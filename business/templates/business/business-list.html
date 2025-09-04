@@ -1,95 +1,164 @@
-{% extends "web/base.html" %}
+{% extends "business/base-business.html" %}
 {% load static %}
 
-{% block title %}My Businesses - Advance Business Tools{% endblock title %}
+{% block page_title %}My Businesses{% endblock page_title %}
+
+{% block toolbar_title %}
+<h1>My Businesses</h1>
+<p>Manage and oversee all your business operations</p>
+{% endblock toolbar_title %}
 
 {% block head %}
-<link rel="stylesheet" href="{% static 'business/css/business-dashboard.css' %}">
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'business/css/business-list.css' %}">
 {% endblock head %}
 
 {% block body %}
-<!-- Dashboard Header -->
-<div class="dashboard-header">
-    <div class="container">
-        <div class="header-content">
-            <div class="page-title">
-                <h1><i class="fas fa-building"></i> My Businesses</h1>
-                <p>Manage and oversee all your business operations</p>
+<!-- Business Controls Panel -->
+<div class="business-controls">
+    <div class="controls-header">
+        <h2 class="controls-title">
+            <i class="fas fa-filter"></i>
+            Business Management
+        </h2>
+        <div class="controls-actions">
+            <div class="view-toggle">
+                <button class="view-btn active" data-view="grid" onclick="toggleView('grid')">
+                    <i class="fas fa-th"></i>
+                </button>
+                <button class="view-btn" data-view="list" onclick="toggleView('list')">
+                    <i class="fas fa-list"></i>
+                </button>
             </div>
-            <div class="header-actions">
-                <a href="{% url 'business:create_business' %}" class="btn-primary">
-                    <i class="fas fa-plus"></i>
-                    New Business
-                </a>
+            <div class="sort-filter">
+                <div class="filter-group">
+                    <label for="sortSelect">Sort by:</label>
+                    <select id="sortSelect" class="filter-select" onchange="sortBusinesses()">
+                        <option value="name">Name</option>
+                        <option value="created">Date Created</option>
+                        <option value="updated">Last Updated</option>
+                    </select>
+                </div>
             </div>
         </div>
     </div>
+    
+    {% if business_list %}
+    <div class="stats-overview">
+        <div class="stat-item">
+            <div class="stat-number">{{ business_list|length }}</div>
+            <div class="stat-label">Total Businesses</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">{{ business_list|length }}</div>
+            <div class="stat-label">Active</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">0</div>
+            <div class="stat-label">Inactive</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">{{ business_list|length }}</div>
+            <div class="stat-label">This Month</div>
+        </div>
+    </div>
+    {% endif %}
 </div>
-<!-- Business List -->
+
+<!-- Business Grid/List Container -->
 <div class="business-section">
     <div class="container">
         {% if business_list %}
-            <div class="business-grid" id="businessGrid">
+            <!-- Grid View -->
+            <div class="business-grid-enhanced" id="businessGridView">
                 {% for business in business_list %}
-                <div class="business-card" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:100 }}">
-                    <div class="card-header">
-                        <div class="business-icon">
+                <div class="business-card-enhanced" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:100 }}" data-name="{{ business.name|lower }}" data-created="{{ business.created_at|date:'Y-m-d' }}">
+                    <div class="card-header-enhanced">
+                        <div class="business-status">Active</div>
+                        <div class="business-icon-enhanced">
                             <i class="fas fa-building"></i>
-                        </div>
-                        <div class="card-menu">
-                            <button class="menu-btn">
-                                <i class="fas fa-ellipsis-v"></i>
-                            </button>
-                            <div class="dropdown-menu">
-                                <a href="{% url 'business:business_detail' business.id %}">
-                                    <i class="fas fa-eye"></i> View Details
-                                </a>
-                                <a href="{% url 'business:business_edit' business.id %}">
-                                    <i class="fas fa-edit"></i> Edit
-                                </a>
-                                <a href="{% url 'business:business_delete' business.id %}" class="delete-link">
-                                    <i class="fas fa-trash"></i> Delete
-                                </a>
-                            </div>
                         </div>
                     </div>
                     
-                    <div class="card-content">
-                        <h3 class="business-name">{{ business.name }}</h3>
-                        <p class="business-address">
+                    <div class="card-content-enhanced">
+                        <h3 class="business-name-enhanced">{{ business.name }}</h3>
+                        <p class="business-address-enhanced">
                             <i class="fas fa-map-marker-alt"></i>
                             {{ business.address|default:"No address provided" }}
                         </p>
-                        <p class="business-description">
+                        <p class="business-description-enhanced">
                             {{ business.description|truncatewords:15|default:"No description available" }}
                         </p>
+                        
+                        <div class="business-metrics">
+                            <div class="metric-item">
+                                <div class="metric-value">0</div>
+                                <div class="metric-label">Jobs</div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-value">${{ 0|floatformat:0 }}</div>
+                                <div class="metric-label">Revenue</div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="card-footer">
-                        <div class="owners-section">
-                            <span class="owners-label">Owners:</span>
-                            <div class="owners-list">
+                    <div class="card-footer-enhanced">
+                        <div class="owners-section-enhanced">
+                            <span style="font-size: 12px; color: #6b7280;">Owners:</span>
+                            <div class="owners-avatars">
                                 {% for owner in business.owners.all %}
-                                    <div class="owner-avatar" title="{{ owner.get_full_name|default:owner.username }}">
-                                        {% if owner.profile.image %}
-                                            <img src="{{ owner.profile.image.url }}" alt="{{ owner.username }}">
-                                        {% else %}
-                                            <div class="avatar-placeholder">
-                                                {{ owner.username|first|upper }}
-                                            </div>
-                                        {% endif %}
+                                    <div class="owner-avatar-small" title="{{ owner.get_full_name|default:owner.username }}">
+                                        {{ owner.username|first|upper }}
                                     </div>
                                 {% empty %}
-                                    <span class="no-owners">No owners assigned</span>
+                                    <span style="font-size: 12px; color: #9ca3af;">None</span>
                                 {% endfor %}
                             </div>
                         </div>
                         
-                        <div class="card-actions">
-                            <a href="{% url 'business:business_detail' business.id %}" class="btn-secondary">
-                                View Details
+                        <div class="card-actions-enhanced">
+                            <a href="{% url 'business:business_detail' business.id %}" class="action-btn primary">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                            <a href="{% url 'business:business_edit' business.id %}" class="action-btn secondary">
+                                <i class="fas fa-edit"></i> Edit
                             </a>
                         </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- List View (Hidden by default) -->
+            <div class="business-list-view" id="businessListView" style="display: none;">
+                <div class="list-header">
+                    <div>Business Name</div>
+                    <div>Owners</div>
+                    <div>Jobs</div>
+                    <div>Revenue</div>
+                    <div>Actions</div>
+                </div>
+                {% for business in business_list %}
+                <div class="list-item" data-name="{{ business.name|lower }}" data-created="{{ business.created_at|date:'Y-m-d' }}">
+                    <div>
+                        <strong>{{ business.name }}</strong>
+                        <br>
+                        <small style="color: #6b7280;">{{ business.address|default:"No address" }}</small>
+                    </div>
+                    <div>
+                        {% for owner in business.owners.all %}
+                            <span style="font-size: 12px; background: #f3f4f6; padding: 2px 6px; border-radius: 4px; margin-right: 4px;">
+                                {{ owner.username }}
+                            </span>
+                        {% empty %}
+                            <span style="color: #9ca3af;">None</span>
+                        {% endfor %}
+                    </div>
+                    <div>0</div>
+                    <div>${{ 0|floatformat:2 }}</div>
+                    <div>
+                        <a href="{% url 'business:business_detail' business.id %}" class="action-btn primary" style="margin-right: 5px;">View</a>
+                        <a href="{% url 'business:business_edit' business.id %}" class="action-btn secondary">Edit</a>
                     </div>
                 </div>
                 {% endfor %}
@@ -113,55 +182,129 @@
 
 {% block script %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // View toggle functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // View toggle functionality
+    window.toggleView = function(viewType) {
+        const gridView = document.getElementById('businessGridView');
+        const listView = document.getElementById('businessListView');
         const viewButtons = document.querySelectorAll('.view-btn');
-        const businessGrid = document.getElementById('businessGrid');
         
+        // Update button states
         viewButtons.forEach(btn => {
-            btn.addEventListener('click', function() {
-                viewButtons.forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                
-                const view = this.dataset.view;
-                businessGrid.className = view === 'list' ? 'business-list' : 'business-grid';
-            });
+            btn.classList.remove('active');
+            if (btn.dataset.view === viewType) {
+                btn.classList.add('active');
+            }
         });
-
-        // Dropdown menu functionality
-        const menuButtons = document.querySelectorAll('.menu-btn');
         
-        menuButtons.forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                const dropdown = this.nextElementSibling;
-                
-                // Close all other dropdowns
-                document.querySelectorAll('.dropdown-menu').forEach(d => {
-                    if (d !== dropdown) d.classList.remove('show');
-                });
-                
-                dropdown.classList.toggle('show');
+        // Toggle views
+        if (viewType === 'list') {
+            gridView.style.display = 'none';
+            listView.style.display = 'block';
+        } else {
+            gridView.style.display = 'grid';
+            listView.style.display = 'none';
+        }
+        
+        // Save preference
+        localStorage.setItem('businessViewPreference', viewType);
+    };
+    
+    // Load saved view preference
+    const savedView = localStorage.getItem('businessViewPreference');
+    if (savedView) {
+        toggleView(savedView);
+    }
+    
+    // Sort functionality
+    window.sortBusinesses = function() {
+        const sortSelect = document.getElementById('sortSelect');
+        const sortValue = sortSelect.value;
+        const gridView = document.getElementById('businessGridView');
+        const listView = document.getElementById('businessListView');
+        
+        // Get all business cards/items
+        const gridCards = Array.from(gridView.children);
+        const listItems = Array.from(listView.querySelectorAll('.list-item'));
+        
+        // Sort function
+        const sortFunction = (a, b) => {
+            switch(sortValue) {
+                case 'name':
+                    return a.dataset.name.localeCompare(b.dataset.name);
+                case 'created':
+                    return new Date(b.dataset.created) - new Date(a.dataset.created);
+                case 'updated':
+                    return new Date(b.dataset.created) - new Date(a.dataset.created); // Using created as proxy
+                default:
+                    return 0;
+            }
+        };
+        
+        // Sort and reappend
+        gridCards.sort(sortFunction).forEach(card => gridView.appendChild(card));
+        listItems.sort(sortFunction).forEach(item => listView.appendChild(item));
+    };
+    
+    // Search functionality enhancement
+    const searchInput = document.getElementById('businessSearch');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const query = this.value.toLowerCase();
+            const gridCards = document.querySelectorAll('.business-card-enhanced');
+            const listItems = document.querySelectorAll('.list-item');
+            
+            // Filter grid view
+            gridCards.forEach(card => {
+                const businessName = card.dataset.name;
+                if (businessName.includes(query)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
             });
-        });
-
-        // Close dropdowns when clicking outside
-        document.addEventListener('click', function() {
-            document.querySelectorAll('.dropdown-menu').forEach(d => {
-                d.classList.remove('show');
-            });
-        });
-
-        // Delete confirmation
-        const deleteLinks = document.querySelectorAll('.delete-link');
-        deleteLinks.forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                if (confirm('Are you sure you want to delete this business? This action cannot be undone.')) {
-                    window.location.href = this.href;
+            
+            // Filter list view
+            listItems.forEach(item => {
+                const businessName = item.dataset.name;
+                if (businessName.includes(query)) {
+                    item.style.display = 'grid';
+                } else {
+                    item.style.display = 'none';
                 }
             });
         });
+    }
+    
+    // Enhanced card hover effects
+    const businessCards = document.querySelectorAll('.business-card-enhanced');
+    businessCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-8px) scale(1.02)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+        });
     });
+    
+    // Add loading states for better UX
+    const actionButtons = document.querySelectorAll('.action-btn');
+    actionButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (!this.classList.contains('loading')) {
+                this.classList.add('loading');
+                const originalText = this.innerHTML;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+                
+                // Reset after navigation (in case of back button)
+                setTimeout(() => {
+                    this.classList.remove('loading');
+                    this.innerHTML = originalText;
+                }, 2000);
+            }
+        });
+    });
+});
 </script>
 {% endblock script %}
