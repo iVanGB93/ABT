@@ -179,23 +179,13 @@ if email_provider == 'sendgrid':
     DEFAULT_FROM_EMAIL = config('SENDGRID_FROM_EMAIL', default='noreply@abt.qbared.com')
     SERVER_EMAIL = DEFAULT_FROM_EMAIL
 elif email_provider == 'resend':
-    # Resend configuration (modern, developer-friendly)
-    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_HOST = 'smtp.resend.com'
-    EMAIL_HOST_USER = 'resend'  # Always 'resend' for Resend
-    EMAIL_HOST_PASSWORD = config('RESEND_API_KEY')
-    EMAIL_PORT = 587
-    EMAIL_USE_TLS = True
+    # Resend configuration using HTTP API (Railway-compatible)
+    EMAIL_BACKEND = 'core.email_backends.ResendAPIBackend'
     DEFAULT_FROM_EMAIL = config('RESEND_FROM_EMAIL', default='noreply@abt.qbared.com')
     SERVER_EMAIL = DEFAULT_FROM_EMAIL
 elif email_provider == 'mailgun':
-    # Mailgun configuration (also works well with Railway)
-    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_HOST = 'smtp.mailgun.org'
-    EMAIL_HOST_USER = config('MAILGUN_SMTP_LOGIN')
-    EMAIL_HOST_PASSWORD = config('MAILGUN_SMTP_PASSWORD')
-    EMAIL_PORT = 587
-    EMAIL_USE_TLS = True
+    # Mailgun configuration using HTTP API (Railway-compatible)
+    EMAIL_BACKEND = 'core.email_backends.MailgunAPIBackend'
     DEFAULT_FROM_EMAIL = config('MAILGUN_FROM_EMAIL', default='noreply@abt.qbared.com')
     SERVER_EMAIL = DEFAULT_FROM_EMAIL
 elif email_provider == 'console':
