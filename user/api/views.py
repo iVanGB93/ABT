@@ -13,6 +13,10 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.conf import settings
+import logging
+
+# Configure logger for email debugging
+logger = logging.getLogger(__name__)
 
 
 from user.models import RegistrationCode
@@ -64,6 +68,7 @@ class RegisterView(APIView):
                         html_message=email_body
                     )
                 except Exception as e:
+                    logger.error(f"Registration code email failed to send to {email}: {str(e)}")
                     print(f"Registration code email failed to send: {e}")
                     # Still return success to not break the flow, but log the error
                 
@@ -114,6 +119,7 @@ class RegisterView(APIView):
             )
         except Exception as e:
             # Log the error but don't break the registration process
+            logger.error(f"Welcome email failed to send to {new_user.email}: {str(e)}")
             print(f"Welcome email failed to send: {e}")
         
         response['OK'] = True
@@ -198,6 +204,7 @@ class AccountView(APIView):
                 )
             except Exception as e:
                 # Log the error but don't break the profile update process
+                logger.error(f"Profile update notification email failed to send: {str(e)}")
                 print(f"Profile update notification email failed to send: {e}")
         
         data = AccountSerializer(profile).data
@@ -241,4 +248,8 @@ class ForgotPasswordView(APIView):
         except User.DoesNotExist:
             content = {'message': 'No account exists with that email.', 'type': 'error'}
             return Response(status=status.HTTP_404_NOT_FOUND, data=content)
+        except Exception as e:
+            logger.error(f"Password reset email failed to send: {str(e)}")
+            content = {'message': 'An error occurred while sending the reset email. Please try again.', 'type': 'error'}
+            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR, data=content)
 

@@ -9,6 +9,14 @@ from django.utils.encoding import force_bytes, force_str
 from django.utils import timezone
 from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
+import logging
+
+# Configure logger for email debugging
+logger = logging.getLogger(__name__)
+from django.utils.encoding import force_bytes, force_str
+from django.utils import timezone
+from django.conf import settings
+from django.contrib.sites.shortcuts import get_current_site
 
 def loginView(request):
     if request.user.is_authenticated:
@@ -75,6 +83,7 @@ def registerView(request):
             )
         except Exception as e:
             # Log the error but don't break the registration process
+            logger.error(f"Welcome email failed to send to {new_user.email}: {str(e)}")
             print(f"Welcome email failed to send: {e}")
         
         login(request, new_user)
@@ -148,6 +157,7 @@ def editProfileView(request):
                 )
             except Exception as e:
                 # Log the error but don't break the profile update process
+                logger.error(f"Profile update notification email failed to send: {str(e)}")
                 print(f"Profile update notification email failed to send: {e}")
         
         return redirect('user:profile')
@@ -208,6 +218,10 @@ def forgotPasswordView(request):
             
         except User.DoesNotExist:
             content = {'message': 'No account exists with that email.', 'type': 'error'}
+            return render(request, 'user/forgot-password.html', content)
+        except Exception as e:
+            logger.error(f"Password reset email failed to send: {str(e)}")
+            content = {'message': 'An error occurred while sending the reset email. Please try again.', 'type': 'error'}
             return render(request, 'user/forgot-password.html', content)
     
     return render(request, 'user/forgot-password.html')

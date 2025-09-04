@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',  # Required for get_current_site
     'web.apps.WebConfig',
     'user.apps.UserConfig',
     'client.apps.ClientConfig',
@@ -137,8 +138,12 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media') """
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Site framework configuration
+SITE_ID = 1
+
 CSRF_TRUSTED_ORIGINS = [
     'https://abt.qbared.com',
+    'https://*.railway.app',  # Add Railway domains
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True
@@ -162,16 +167,34 @@ SIMPLE_JWT = {
 #configuracion de correo
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
-#EMAIL_HOST = 'smtpout.secureserver.net'
-#EMAIL_USE_SSL = False
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
-#EMAIL_PORT = 80
 EMAIL_HOST_USER = config('EMAIL_HOST_USER')
-#EMAIL_HOST_USER = 'admin@qbared.com'
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 SERVER_EMAIL = EMAIL_HOST_USER
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+
+# Logging configuration for email debugging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': 'email_debug.log',
+        },
+    },
+    'loggers': {
+        'django.core.mail': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
 
 
 #DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
