@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to ABT - Advance Business Tools</title>
+    <style>
+        /* Inline styles for email compatibility */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .email-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        .email-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .email-logo {
+            font-size: 2.2rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+        .email-subtitle {
+            color: #666;
+            font-size: 1.1rem;
+        }
+        .welcome-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin: 10px 0 20px 0;
+        }
+        .email-body {
+            margin: 30px 0;
+            line-height: 1.8;
+        }
+        .cta-button {
+            display: inline-block;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .features-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 25px 0;
+        }
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            padding: 10px 0;
+        }
+        .feature-icon {
+            font-size: 1.5rem;
+            margin-right: 15px;
+            width: 30px;
+        }
+        .feature-text {
+            flex: 1;
+        }
+        .email-tips {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            color: #1565c0;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-size: 0.9rem;
+        }
+        .email-footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        .social-links {
+            margin: 20px 0;
+        }
+        .social-links a {
+            display: inline-block;
+            margin: 0 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 50%;
+            text-decoration: none;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="email-content">
+            <div class="email-header">
+                <div class="email-logo">ABT</div>
+                <div class="email-subtitle">Advance Business Tools</div>
+                <div class="welcome-badge">🎉 Welcome!</div>
+            </div>
+
+            <div class="email-body">
+                <h2>Hello {{ user.first_name|default:user.username }}!</h2>
+                
+                <p>Welcome to <strong>ABT - Advance Business Tools</strong>! We're excited to have you join our community of business professionals.</p>
+                
+                <p>Your account has been successfully created with the following details:</p>
+                <ul>
+                    <li><strong>Username:</strong> {{ user.username }}</li>
+                    <li><strong>Email:</strong> {{ user.email }}</li>
+                    <li><strong>Registration Date:</strong> {{ registration_date|date:"F d, Y" }}</li>
+                </ul>
+
+                <div style="text-align: center;">
+                    <a href="{{ login_url }}" class="cta-button">Start Using ABT</a>
+                </div>
+
+                <div class="features-section">
+                    <h3 style="margin-top: 0; color: #333;">What you can do with ABT:</h3>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">📊</div>
+                        <div class="feature-text">
+                            <strong>Manage Projects</strong><br>
+                            <small>Track your business projects and their progress</small>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">👥</div>
+                        <div class="feature-text">
+                            <strong>Client Management</strong><br>
+                            <small>Keep all your client information organized</small>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">💼</div>
+                        <div class="feature-text">
+                            <strong>Job Tracking</strong><br>
+                            <small>Monitor job progress and manage resources</small>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">📈</div>
+                        <div class="feature-text">
+                            <strong>Business Analytics</strong><br>
+                            <small>Get insights into your business performance</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="email-tips">
+                    <strong>💡 Pro Tips:</strong>
+                    <ul style="margin: 10px 0; padding-left: 20px;">
+                        <li>Complete your profile to get the most out of ABT</li>
+                        <li>Start by creating your first project</li>
+                        <li>Explore the dashboard to familiarize yourself with features</li>
+                        <li>Check out our help section if you need assistance</li>
+                    </ul>
+                </div>
+                
+                <p>If you have any questions or need help getting started, don't hesitate to contact our support team.</p>
+                
+                <p>Thank you for choosing ABT to help advance your business tools!</p>
+                
+                <p><strong>Best regards,</strong><br>The ABT Team</p>
+            </div>
+
+            <div class="email-footer">
+                <p><strong>{{ site_name }}</strong></p>
+                
+                <div class="social-links">
+                    <a href="#" title="Facebook">📘</a>
+                    <a href="#" title="Twitter">🐦</a>
+                    <a href="#" title="LinkedIn">💼</a>
+                    <a href="#" title="Instagram">📷</a>
+                </div>
+                
+                <p>This is an automated welcome email. Please do not reply to this message.</p>
+                <p>If you didn't create this account, please contact us immediately.</p>
+                
+                <p style="margin-top: 20px;">
+                    <small>© 2025 ABT - Advance Business Tools. All rights reserved.</small>
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your ABT Registration Code</title>
+    <style>
+        /* Inline styles for email compatibility */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .email-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        .email-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .email-logo {
+            font-size: 2.2rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+        .email-subtitle {
+            color: #666;
+            font-size: 1.1rem;
+        }
+        .verification-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #ffc107 0%, #ff8f00 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin: 10px 0 20px 0;
+        }
+        .email-body {
+            margin: 30px 0;
+            line-height: 1.8;
+        }
+        .verification-code {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+            text-align: center;
+            padding: 20px 30px;
+            border-radius: 15px;
+            margin: 30px 0;
+            letter-spacing: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        .code-instructions {
+            background: #e8f5e8;
+            border: 1px solid #c8e6c9;
+            color: #2e7d32;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 25px 0;
+        }
+        .security-notice {
+            background: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-size: 0.9rem;
+        }
+        .email-footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="email-content">
+            <div class="email-header">
+                <div class="email-logo">ABT</div>
+                <div class="email-subtitle">Advance Business Tools</div>
+                <div class="verification-badge">🔐 Verification Code</div>
+            </div>
+
+            <div class="email-body">
+                <h2>Complete Your Registration</h2>
+                
+                <p>Thank you for starting your registration with <strong>ABT - Advance Business Tools</strong>!</p>
+                
+                <p>To complete your account setup, please use the verification code below:</p>
+
+                <div class="verification-code">
+                    {{ code }}
+                </div>
+
+                <div class="code-instructions">
+                    <h3 style="margin-top: 0; color: #2e7d32;">📱 How to use your code:</h3>
+                    <ol style="margin: 10px 0; padding-left: 20px;">
+                        <li>Return to the ABT app or website</li>
+                        <li>Enter this verification code when prompted</li>
+                        <li>Complete your registration with your chosen username and password</li>
+                        <li>Start enjoying all ABT features!</li>
+                    </ol>
+                </div>
+
+                <div class="security-notice">
+                    <strong>🔒 Security Information:</strong>
+                    <ul style="margin: 10px 0; padding-left: 20px;">
+                        <li>This code expires in 24 hours for security</li>
+                        <li>You can only use it once</li>
+                        <li>Keep this code private and secure</li>
+                        <li>If you didn't request this code, ignore this email</li>
+                    </ul>
+                </div>
+                
+                <p>If you're having trouble with your registration, feel free to contact our support team.</p>
+                
+                <p>Welcome to the ABT community!</p>
+            </div>
+
+            <div class="email-footer">
+                <p><strong>{{ site_name }}</strong></p>
+                <p>This is an automated email, please do not reply to this message.</p>
+                <p style="margin-top: 20px;">
+                    <small>© 2025 ABT - Advance Business Tools. All rights reserved.</small>
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ABT - Advance Business Tools{% endblock %}</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Custom User Styles -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'user/css/user.css' %}">
+    
+    <!-- Additional Styles -->
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="container {% block container_class %}{% endblock %}">
+        <!-- Logo Section -->
+        <div class="logo">
+            <h1>ABT</h1>
+            <p>Advance Business Tools</p>
+        </div>
+
+        <!-- Content Block -->
+        {% block content %}{% endblock %}
+
+        <!-- Back Link Section -->
+        {% block back_link %}{% endblock %}
+    </div>
+
+    <!-- JavaScript -->
+    {% block extra_js %}{% endblock %}
+    
+    <!-- Common JavaScript -->
+    <script>
+        // Auto-hide success messages after 5 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            const messageEl = document.querySelector('.message.success');
+            if (messageEl) {
+                setTimeout(() => {
+                    messageEl.style.opacity = '0';
+                    setTimeout(() => messageEl.remove(), 300);
+                }, 5000);
+            }
+        });
+
+        // Toggle password visibility function
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const icon = input.parentElement.querySelector('.toggle-password');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+    </script>
+</body>
+</html>

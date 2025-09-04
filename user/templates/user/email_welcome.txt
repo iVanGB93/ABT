@@ -1,0 +1,38 @@
+Welcome to ABT - Advance Business Tools!
+
+Hello {{ user.first_name|default:user.username }},
+
+Welcome to ABT! We're excited to have you join our community of business professionals.
+
+Your account has been successfully created with the following details:
+- Username: {{ user.username }}
+- Email: {{ user.email }}
+- Registration Date: {{ registration_date|date:"F d, Y" }}
+
+What you can do with ABT:
+• Manage Projects - Track your business projects and their progress
+• Client Management - Keep all your client information organized  
+• Job Tracking - Monitor job progress and manage resources
+• Business Analytics - Get insights into your business performance
+
+Pro Tips:
+• Complete your profile to get the most out of ABT
+• Start by creating your first project
+• Explore the dashboard to familiarize yourself with features
+• Check out our help section if you need assistance
+
+Start using ABT: {{ login_url }}
+
+If you have any questions or need help getting started, don't hesitate to contact our support team.
+
+Thank you for choosing ABT to help advance your business tools!
+
+Best regards,
+The ABT Team
+
+---
+{{ site_name }}
+© 2025 ABT - Advance Business Tools. All rights reserved.
+
+This is an automated welcome email. Please do not reply to this message.
+If you didn't create this account, please contact us immediately.

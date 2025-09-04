@@ -1,0 +1,106 @@
+{% extends 'user/base.html' %}
+
+{% block title %}Password Reset - ABT{% endblock %}
+
+{% block container_class %}large success{% endblock %}
+
+{% block content %}
+    <div class="success-icon">
+        <i class="fas fa-check-circle"></i>
+    </div>
+
+    <div class="success-content">
+        <h2>Password Reset!</h2>
+        <p>
+            Your password has been updated successfully. You can now log in with your new password.
+        </p>
+    </div>
+
+    <div class="actions">
+        <a href="{% url 'user:login' %}" class="btn">
+            <i class="fas fa-sign-in-alt"></i>
+            Login
+        </a>
+        <a href="{% url 'web:index' %}" class="btn secondary">
+            <i class="fas fa-home"></i>
+            Go Home
+        </a>
+    </div>
+
+    <div class="security-tips">
+        <h4>
+            <i class="fas fa-shield-alt"></i>
+            Security Tips
+        </h4>
+        <ul>
+            <li>
+                <i class="fas fa-check"></i>
+                Make sure to log out when using shared devices
+            </li>
+            <li>
+                <i class="fas fa-check"></i>
+                Don't share your password with anyone
+            </li>
+            <li>
+                <i class="fas fa-check"></i>
+                Consider changing your password regularly
+            </li>
+            <li>
+                <i class="fas fa-check"></i>
+                If you detect suspicious activity, contact support immediately
+            </li>
+        </ul>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        // Auto redirect to login after 10 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            let countdown = 10;
+            const loginBtn = document.querySelector('a[href="{% url 'user:login' %}"]');
+            const originalText = loginBtn.innerHTML;
+            
+            const timer = setInterval(() => {
+                countdown--;
+                const btnText = `<i class="fas fa-sign-in-alt"></i> Login (${countdown}s)`;
+                loginBtn.innerHTML = btnText;
+                
+                if (countdown <= 0) {
+                    clearInterval(timer);
+                    window.location.href = "{% url 'user:login' %}";
+                }
+            }, 1000);
+
+            // Click to cancel auto redirect
+            loginBtn.addEventListener('click', () => {
+                clearInterval(timer);
+                loginBtn.innerHTML = originalText;
+            });
+
+            // Create confetti effect
+            setTimeout(createConfetti, 500);
+        });
+
+        function createConfetti() {
+            const colors = ['var(--primary-color)', 'var(--secondary-color)', 'var(--success-color)', 'var(--accent-color)'];
+            
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDelay = Math.random() * 2 + 's';
+                    confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                    
+                    document.body.appendChild(confetti);
+                    
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, 5000);
+                }, i * 50);
+            }
+        }
+    </script>
+{% endblock %}

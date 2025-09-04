@@ -1,609 +1,210 @@
-{% extends 'web/base.html' %}
-{% load static %}
+{% extends 'user/base.html' %}
 
-{% block title %}Register - Advance Business Tools{% endblock title %}
+{% block title %}Register - ABT{% endblock %}
 
-{% block head %}
-<link rel="stylesheet" href="{% static 'web/css/modern-landing.css' %}">
-<style>
-    /* Register specific styles */
-    .register-container {
-        min-height: 100vh;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 2rem;
-    }
-    
-    .register-card {
-        background: white;
-        border-radius: 20px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
-        padding: 3rem;
-        width: 100%;
-        max-width: 500px;
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-    
-    .register-header {
-        text-align: center;
-        margin-bottom: 2.5rem;
-    }
-    
-    .register-logo {
-        width: 80px;
-        height: 80px;
-        background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
-        border-radius: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 1.5rem;
-        color: white;
-        font-size: 2rem;
-    }
-    
-    .register-title {
-        font-size: 2rem;
-        font-weight: 700;
-        color: var(--text-dark);
-        margin-bottom: 0.5rem;
-    }
-    
-    .register-subtitle {
-        color: var(--text-light);
-        font-size: 1rem;
-    }
-    
-    .register-form {
-        space: 1.5rem;
-    }
-    
-    .form-group {
-        margin-bottom: 1.5rem;
-    }
-    
-    .form-group label {
-        display: block;
-        margin-bottom: 0.5rem;
-        font-weight: 600;
-        color: var(--text-dark);
-        font-size: 0.9rem;
-    }
-    
-    .form-input {
-        width: 100%;
-        padding: 1rem 1.25rem;
-        border: 2px solid var(--border-light);
-        border-radius: 12px;
-        font-size: 1rem;
-        transition: all 0.3s ease;
-        background: var(--bg-light);
-        font-family: inherit;
-    }
-    
-    .form-input:focus {
-        outline: none;
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        background: white;
-    }
-    
-    .form-input::placeholder {
-        color: var(--text-light);
-    }
-    
-    .form-input.error {
-        border-color: #ef4444;
-        background: #fef2f2;
-    }
-    
-    .form-input.success {
-        border-color: #10b981;
-        background: #f0fdf4;
-    }
-    
-    .password-strength {
-        margin-top: 0.5rem;
-        padding: 0.5rem;
-        border-radius: 8px;
-        font-size: 0.85rem;
-        transition: all 0.3s ease;
-    }
-    
-    .strength-weak {
-        background: #fef2f2;
-        color: #dc2626;
-        border: 1px solid #fecaca;
-    }
-    
-    .strength-medium {
-        background: #fef3c7;
-        color: #d97706;
-        border: 1px solid #fed7aa;
-    }
-    
-    .strength-strong {
-        background: #f0fdf4;
-        color: #16a34a;
-        border: 1px solid #bbf7d0;
-    }
-    
-    .btn-register {
-        width: 100%;
-        padding: 1rem;
-        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-        color: white;
-        border: none;
-        border-radius: 12px;
-        font-size: 1rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        margin-bottom: 1rem;
-    }
-    
-    .btn-register:hover:not(:disabled) {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 30px rgba(37, 99, 235, 0.3);
-    }
-    
-    .btn-register:disabled {
-        background: #9ca3af;
-        cursor: not-allowed;
-        transform: none;
-    }
-    
-    .btn-back {
-        width: 100%;
-        padding: 1rem;
-        background: var(--bg-light);
-        color: var(--text-dark);
-        border: 2px solid var(--border-light);
-        border-radius: 12px;
-        font-size: 1rem;
-        font-weight: 600;
-        text-decoration: none;
-        display: inline-block;
-        text-align: center;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-    
-    .btn-back:hover {
-        background: white;
-        border-color: var(--primary-color);
-        color: var(--primary-color);
-        transform: translateY(-1px);
-        text-decoration: none;
-    }
-    
-    .alert {
-        padding: 1rem;
-        border-radius: 12px;
-        margin-bottom: 1.5rem;
-        font-weight: 500;
-        text-align: center;
-    }
-    
-    .alert-error {
-        background: #fef2f2;
-        color: #dc2626;
-        border: 1px solid #fecaca;
-    }
-    
-    .alert-success {
-        background: #f0fdf4;
-        color: #16a34a;
-        border: 1px solid #bbf7d0;
-    }
-    
-    .register-footer {
-        text-align: center;
-        margin-top: 2rem;
-        padding-top: 2rem;
-        border-top: 1px solid var(--border-light);
-    }
-    
-    .register-footer p {
-        color: var(--text-light);
-        font-size: 0.9rem;
-        margin: 0;
-    }
-    
-    .register-footer a {
-        color: var(--primary-color);
-        text-decoration: none;
-        font-weight: 600;
-    }
-    
-    .register-footer a:hover {
-        text-decoration: underline;
-    }
-    
-    .form-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1rem;
-    }
-    
-    .field-feedback {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        margin-top: 0.5rem;
-        font-size: 0.85rem;
-    }
-    
-    .field-feedback.success {
-        color: #16a34a;
-    }
-    
-    .field-feedback.error {
-        color: #dc2626;
-    }
-    
-    /* Animation */
-    .register-card {
-        animation: slideUp 0.6s ease-out;
-    }
-    
-    @keyframes slideUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    
-    /* Progress bar for form completion */
-    .form-progress {
-        height: 4px;
-        background: var(--border-light);
-        border-radius: 2px;
-        margin-bottom: 2rem;
-        overflow: hidden;
-    }
-    
-    .form-progress-bar {
-        height: 100%;
-        background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
-        width: 0%;
-        transition: width 0.3s ease;
-        border-radius: 2px;
-    }
-    
-    /* Responsive */
-    @media (max-width: 480px) {
-        .register-container {
-            padding: 1rem;
-        }
-        
-        .register-card {
-            padding: 2rem;
-        }
-        
-        .register-title {
-            font-size: 1.75rem;
-        }
-        
-        .form-row {
-            grid-template-columns: 1fr;
-        }
-    }
-</style>
-{% endblock head %}
+{% block container_class %}large{% endblock %}
 
-{% block body %}
-<div class="register-container">
-    <div class="register-card">
-        <div class="register-header">
-            <div class="register-logo">
-                <i class="fas fa-user-plus"></i>
-            </div>
-            <h1 class="register-title">Join ABT</h1>
-            <p class="register-subtitle">Create your business account today</p>
-        </div>
-        
-        <div class="form-progress">
-            <div class="form-progress-bar" id="progressBar"></div>
-        </div>
-        
-        {% if message %}
-        <div class="alert alert-error">
-            <i class="fas fa-exclamation-circle"></i>
-            {{ message }}
-        </div>
-        {% endif %}
-        
-        {% if messages %}
-            {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}">
-                <i class="fas fa-{% if message.tags == 'error' %}exclamation-circle{% elif message.tags == 'success' %}check-circle{% else %}info-circle{% endif %}"></i>
+{% block content %}
+    <div class="form-header">
+        <h2>Create Account</h2>
+        <p>Join ABT to manage your business efficiently</p>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="message {{ message.tags }}">
+                {% if message.tags == 'success' %}
+                    <i class="fas fa-check-circle"></i>
+                {% elif message.tags == 'error' %}
+                    <i class="fas fa-exclamation-circle"></i>
+                {% elif message.tags == 'warning' %}
+                    <i class="fas fa-exclamation-triangle"></i>
+                {% else %}
+                    <i class="fas fa-info-circle"></i>
+                {% endif %}
                 {{ message }}
             </div>
-            {% endfor %}
-        {% endif %}
-        
-        <form action="{% url 'user:register' %}" method="post" class="register-form" id="registerForm">
-            {% csrf_token %}
-            
-            <div class="form-group">
-                <label for="username">
-                    <i class="fas fa-user"></i>
-                    Username
-                </label>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post" id="registerForm">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="first_name">First Name</label>
+            <div class="input-wrapper">
                 <input 
                     type="text" 
-                    id="username"
+                    id="first_name" 
+                    name="first_name" 
+                    required 
+                    placeholder="Enter your first name"
+                    autocomplete="given-name"
+                >
+                <i class="fas fa-user input-icon"></i>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="last_name">Last Name</label>
+            <div class="input-wrapper">
+                <input 
+                    type="text" 
+                    id="last_name" 
+                    name="last_name" 
+                    required 
+                    placeholder="Enter your last name"
+                    autocomplete="family-name"
+                >
+                <i class="fas fa-user input-icon"></i>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="username">Username</label>
+            <div class="input-wrapper">
+                <input 
+                    type="text" 
+                    id="username" 
                     name="username" 
                     required 
-                    maxlength="50" 
-                    placeholder="Choose a unique username"
-                    class="form-input"
+                    placeholder="Choose a username"
                     autocomplete="username"
                 >
-                <div class="field-feedback" id="usernameFeedback"></div>
+                <i class="fas fa-at input-icon"></i>
             </div>
-            
-            <div class="form-group">
-                <label for="email">
-                    <i class="fas fa-envelope"></i>
-                    Email Address
-                </label>
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email</label>
+            <div class="input-wrapper">
                 <input 
                     type="email" 
-                    id="email"
+                    id="email" 
                     name="email" 
                     required 
-                    maxlength="100" 
-                    placeholder="your@email.com"
-                    class="form-input"
+                    placeholder="youremail@example.com"
                     autocomplete="email"
                 >
-                <div class="field-feedback" id="emailFeedback"></div>
+                <i class="fas fa-envelope input-icon"></i>
             </div>
-            
-            <div class="form-group">
-                <label for="password">
-                    <i class="fas fa-lock"></i>
-                    Password
-                </label>
-                <input 
-                    type="password" 
-                    id="password"
-                    name="password" 
-                    required
-                    placeholder="Create a strong password"
-                    class="form-input"
-                    autocomplete="new-password"
-                >
-                <div class="password-strength" id="passwordStrength"></div>
-            </div>
-            
-            <div class="form-group">
-                <label for="password2">
-                    <i class="fas fa-lock"></i>
-                    Confirm Password
-                </label>
-                <input 
-                    type="password" 
-                    id="password2"
-                    name="password2" 
-                    required
-                    placeholder="Confirm your password"
-                    class="form-input"
-                    autocomplete="new-password"
-                >
-                <div class="field-feedback" id="password2Feedback"></div>
-            </div>
-            
-            <button type="submit" class="btn-register" id="submitBtn" disabled>
-                <i class="fas fa-user-plus"></i>
-                Create Account
-            </button>
-            
-            <a href="{% url 'web:index' %}" class="btn-back">
-                <i class="fas fa-arrow-left"></i>
-                Back to Home
-            </a>
-        </form>
-        
-        <div class="register-footer">
-            <p>
-                Already have an account? 
-                <a href="{% url 'user:login' %}">Sign in here</a>
-            </p>
         </div>
-    </div>
-</div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('registerForm');
-    const inputs = form.querySelectorAll('.form-input');
-    const submitBtn = document.getElementById('submitBtn');
-    const progressBar = document.getElementById('progressBar');
-    
-    // Focus on first input
-    inputs[0].focus();
-    
-    let validationState = {
-        username: false,
-        email: false,
-        password: false,
-        password2: false
-    };
-    
-    function updateProgress() {
-        const validCount = Object.values(validationState).filter(Boolean).length;
-        const progress = (validCount / 4) * 100;
-        progressBar.style.width = progress + '%';
-        
-        // Enable submit button when all fields are valid
-        submitBtn.disabled = validCount !== 4;
-    }
-    
-    function validateUsername() {
-        const username = document.getElementById('username');
-        const feedback = document.getElementById('usernameFeedback');
-        const value = username.value.trim();
-        
-        if (value.length === 0) {
-            username.className = 'form-input';
-            feedback.innerHTML = '';
-            validationState.username = false;
-        } else if (value.length < 3) {
-            username.className = 'form-input error';
-            feedback.innerHTML = '<i class="fas fa-times"></i> Username must be at least 3 characters';
-            feedback.className = 'field-feedback error';
-            validationState.username = false;
-        } else if (!/^[a-zA-Z0-9_]+$/.test(value)) {
-            username.className = 'form-input error';
-            feedback.innerHTML = '<i class="fas fa-times"></i> Only letters, numbers and underscore allowed';
-            feedback.className = 'field-feedback error';
-            validationState.username = false;
-        } else {
-            username.className = 'form-input success';
-            feedback.innerHTML = '<i class="fas fa-check"></i> Username looks good';
-            feedback.className = 'field-feedback success';
-            validationState.username = true;
-        }
-    }
-    
-    function validateEmail() {
-        const email = document.getElementById('email');
-        const feedback = document.getElementById('emailFeedback');
-        const value = email.value.trim();
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        
-        if (value.length === 0) {
-            email.className = 'form-input';
-            feedback.innerHTML = '';
-            validationState.email = false;
-        } else if (!emailRegex.test(value)) {
-            email.className = 'form-input error';
-            feedback.innerHTML = '<i class="fas fa-times"></i> Please enter a valid email address';
-            feedback.className = 'field-feedback error';
-            validationState.email = false;
-        } else {
-            email.className = 'form-input success';
-            feedback.innerHTML = '<i class="fas fa-check"></i> Email format is valid';
-            feedback.className = 'field-feedback success';
-            validationState.email = true;
-        }
-    }
-    
-    function validatePassword() {
-        const password = document.getElementById('password');
-        const strengthDiv = document.getElementById('passwordStrength');
-        const value = password.value;
-        
-        if (value.length === 0) {
-            password.className = 'form-input';
-            strengthDiv.innerHTML = '';
-            strengthDiv.className = 'password-strength';
-            validationState.password = false;
-        } else {
-            let score = 0;
-            let feedback = [];
+        <div class="form-group">
+            <label for="password1">Password</label>
+            <div class="input-wrapper">
+                <input 
+                    type="password" 
+                    id="password1" 
+                    name="password1" 
+                    required 
+                    placeholder="Create a password"
+                    autocomplete="new-password"
+                    minlength="6"
+                >
+                <i class="fas fa-lock input-icon"></i>
+                <i class="fas fa-eye toggle-password" onclick="togglePassword('password1')"></i>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="password2">Confirm Password</label>
+            <div class="input-wrapper">
+                <input 
+                    type="password" 
+                    id="password2" 
+                    name="password2" 
+                    required 
+                    placeholder="Confirm your password"
+                    autocomplete="new-password"
+                    minlength="6"
+                >
+                <i class="fas fa-lock input-icon"></i>
+                <i class="fas fa-eye toggle-password" onclick="togglePassword('password2')"></i>
+            </div>
+        </div>
+
+        <div class="password-requirements">
+            <h4>Password requirements:</h4>
+            <div class="requirement" id="length-req">
+                <i class="fas fa-circle"></i>
+                Minimum 6 characters
+            </div>
+            <div class="requirement" id="match-req">
+                <i class="fas fa-circle"></i>
+                Passwords match
+            </div>
+        </div>
+
+        <button type="submit" class="btn" id="registerBtn">
+            <i class="fas fa-user-plus"></i>
+            Create Account
+        </button>
+    </form>
+
+    <div class="help-text">
+        <p>
+            Already have an account? 
+            <a href="{% url 'user:login' %}" style="color: var(--primary-color); text-decoration: none; font-weight: 500;">Sign in here</a>
+        </p>
+    </div>
+{% endblock %}
+
+{% block back_link %}
+    <div class="back-link">
+        <a href="{% url 'web:index' %}">
+            <i class="fas fa-arrow-left"></i>
+            Back to Home
+        </a>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        function validatePasswords() {
+            const password1 = document.getElementById('password1').value;
+            const password2 = document.getElementById('password2').value;
+            const submitBtn = document.getElementById('registerBtn');
             
-            if (value.length >= 8) score++;
-            else feedback.push('at least 8 characters');
+            const lengthReq = document.getElementById('length-req');
+            const matchReq = document.getElementById('match-req');
             
-            if (/[a-z]/.test(value)) score++;
-            else feedback.push('lowercase letter');
-            
-            if (/[A-Z]/.test(value)) score++;
-            else feedback.push('uppercase letter');
-            
-            if (/[0-9]/.test(value)) score++;
-            else feedback.push('number');
-            
-            if (/[^a-zA-Z0-9]/.test(value)) score++;
-            else feedback.push('special character');
-            
-            if (score < 3) {
-                password.className = 'form-input error';
-                strengthDiv.className = 'password-strength strength-weak';
-                strengthDiv.innerHTML = `<i class="fas fa-shield-alt"></i> Weak password. Add: ${feedback.slice(0, 2).join(', ')}`;
-                validationState.password = false;
-            } else if (score < 4) {
-                password.className = 'form-input';
-                strengthDiv.className = 'password-strength strength-medium';
-                strengthDiv.innerHTML = `<i class="fas fa-shield-alt"></i> Medium strength. Consider adding: ${feedback[0] || 'more complexity'}`;
-                validationState.password = true;
+            // Check length
+            if (password1.length >= 6) {
+                lengthReq.classList.add('valid');
+                lengthReq.classList.remove('invalid');
+                lengthReq.querySelector('i').className = 'fas fa-check-circle';
             } else {
-                password.className = 'form-input success';
-                strengthDiv.className = 'password-strength strength-strong';
-                strengthDiv.innerHTML = '<i class="fas fa-shield-alt"></i> Strong password!';
-                validationState.password = true;
+                lengthReq.classList.remove('valid');
+                lengthReq.classList.add('invalid');
+                lengthReq.querySelector('i').className = 'fas fa-circle';
             }
+            
+            // Check match
+            if (password1 === password2 && password2 !== '') {
+                matchReq.classList.add('valid');
+                matchReq.classList.remove('invalid');
+                matchReq.querySelector('i').className = 'fas fa-check-circle';
+            } else {
+                matchReq.classList.remove('valid');
+                matchReq.classList.add('invalid');
+                matchReq.querySelector('i').className = 'fas fa-circle';
+            }
+            
+            // Enable/disable submit button
+            const isValid = password1.length >= 6 && password1 === password2;
+            submitBtn.disabled = !isValid;
         }
-        
-        // Re-validate password confirmation
-        validatePasswordConfirm();
-    }
-    
-    function validatePasswordConfirm() {
-        const password = document.getElementById('password').value;
-        const password2 = document.getElementById('password2');
-        const feedback = document.getElementById('password2Feedback');
-        const value = password2.value;
-        
-        if (value.length === 0) {
-            password2.className = 'form-input';
-            feedback.innerHTML = '';
-            validationState.password2 = false;
-        } else if (value !== password) {
-            password2.className = 'form-input error';
-            feedback.innerHTML = '<i class="fas fa-times"></i> Passwords do not match';
-            feedback.className = 'field-feedback error';
-            validationState.password2 = false;
-        } else {
-            password2.className = 'form-input success';
-            feedback.innerHTML = '<i class="fas fa-check"></i> Passwords match';
-            feedback.className = 'field-feedback success';
-            validationState.password2 = true;
-        }
-    }
-    
-    // Event listeners
-    document.getElementById('username').addEventListener('input', () => {
-        validateUsername();
-        updateProgress();
-    });
-    
-    document.getElementById('email').addEventListener('input', () => {
-        validateEmail();
-        updateProgress();
-    });
-    
-    document.getElementById('password').addEventListener('input', () => {
-        validatePassword();
-        updateProgress();
-    });
-    
-    document.getElementById('password2').addEventListener('input', () => {
-        validatePasswordConfirm();
-        updateProgress();
-    });
-    
-    // Form submission
-    form.addEventListener('submit', function(e) {
-        if (submitBtn.disabled) {
-            e.preventDefault();
-            return;
-        }
-        
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
-        submitBtn.disabled = true;
-    });
-});
-</script>
-{% endblock body %}
+
+        // Add event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            const password1Field = document.getElementById('password1');
+            const password2Field = document.getElementById('password2');
+            
+            if (password1Field && password2Field) {
+                password1Field.addEventListener('input', validatePasswords);
+                password2Field.addEventListener('input', validatePasswords);
+                validatePasswords(); // Initial validation
+            }
+        });
+    </script>
+{% endblock %}
