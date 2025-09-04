@@ -178,6 +178,16 @@ if email_provider == 'sendgrid':
     EMAIL_USE_TLS = True
     DEFAULT_FROM_EMAIL = config('SENDGRID_FROM_EMAIL', default='noreply@abt.qbared.com')
     SERVER_EMAIL = DEFAULT_FROM_EMAIL
+elif email_provider == 'resend':
+    # Resend configuration (modern, developer-friendly)
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = 'smtp.resend.com'
+    EMAIL_HOST_USER = 'resend'  # Always 'resend' for Resend
+    EMAIL_HOST_PASSWORD = config('RESEND_API_KEY')
+    EMAIL_PORT = 587
+    EMAIL_USE_TLS = True
+    DEFAULT_FROM_EMAIL = config('RESEND_FROM_EMAIL', default='noreply@abt.qbared.com')
+    SERVER_EMAIL = DEFAULT_FROM_EMAIL
 elif email_provider == 'mailgun':
     # Mailgun configuration (also works well with Railway)
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
