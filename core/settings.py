@@ -165,14 +165,44 @@ SIMPLE_JWT = {
 }
 
 #configuracion de correo
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_USE_TLS = True
-EMAIL_PORT = 587
-EMAIL_HOST_USER = config('EMAIL_HOST_USER')
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-SERVER_EMAIL = EMAIL_HOST_USER
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+# Check email provider preference
+email_provider = config('EMAIL_PROVIDER', default='gmail')
+
+if email_provider == 'sendgrid':
+    # SendGrid configuration (works well with Railway)
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = 'smtp.sendgrid.net'
+    EMAIL_HOST_USER = 'apikey'  # Always 'apikey' for SendGrid
+    EMAIL_HOST_PASSWORD = config('SENDGRID_API_KEY')
+    EMAIL_PORT = 587
+    EMAIL_USE_TLS = True
+    DEFAULT_FROM_EMAIL = config('SENDGRID_FROM_EMAIL', default='noreply@abt.qbared.com')
+    SERVER_EMAIL = DEFAULT_FROM_EMAIL
+elif email_provider == 'mailgun':
+    # Mailgun configuration (also works well with Railway)
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = 'smtp.mailgun.org'
+    EMAIL_HOST_USER = config('MAILGUN_SMTP_LOGIN')
+    EMAIL_HOST_PASSWORD = config('MAILGUN_SMTP_PASSWORD')
+    EMAIL_PORT = 587
+    EMAIL_USE_TLS = True
+    DEFAULT_FROM_EMAIL = config('MAILGUN_FROM_EMAIL', default='noreply@abt.qbared.com')
+    SERVER_EMAIL = DEFAULT_FROM_EMAIL
+elif email_provider == 'console':
+    # Console backend for development/testing
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    DEFAULT_FROM_EMAIL = 'noreply@abt.qbared.com'
+    SERVER_EMAIL = DEFAULT_FROM_EMAIL
+else:
+    # Gmail configuration (works locally but may fail on Railway)
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = 'smtp.gmail.com'
+    EMAIL_USE_TLS = True
+    EMAIL_PORT = 587
+    EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+    DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+    SERVER_EMAIL = EMAIL_HOST_USER
+    EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 
 # Logging configuration for email debugging
 LOGGING = {

@@ -44,10 +44,13 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('--email', type=str, help='Email address to send test email to')
         parser.add_argument('--type', type=str, default='simple', 
-                          choices=['simple', 'welcome', 'reset', 'async'],
+                          choices=['simple', 'welcome', 'reset', 'async', 'provider'],
                           help='Type of test email to send')
         parser.add_argument('--async', action='store_true', 
                           help='Test asynchronous email sending')
+        parser.add_argument('--provider', type=str, 
+                          choices=['gmail', 'sendgrid', 'mailgun'],
+                          help='Test specific email provider')
 
     def handle(self, *args, **options):
         email = options.get('email')
@@ -57,6 +60,7 @@ class Command(BaseCommand):
 
         email_type = options['type']
         use_async = options['async'] or email_type == 'async'
+        test_provider = options.get('provider')
 
         try:
             self.stdout.write(f'Testing email configuration...')
@@ -66,8 +70,29 @@ class Command(BaseCommand):
             self.stdout.write(f'EMAIL_HOST_USER: {settings.EMAIL_HOST_USER}')
             self.stdout.write(f'DEFAULT_FROM_EMAIL: {settings.DEFAULT_FROM_EMAIL}')
             
+            # Show current provider
+            if 'sendgrid' in settings.EMAIL_HOST:
+                self.stdout.write(self.style.SUCCESS('📧 Current Provider: SendGrid'))
+            elif 'mailgun' in settings.EMAIL_HOST:
+                self.stdout.write(self.style.SUCCESS('📧 Current Provider: Mailgun'))
+            elif 'gmail' in settings.EMAIL_HOST:
+                self.stdout.write(self.style.WARNING('📧 Current Provider: Gmail (may fail on Railway)'))
+            
             if use_async:
                 self.stdout.write(self.style.WARNING('Testing ASYNCHRONOUS email sending...'))
+
+            if email_type == 'provider':
+                # Test provider connectivity
+                self.stdout.write(f'🔌 Testing {settings.EMAIL_HOST} connectivity...')
+                import socket
+                try:
+                    socket.create_connection((settings.EMAIL_HOST, settings.EMAIL_PORT), timeout=10)
+                    self.stdout.write(self.style.SUCCESS(f'✅ Connection to {settings.EMAIL_HOST}:{settings.EMAIL_PORT} successful'))
+                except Exception as e:
+                    self.stdout.write(self.style.ERROR(f'❌ Connection failed: {str(e)}'))
+                    if 'gmail.com' in settings.EMAIL_HOST:
+                        self.stdout.write(self.style.WARNING('💡 Railway often blocks Gmail. Try SendGrid or Mailgun.'))
+                    return
 
             if email_type == 'simple' or email_type == 'async':
                 # Send simple test email
