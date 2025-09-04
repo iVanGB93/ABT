@@ -5,8 +5,38 @@ from django.contrib.auth.models import User
 from django.template.loader import render_to_string
 from django.contrib.sites.models import Site
 import logging
+import threading
+import time
 
 logger = logging.getLogger(__name__)
+
+class AsyncEmailTest(threading.Thread):
+    """Test email sending in background thread"""
+    def __init__(self, email_subject, email_body, email_html, recipient_email, test_type):
+        threading.Thread.__init__(self)
+        self.email_subject = email_subject
+        self.email_body = email_body  
+        self.email_html = email_html
+        self.recipient_email = recipient_email
+        self.test_type = test_type
+        self.daemon = True
+        self.result = None
+        
+    def run(self):
+        try:
+            start_time = time.time()
+            send_mail(
+                self.email_subject,
+                self.email_body,
+                settings.DEFAULT_FROM_EMAIL,
+                [self.recipient_email],
+                fail_silently=False,
+                html_message=self.email_html
+            )
+            end_time = time.time()
+            self.result = f"SUCCESS: {self.test_type} email sent in {end_time - start_time:.2f} seconds"
+        except Exception as e:
+            self.result = f"ERROR: {self.test_type} email failed - {str(e)}"
 
 class Command(BaseCommand):
     help = 'Test email configuration and send a test email'
@@ -14,8 +44,10 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('--email', type=str, help='Email address to send test email to')
         parser.add_argument('--type', type=str, default='simple', 
-                          choices=['simple', 'welcome', 'reset'],
+                          choices=['simple', 'welcome', 'reset', 'async'],
                           help='Type of test email to send')
+        parser.add_argument('--async', action='store_true', 
+                          help='Test asynchronous email sending')
 
     def handle(self, *args, **options):
         email = options.get('email')
@@ -24,6 +56,7 @@ class Command(BaseCommand):
             return
 
         email_type = options['type']
+        use_async = options['async'] or email_type == 'async'
 
         try:
             self.stdout.write(f'Testing email configuration...')
@@ -32,17 +65,39 @@ class Command(BaseCommand):
             self.stdout.write(f'EMAIL_USE_TLS: {settings.EMAIL_USE_TLS}')
             self.stdout.write(f'EMAIL_HOST_USER: {settings.EMAIL_HOST_USER}')
             self.stdout.write(f'DEFAULT_FROM_EMAIL: {settings.DEFAULT_FROM_EMAIL}')
+            
+            if use_async:
+                self.stdout.write(self.style.WARNING('Testing ASYNCHRONOUS email sending...'))
 
-            if email_type == 'simple':
+            if email_type == 'simple' or email_type == 'async':
                 # Send simple test email
-                send_mail(
-                    'ABT Email Test',
-                    'This is a test email from ABT. If you received this, email configuration is working!',
-                    settings.DEFAULT_FROM_EMAIL,
-                    [email],
-                    fail_silently=False,
-                )
-                self.stdout.write(self.style.SUCCESS(f'Simple test email sent successfully to {email}'))
+                if use_async:
+                    email_thread = AsyncEmailTest(
+                        'ABT Email Test (Async)',
+                        'This is an ASYNCHRONOUS test email from ABT. If you received this, async email is working!',
+                        None,
+                        email,
+                        'Simple Async'
+                    )
+                    email_thread.start()
+                    self.stdout.write('Async email thread started... waiting for completion...')
+                    email_thread.join(timeout=30)  # Wait max 30 seconds
+                    if email_thread.result:
+                        if "SUCCESS" in email_thread.result:
+                            self.stdout.write(self.style.SUCCESS(email_thread.result))
+                        else:
+                            self.stdout.write(self.style.ERROR(email_thread.result))
+                    else:
+                        self.stdout.write(self.style.WARNING('Async email thread timed out'))
+                else:
+                    send_mail(
+                        'ABT Email Test',
+                        'This is a test email from ABT. If you received this, email configuration is working!',
+                        settings.DEFAULT_FROM_EMAIL,
+                        [email],
+                        fail_silently=False,
+                    )
+                    self.stdout.write(self.style.SUCCESS(f'Simple test email sent successfully to {email}'))
 
             elif email_type == 'welcome':
                 # Send welcome email template

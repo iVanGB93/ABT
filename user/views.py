@@ -10,9 +10,57 @@ from django.utils import timezone
 from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
 import logging
+import threading
 
 # Configure logger for email debugging
 logger = logging.getLogger(__name__)
+
+class EmailSendingThread(threading.Thread):
+    """Thread class for sending emails asynchronously in web views"""
+    def __init__(self, email_subject, email_body_text, email_body_html, recipient_email):
+        threading.Thread.__init__(self)
+        self.email_subject = email_subject
+        self.email_body_text = email_body_text
+        self.email_body_html = email_body_html
+        self.recipient_email = recipient_email
+        self.daemon = True
+        
+    def run(self):
+        try:
+            send_mail(
+                self.email_subject,
+                self.email_body_text,
+                settings.DEFAULT_FROM_EMAIL,
+                [self.recipient_email],
+                fail_silently=False,
+                html_message=self.email_body_html
+            )
+            logger.info(f"Email sent successfully to {self.recipient_email}")
+        except Exception as e:
+            logger.error(f"Failed to send email to {self.recipient_email}: {str(e)}")
+
+class PasswordResetEmailThread(threading.Thread):
+    """Thread class for sending password reset emails asynchronously"""
+    def __init__(self, email_subject, email_body, recipient_email):
+        threading.Thread.__init__(self)
+        self.email_subject = email_subject
+        self.email_body = email_body
+        self.recipient_email = recipient_email
+        self.daemon = True
+        
+    def run(self):
+        try:
+            send_mail(
+                self.email_subject,
+                self.email_body,
+                settings.DEFAULT_FROM_EMAIL,
+                [self.recipient_email],
+                fail_silently=False,
+                html_message=self.email_body
+            )
+            logger.info(f"Password reset email sent successfully to {self.recipient_email}")
+        except Exception as e:
+            logger.error(f"Failed to send password reset email to {self.recipient_email}: {str(e)}")
 from django.utils.encoding import force_bytes, force_str
 from django.utils import timezone
 from django.conf import settings
@@ -54,7 +102,7 @@ def registerView(request):
         new_user.set_password(password)
         new_user.save()
         
-        # Send welcome email
+        # Send welcome email asynchronously
         try:
             current_site = get_current_site(request)
             login_url = f"http://{current_site.domain}/user/login/"
@@ -72,18 +120,18 @@ def registerView(request):
             email_body_html = render_to_string('user/email_welcome.html', context)
             email_body_text = render_to_string('user/email_welcome.txt', context)
             
-            # Send welcome email with both HTML and text versions
-            send_mail(
+            # Send welcome email asynchronously
+            email_thread = EmailSendingThread(
                 email_subject,
-                email_body_text,  # Plain text version as main body
-                settings.DEFAULT_FROM_EMAIL,
-                [new_user.email],
-                fail_silently=True,  # Don't break registration if email fails
-                html_message=email_body_html  # HTML version as alternative
+                email_body_text,
+                email_body_html,
+                new_user.email
             )
+            email_thread.start()
+            
         except Exception as e:
             # Log the error but don't break the registration process
-            logger.error(f"Welcome email failed to send to {new_user.email}: {str(e)}")
+            logger.error(f"Failed to start welcome email thread for {new_user.email}: {str(e)}")
             print(f"Welcome email failed to send: {e}")
         
         login(request, new_user)
@@ -144,20 +192,21 @@ def editProfileView(request):
                 
                 # Render email template
                 email_subject = 'ABT Profile Updated - Security Notification'
-                email_body = render_to_string('user/email_profile_updated.html', context)
+                email_body_html = render_to_string('user/email_profile_updated.html', context)
+                email_body_text = f'Your ABT profile was updated. If this wasn\'t you, please contact support.'
                 
-                # Send notification email
-                send_mail(
+                # Send notification email asynchronously
+                email_thread = EmailSendingThread(
                     email_subject,
-                    email_body,
-                    settings.DEFAULT_FROM_EMAIL,
-                    [user.email],
-                    fail_silently=True,  # Don't break profile update if email fails
-                    html_message=email_body
+                    email_body_text,
+                    email_body_html,
+                    user.email
                 )
+                email_thread.start()
+                
             except Exception as e:
                 # Log the error but don't break the profile update process
-                logger.error(f"Profile update notification email failed to send: {str(e)}")
+                logger.error(f"Failed to start profile update email thread: {str(e)}")
                 print(f"Profile update notification email failed to send: {e}")
         
         return redirect('user:profile')
@@ -203,15 +252,13 @@ def forgotPasswordView(request):
             email_subject = 'Reset your password on ABT'
             email_body = render_to_string('user/email_reset_password.html', context)
             
-            # Send email
-            send_mail(
+            # Send email asynchronously
+            email_thread = PasswordResetEmailThread(
                 email_subject,
                 email_body,
-                settings.DEFAULT_FROM_EMAIL,
-                [user.email],
-                fail_silently=False,
-                html_message=email_body
+                user.email
             )
+            email_thread.start()
             
             content = {'message': 'A password reset link has been sent to your email.', 'type': 'success'}
             return render(request, 'user/forgot-password.html', content)

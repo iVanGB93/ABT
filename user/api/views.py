@@ -24,6 +24,53 @@ import threading
 
 from user.models import Profile
 
+class EmailSendingThread(threading.Thread):
+    """Thread class for sending emails asynchronously"""
+    def __init__(self, email_subject, email_body_text, email_body_html, recipient_email):
+        threading.Thread.__init__(self)
+        self.email_subject = email_subject
+        self.email_body_text = email_body_text
+        self.email_body_html = email_body_html
+        self.recipient_email = recipient_email
+        self.daemon = True  # Die when main thread dies
+        
+    def run(self):
+        try:
+            send_mail(
+                self.email_subject,
+                self.email_body_text,
+                settings.DEFAULT_FROM_EMAIL,
+                [self.recipient_email],
+                fail_silently=False,
+                html_message=self.email_body_html
+            )
+            logger.info(f"Email sent successfully to {self.recipient_email}")
+        except Exception as e:
+            logger.error(f"Failed to send email to {self.recipient_email}: {str(e)}")
+
+class PasswordResetEmailThread(threading.Thread):
+    """Thread class for sending password reset emails asynchronously"""
+    def __init__(self, email_subject, email_body, recipient_email):
+        threading.Thread.__init__(self)
+        self.email_subject = email_subject
+        self.email_body = email_body
+        self.recipient_email = recipient_email
+        self.daemon = True
+        
+    def run(self):
+        try:
+            send_mail(
+                self.email_subject,
+                self.email_body,
+                settings.DEFAULT_FROM_EMAIL,
+                [self.recipient_email],
+                fail_silently=False,
+                html_message=self.email_body
+            )
+            logger.info(f"Password reset email sent successfully to {self.recipient_email}")
+        except Exception as e:
+            logger.error(f"Failed to send password reset email to {self.recipient_email}: {str(e)}")
+
 class RegisterView(APIView):
     permission_classes = (AllowAny,)
 
@@ -43,7 +90,7 @@ class RegisterView(APIView):
                     new_code = RegistrationCode(email=email)
                     new_code.save()
                 
-                # Send professional registration code email
+                # Send professional registration code email asynchronously
                 try:
                     current_site = get_current_site(request)
                     
@@ -56,21 +103,21 @@ class RegisterView(APIView):
                     
                     # Render email template
                     email_subject = 'Your ABT Registration Code - Complete Your Account'
-                    email_body = render_to_string('user/email_registration_code.html', context)
+                    email_body_html = render_to_string('user/email_registration_code.html', context)
+                    email_body_text = f'Your ABT registration code is: {new_code.code}'
                     
-                    # Send registration code email
-                    send_mail(
-                        email_subject,
-                        f'Your ABT registration code is: {new_code.code}',  # Fallback text
-                        settings.DEFAULT_FROM_EMAIL,
-                        [email],
-                        fail_silently=False,
-                        html_message=email_body
+                    # Send email asynchronously
+                    email_thread = EmailSendingThread(
+                        email_subject, 
+                        email_body_text, 
+                        email_body_html, 
+                        email
                     )
+                    email_thread.start()
+                    
                 except Exception as e:
-                    logger.error(f"Registration code email failed to send to {email}: {str(e)}")
-                    print(f"Registration code email failed to send: {e}")
-                    # Still return success to not break the flow, but log the error
+                    logger.error(f"Failed to start email thread for {email}: {str(e)}")
+                    # Continue anyway, don't break the registration flow
                 
                 response['message'] = "A verification code was sent to your email, please check it and continue."
                 response['code'] = new_code.code
@@ -90,7 +137,7 @@ class RegisterView(APIView):
         code.active = False
         code.save()
         
-        # Send welcome email using the professional template
+        # Send welcome email using the professional template asynchronously
         try:
             current_site = get_current_site(request)
             login_url = f"http://{current_site.domain}/user/login/"
@@ -108,18 +155,18 @@ class RegisterView(APIView):
             email_body_html = render_to_string('user/email_welcome.html', context)
             email_body_text = render_to_string('user/email_welcome.txt', context)
             
-            # Send welcome email with both HTML and text versions
-            send_mail(
+            # Send welcome email asynchronously
+            email_thread = EmailSendingThread(
                 email_subject,
-                email_body_text,  # Plain text version as main body
-                settings.DEFAULT_FROM_EMAIL,
-                [new_user.email],
-                fail_silently=True,  # Don't break registration if email fails
-                html_message=email_body_html  # HTML version as alternative
+                email_body_text,
+                email_body_html,
+                new_user.email
             )
+            email_thread.start()
+            
         except Exception as e:
             # Log the error but don't break the registration process
-            logger.error(f"Welcome email failed to send to {new_user.email}: {str(e)}")
+            logger.error(f"Failed to start welcome email thread for {new_user.email}: {str(e)}")
             print(f"Welcome email failed to send: {e}")
         
         response['OK'] = True
@@ -191,20 +238,21 @@ class AccountView(APIView):
                 
                 # Render email template
                 email_subject = 'ABT Profile Updated - Security Notification'
-                email_body = render_to_string('user/email_profile_updated.html', context)
+                email_body_html = render_to_string('user/email_profile_updated.html', context)
+                email_body_text = f'Your ABT profile was updated. If this wasn\'t you, please contact support.'
                 
-                # Send notification email
-                send_mail(
+                # Send notification email asynchronously
+                email_thread = EmailSendingThread(
                     email_subject,
-                    email_body,
-                    settings.DEFAULT_FROM_EMAIL,
-                    [user.email],
-                    fail_silently=True,  # Don't break profile update if email fails
-                    html_message=email_body
+                    email_body_text,
+                    email_body_html,
+                    user.email
                 )
+                email_thread.start()
+                
             except Exception as e:
                 # Log the error but don't break the profile update process
-                logger.error(f"Profile update notification email failed to send: {str(e)}")
+                logger.error(f"Failed to start profile update email thread: {str(e)}")
                 print(f"Profile update notification email failed to send: {e}")
         
         data = AccountSerializer(profile).data
@@ -232,15 +280,14 @@ class ForgotPasswordView(APIView):
             # Render email template
             email_subject = 'Reset your password on ABT'
             email_body = render_to_string('user/email_reset_password.html', context)
-            # Send email
-            send_mail(
+            
+            # Send email asynchronously
+            email_thread = PasswordResetEmailThread(
                 email_subject,
                 email_body,
-                settings.DEFAULT_FROM_EMAIL,
-                [user.email],
-                fail_silently=False,
-                html_message=email_body
+                user.email
             )
+            email_thread.start()
             
             content = {'message': 'A password reset link has been sent to your email.', 'type': 'success'}
             return Response(status=status.HTTP_200_OK, data=content)
