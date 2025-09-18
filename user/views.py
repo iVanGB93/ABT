@@ -240,8 +240,10 @@ def forgotPasswordView(request):
             uid = urlsafe_base64_encode(force_bytes(user.pk))
             
             # Create reset link
-            domain = settings.SITE_DOMAIN
-            protocol = settings.SITE_PROTOCOL
+            #domain = settings.SITE_DOMAIN
+            #protocol = settings.SITE_PROTOCOL
+            domain = 'abt.qbared.com'
+            protocol = 'https'
             reset_url = f"{protocol}://{domain}/user/reset-password/{uid}/{token}/"
             
             # Create email context
