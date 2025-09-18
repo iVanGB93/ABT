@@ -8,6 +8,8 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.utils import timezone
 from django.conf import settings
+import logging
+import threading
 from django.contrib.sites.shortcuts import get_current_site
 import logging
 import threading
@@ -61,10 +63,6 @@ class PasswordResetEmailThread(threading.Thread):
             logger.info(f"Password reset email sent successfully to {self.recipient_email}")
         except Exception as e:
             logger.error(f"Failed to send password reset email to {self.recipient_email}: {str(e)}")
-from django.utils.encoding import force_bytes, force_str
-from django.utils import timezone
-from django.conf import settings
-from django.contrib.sites.shortcuts import get_current_site
 
 def loginView(request):
     if request.user.is_authenticated:
@@ -104,8 +102,10 @@ def registerView(request):
         
         # Send welcome email asynchronously
         try:
-            current_site = get_current_site(request)
-            login_url = f"http://{current_site.domain}/user/login/"
+            # Use configured domain instead of current site
+            domain = settings.SITE_DOMAIN
+            protocol = settings.SITE_PROTOCOL
+            login_url = f"{protocol}://{domain}/user/login/"
             
             # Create email context
             context = {
@@ -180,7 +180,9 @@ def editProfileView(request):
         # Send notification email if there were changes
         if changes:
             try:
-                current_site = get_current_site(request)
+                # Use configured domain instead of current site
+                domain = settings.SITE_DOMAIN
+                protocol = settings.SITE_PROTOCOL
                 
                 # Create email context
                 context = {
@@ -238,8 +240,9 @@ def forgotPasswordView(request):
             uid = urlsafe_base64_encode(force_bytes(user.pk))
             
             # Create reset link
-            current_site = get_current_site(request)
-            reset_url = f"http://{current_site.domain}/user/reset-password/{uid}/{token}/"
+            domain = settings.SITE_DOMAIN
+            protocol = settings.SITE_PROTOCOL
+            reset_url = f"{protocol}://{domain}/user/reset-password/{uid}/{token}/"
             
             # Create email context
             context = {

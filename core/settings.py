@@ -141,6 +141,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Site framework configuration
 SITE_ID = 1
 
+# Domain configuration for email links
+if DEBUG:
+    SITE_DOMAIN = 'localhost:8000'
+    SITE_PROTOCOL = 'http'
+else:
+    SITE_DOMAIN = 'abt.qbared.com'
+    SITE_PROTOCOL = 'https'
+
 CSRF_TRUSTED_ORIGINS = [
     'https://abt.qbared.com',
     'https://*.railway.app',  # Add Railway domains
