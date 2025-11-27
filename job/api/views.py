@@ -69,11 +69,11 @@ class JobView(APIView):
         business = Business.objects.get(name=data['business'])
         if action == 'new':
             data = request.data
-            name = data['name']
-            if not Client.objects.filter(name=name).exists():
+            client = data['client']
+            if not Client.objects.filter(id=client).exists():
                 response['message'] = "Client does not exits."
                 return Response(status=status.HTTP_200_OK, data=response)
-            client = Client.objects.get(name=name)
+            client = Client.objects.get(id=client)
             new_job = Job(business=business, client=client, provider=provider_user, description=data['description'], address=data['address'], address2=data.get('address2', 'no extra address saved'), price=data['price'])
             new_job.image = data.get('image', new_job.image)
             new_job.save()
