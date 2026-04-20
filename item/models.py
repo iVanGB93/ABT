@@ -13,7 +13,7 @@ def upload_to_item_list(instance, filename):
 class Item_List(models.Model):
     name = models.CharField(max_length=100)
     description = models.CharField(max_length=150)
-    price = models.FloatField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)
     amount = models.IntegerField()
     image = models.ImageField(upload_to=upload_to_item_list, default='itemDefault.jpg')
     date = models.DateTimeField(db_default=Now())
@@ -32,7 +32,7 @@ class Item(models.Model):
     job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name='items')
     name = models.CharField(max_length=100)
     description = models.CharField(max_length=150)
-    price = models.FloatField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)
     image = models.ImageField(upload_to=upload_to_item, default='itemDefault.jpg')
     date = models.DateTimeField(db_default=Now())
 

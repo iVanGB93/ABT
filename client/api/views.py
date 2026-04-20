@@ -3,6 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.contrib.auth.models import User
+from django.shortcuts import get_object_or_404
 
 from .serializers import ClientSerializer
 from client.models import Client
@@ -15,7 +16,7 @@ class ClientsView(APIView):
         business_name = self.kwargs.get('pk')
         if Business.objects.filter(name=business_name).exists():
             business = Business.objects.get(name=business_name)
-            clients = Client.objects.filter(business=business)
+            clients = Client.objects.filter(business=business).select_related('provider', 'business')
             data = []
             for client in clients:
                 data.append(ClientSerializer(client).data)
@@ -29,7 +30,7 @@ class ClientView(APIView):
 
     def get(self, request, queryset=None, **kwargs):
         client_id = self.kwargs.get('pk') 
-        client = Client.objects.get(id=client_id)
+        client = get_object_or_404(Client, id=client_id)
         data = ClientSerializer(client).data
         return Response(status=status.HTTP_200_OK, data=data)
 

@@ -3,12 +3,14 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.contrib.auth.models import User
-
+import logging
 
 from .serializers import ItemSerializer, ItemListSerializer
 from job.api.serializers import JobSerializer
 from item.models import Item, Item_List
 from business.models import Business
+
+logger = logging.getLogger(__name__)
 
 class ItemsView(APIView):
     parser_classes = [MultiPartParser, FormParser]
@@ -16,7 +18,7 @@ class ItemsView(APIView):
     def get(self, request, queryset=None, **kwargs):
         business_name = self.kwargs.get('pk')
         business = Business.objects.get(name=business_name)
-        item_list = Item_List.objects.filter(business=business)
+        item_list = Item_List.objects.filter(business=business).select_related('business')
         data = []
         for item in item_list:
             data.append(ItemListSerializer(item).data)
@@ -98,7 +100,7 @@ class ItemView(APIView):
     def post(self, request, queryset=None, **kwargs):
         pk = self.kwargs.get('pk')
         data = request.data
-        print("ITEM DATA", data)
+        logger.debug('ItemView POST data: %s', data)
         action = data['action']
         response = {'OK': False}
         if action == 'new':

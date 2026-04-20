@@ -51,7 +51,7 @@ def generarHash():
 class RegistrationCode(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
     email=models.EmailField()
-    code=models.IntegerField(default=generarHash, unique=True)
+    code=models.CharField(max_length=6, default=generarHash, unique=True)
     created = models.DateTimeField(db_default=Now())
     active = models.BooleanField(default=True)
     used = models.DateTimeField(null=True)

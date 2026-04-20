@@ -4,6 +4,7 @@ from rest_framework.views import APIView
 from rest_framework import status
 from django.contrib.auth.models import User
 from rest_framework.parsers import MultiPartParser, FormParser
+import logging
 
 from job.api.serializers import JobSerializer, ItemSerializer, InvoiceSerializer, SpentSerializer, ChargeSerializer
 from job.models import Job, Spent, Invoice, Charge
@@ -12,13 +13,15 @@ from user.models import Profile
 from client.models import Client
 from business.models import Business
 
+logger = logging.getLogger(__name__)
+
 
 class JobsView(APIView):
 
     def get(self, request, queryset=None, **kwargs):
         bussines_name = self.kwargs.get('pk')
         business = Business.objects.get(name=bussines_name)
-        jobs = Job.objects.filter(business=business)
+        jobs = Job.objects.filter(business=business).select_related('client', 'provider', 'business')
         data = []
         for job in jobs:
             data.append(JobSerializer(job).data)
@@ -178,7 +181,7 @@ class InvoiceView(APIView):
             invoice = Invoice.objects.get(job_id=pk)
             provider = str(invoice.job.provider.pk).zfill(3)[:3]
             last_invoice = Invoice.objects.filter(number__startswith='2').order_by('-number').first()
-            print(provider, last_invoice)
+            logger.debug('Invoice provider=%s last_invoice=%s', provider, last_invoice)
             data = {"invoice": InvoiceSerializer(invoice).data}
             charges = Charge.objects.filter(invoice=invoice)
             charges_list = []
@@ -238,7 +241,6 @@ class InvoiceView(APIView):
 class ChargeView(APIView):
 
     def get(self, request, queryset=None, **kwargs):
-        print("!")
         pk = self.kwargs.get('pk')
         if Invoice.objects.filter(id=pk).exists():
             invoice = Invoice.objects.get(id=pk)
@@ -247,7 +249,7 @@ class ChargeView(APIView):
             for charge in charges:
                 charge_data = ChargeSerializer(charge).data
                 data.append(charge_data)
-            print("DATA", data)
+            logger.debug('Charges for invoice %s: %s', pk, data)
             return Response(status=status.HTTP_200_OK, data=data)
         else:
             data = {'message': 'Invoice not created yet.'}

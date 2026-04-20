@@ -28,7 +28,7 @@ class Job(models.Model):
     description = models.CharField(max_length=150)
     address = models.CharField(max_length=150)
     address2 = models.CharField(max_length=50, default='no extra address saved')
-    price = models.FloatField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)
     image = models.ImageField(upload_to=upload_to_job, default='jobDefault.jpg')
     created_at = models.DateTimeField(db_default=Now())
     updated_at = models.DateTimeField(db_default=Now())
@@ -64,7 +64,7 @@ def upload_to_spent(instance, filename):
 class Spent(models.Model):
     job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name='spent')
     description = models.CharField(max_length=150)
-    price = models.FloatField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)
     image = models.ImageField(upload_to=upload_to_spent, default='spentDefault.jpg')
     date = models.DateTimeField(db_default=Now())
 

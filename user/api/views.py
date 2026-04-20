@@ -167,7 +167,7 @@ class RegisterView(APIView):
         except Exception as e:
             # Log the error but don't break the registration process
             logger.error(f"Failed to start welcome email thread for {new_user.email}: {str(e)}")
-            print(f"Welcome email failed to send: {e}")
+            logger.error(f"Welcome email failed to send: {e}")
         
         response['OK'] = True
         response['message'] = "Account created."
@@ -185,7 +185,7 @@ class AccountView(APIView):
     
     def post(self, request, queryset=None, **kwargs):
         data = request.data
-        print(data)
+        logger.debug('AccountView POST data: %s', data)
         user = self.kwargs.get('pk')
         user = User.objects.get(username=user)
         profile = Profile.objects.get(user=user)
@@ -253,7 +253,7 @@ class AccountView(APIView):
             except Exception as e:
                 # Log the error but don't break the profile update process
                 logger.error(f"Failed to start profile update email thread: {str(e)}")
-                print(f"Profile update notification email failed to send: {e}")
+                logger.error(f"Profile update notification email failed to send: {e}")
         
         data = AccountSerializer(profile).data
         return Response(status=status.HTTP_200_OK, data=data)

@@ -11,7 +11,7 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 
 ADMINS = [('iVan', 'ivanguachbeltran@gmail.com')]
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -154,7 +154,18 @@ CSRF_TRUSTED_ORIGINS = [
     'https://*.railway.app',  # Add Railway domains
 ]
 
-CORS_ALLOW_ALL_ORIGINS = True
+# In development you can set CORS_ALLOW_ALL_ORIGINS=True in settings.ini.
+# In production set CORS_ALLOWED_ORIGINS to a comma-separated list of allowed origins.
+CORS_ALLOW_ALL_ORIGINS = config('CORS_ALLOW_ALL_ORIGINS', default=False, cast=bool)
+if not CORS_ALLOW_ALL_ORIGINS:
+    CORS_ALLOWED_ORIGINS = [
+        o.strip()
+        for o in config(
+            'CORS_ALLOWED_ORIGINS',
+            default='http://localhost:8000,https://abt.qbared.com',
+        ).split(',')
+        if o.strip()
+    ]
 
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,

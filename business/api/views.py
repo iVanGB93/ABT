@@ -4,11 +4,15 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.contrib.auth.models import User
+from django.conf import settings
+import logging
+import threading
+import json
 
 from .serializers import BusinessSerializer, ExtraIncomeSerializer, ExtraExpenseSerializer, PaymentMethodTypeSerializer, PaymentMethodSerializer
 from business.models import Business, ExtraIncome, ExtraExpense, Invitation, PaymentMethodType
-import threading
-import json
+
+logger = logging.getLogger(__name__)
 
 class EmailSending(threading.Thread):
     def __init__(self, email):
@@ -24,7 +28,7 @@ class BusinessesView(APIView):
         owner = self.kwargs.get('pk')
         if User.objects.filter(username=owner).exists():
             owner_user = User.objects.get(username=owner)
-            businesses = Business.objects.filter(owners=owner_user)
+            businesses = Business.objects.filter(owners=owner_user).prefetch_related('owners')
             data = []
             for business in businesses:
                 data.append(BusinessSerializer(business).data)
@@ -81,11 +85,11 @@ class BusinessView(APIView):
                             email=owner_email,
                         )
                         invitation.save()
-                        email = EmailMessage('ABT - Ownership invitation', f'{owner.username} invited you to be owner of {new_business.name}. Go to "https://abt.qbared.com/business/invitation/{invitation.code}/" to accept. Use the code: {invitation.code}', None, [owner_email])
+                        email = EmailMessage('ABT - Ownership invitation', f'{owner.username} invited you to be owner of {new_business.name}. Go to "{settings.SITE_PROTOCOL}://{settings.SITE_DOMAIN}/business/invitation/{invitation.code}/" to accept. Use the code: {invitation.code}', None, [owner_email])
                         EmailSending(email).start()
                 else:
                     for no_user in owners:
-                        email = EmailMessage('ABT - Ownership invitation', f'{owner.username} invited you to be owner of {new_business.name}, you are not registered yet. Please register at "https://abt.qbared.com/user/register/', None, [no_user])
+                        email = EmailMessage('ABT - Ownership invitation', f'{owner.username} invited you to be owner of {new_business.name}, you are not registered yet. Please register at "{settings.SITE_PROTOCOL}://{settings.SITE_DOMAIN}/user/register/', None, [no_user])
                         EmailSending(email).start()
             new_business.save()
             new_business.owners.set([owner])
@@ -126,7 +130,7 @@ class BusinessView(APIView):
                                     email=owner_email,
                                 )
                                 invitation.save()
-                                email = EmailMessage('ABT - Ownership invitation', f'{inviter.username} invited you to be owner of {business.name}. Go to "https://abt.qbared.com/business/invitation/{invitation.code}/" to accept. Use the code: {invitation.code}', None, [owner_email])
+                                email = EmailMessage('ABT - Ownership invitation', f'{inviter.username} invited you to be owner of {business.name}. Go to "{settings.SITE_PROTOCOL}://{settings.SITE_DOMAIN}/business/invitation/{invitation.code}/" to accept. Use the code: {invitation.code}', None, [owner_email])
                                 EmailSending(email).start()
                             for owner_email in not_registered_emails:
                                 inviter = User.objects.get(email=owner_email)
@@ -136,10 +140,10 @@ class BusinessView(APIView):
                                     email=owner_email,
                                 )
                                 invitation.save()
-                                email = EmailMessage('ABT - Ownership invitation', f'{inviter.username} invited you to be owner of {business.name}, you are not registered yet. Please register at "https://abt.qbared.com/user/register/', None, [owner_email])
+                                email = EmailMessage('ABT - Ownership invitation', f'{inviter.username} invited you to be owner of {business.name}, you are not registered yet. Please register at "{settings.SITE_PROTOCOL}://{settings.SITE_DOMAIN}/user/register/', None, [owner_email])
                                 EmailSending(email).start()
                         else:
-                            print('No owners provided')
+                            logger.warning('No owners provided for business %s update', data.get('id'))
                     except json.JSONDecodeError:
                         owners = [owners]
                 business.save()
