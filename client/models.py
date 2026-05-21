@@ -17,7 +17,7 @@ class Client(models.Model):
     name = models.CharField(max_length=80)
     last_name = models.CharField(max_length=80, default='no last name saved')
     email = models.EmailField(max_length=80, default='no@email.saved')
-    phone = models.CharField(max_length=15, default='no phone saved')
+    phone = models.CharField(max_length=20, default='no phone saved')
     address = models.CharField(max_length=150, default='no address saved')
     address2 = models.CharField(max_length=50, default='no extra address saved')
     image = models.ImageField(_("Image"), upload_to=upload_to, default='userDefault.jpg')
