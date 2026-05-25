@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
+from django.contrib import messages
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
@@ -68,8 +69,11 @@ def loginView(request):
     if request.user.is_authenticated:
         return redirect('web:index')
     if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '')
+        if not username or not password:
+            messages.error(request, 'Please enter both username and password.')
+            return render(request, 'user/login.html', {'prefill_username': username})
         if User.objects.filter(username=username).exists():
             user = authenticate(request, username=username, password=password)
             if user is not None:
@@ -77,27 +81,41 @@ def loginView(request):
                 next_url = request.GET.get('next', 'web:index')
                 return redirect(next_url)
             else:
-                content = {'message': 'contraseña incorrecta'}
-                return render(request, 'user/login.html', content)
-        content = {'message': 'usuario no existe'}
-        return render(request, 'user/login.html', content)            
+                messages.error(request, 'Incorrect password. Please try again.')
+                return render(request, 'user/login.html', {'prefill_username': username})
+        messages.error(request, 'No account found with that username.')
+        return render(request, 'user/login.html', {'prefill_username': username})
     return render(request, 'user/login.html')
 
 def registerView(request):
     if request.user.is_authenticated:
         return redirect('web:index')
     if request.method == 'POST':
-        username = request.POST['username']
-        email = request.POST['email']
-        password = request.POST['password']
+        first_name = request.POST.get('first_name', '').strip()
+        last_name  = request.POST.get('last_name', '').strip()
+        username   = request.POST.get('username', '').strip()
+        email      = request.POST.get('email', '').strip()
+        password1  = request.POST.get('password1', '')
+        password2  = request.POST.get('password2', '')
+        prefill = {'prefill_first_name': first_name, 'prefill_last_name': last_name,
+                   'prefill_username': username, 'prefill_email': email}
+        if not first_name or not username or not email or not password1:
+            messages.error(request, 'Please fill in all required fields.')
+            return render(request, 'user/register.html', prefill)
+        if password1 != password2:
+            messages.error(request, 'Passwords do not match.')
+            return render(request, 'user/register.html', prefill)
+        if len(password1) < 6:
+            messages.error(request, 'Password must be at least 6 characters.')
+            return render(request, 'user/register.html', prefill)
         if User.objects.filter(username=username).exists():
-            content = {'message': 'User already exists'}
-            return render(request, 'user/register.html', content)
+            messages.error(request, 'That username is already taken. Please choose another.')
+            return render(request, 'user/register.html', prefill)
         if User.objects.filter(email=email).exists():
-            content = {'message': 'Email already registered'}
-            return render(request, 'user/register.html', content)
-        new_user = User(username=username, email=email)
-        new_user.set_password(password)
+            messages.error(request, 'An account with that email already exists.')
+            return render(request, 'user/register.html', prefill)
+        new_user = User(username=username, email=email, first_name=first_name, last_name=last_name)
+        new_user.set_password(password1)
         new_user.save()
         
         # Send welcome email asynchronously

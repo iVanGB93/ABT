@@ -4,7 +4,7 @@
 {% block page_title %}Financial Report - {{ business.name }}{% endblock page_title %}
 
 {% block head %}
-<link rel="stylesheet" href="{% static 'business/css/business-detail.css' %}">
+{{ block.super }}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
     .financial-report-container {
@@ -408,7 +408,7 @@
             {% elif period == 'quarter' %}Current quarter
             {% elif period == 'year' %}Current year
             {% else %}Last 30 days{% endif %}
-            • From {{ start_date|date:"M d, Y" }} to {{ "now"|date:"M d, Y" }}
+            • From {{ start_date|date:"M d, Y" }} to {% now "M d, Y" %}
         </p>
     </div>
     

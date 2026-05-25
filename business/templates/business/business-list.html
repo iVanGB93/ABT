@@ -8,63 +8,7 @@
 <p>Manage and oversee all your business operations</p>
 {% endblock toolbar_title %}
 
-{% block head %}
-{{ block.super }}
-<link rel="stylesheet" href="{% static 'business/css/business-list.css' %}">
-{% endblock head %}
-
-{% block body %}
-<!-- Business Controls Panel -->
-<div class="business-controls">
-    <div class="controls-header">
-        <h2 class="controls-title">
-            <i class="fas fa-filter"></i>
-            Business Management
-        </h2>
-        <div class="controls-actions">
-            <div class="view-toggle">
-                <button class="view-btn active" data-view="grid" onclick="toggleView('grid')">
-                    <i class="fas fa-th"></i>
-                </button>
-                <button class="view-btn" data-view="list" onclick="toggleView('list')">
-                    <i class="fas fa-list"></i>
-                </button>
-            </div>
-            <div class="sort-filter">
-                <div class="filter-group">
-                    <label for="sortSelect">Sort by:</label>
-                    <select id="sortSelect" class="filter-select" onchange="sortBusinesses()">
-                        <option value="name">Name</option>
-                        <option value="created">Date Created</option>
-                        <option value="updated">Last Updated</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    {% if business_list %}
-    <div class="stats-overview">
-        <div class="stat-item">
-            <div class="stat-number">{{ business_list|length }}</div>
-            <div class="stat-label">Total Businesses</div>
-        </div>
-        <div class="stat-item">
-            <div class="stat-number">{{ business_list|length }}</div>
-            <div class="stat-label">Active</div>
-        </div>
-        <div class="stat-item">
-            <div class="stat-number">0</div>
-            <div class="stat-label">Inactive</div>
-        </div>
-        <div class="stat-item">
-            <div class="stat-number">{{ business_list|length }}</div>
-            <div class="stat-label">This Month</div>
-        </div>
-    </div>
-    {% endif %}
-</div>
-
+{% block content %}
 <!-- Business Grid/List Container -->
 <div class="business-section">
     <div class="container">
@@ -117,10 +61,10 @@
                         </div>
                         
                         <div class="card-actions-enhanced">
-                            <a href="{% url 'business:business_detail' business.id %}" class="action-btn primary">
+                            <a href="{% url 'business:business_detail' business.name %}" class="action-btn primary">
                                 <i class="fas fa-eye"></i> View
                             </a>
-                            <a href="{% url 'business:business_edit' business.id %}" class="action-btn secondary">
+                            <a href="{% url 'business:business_edit' business.name %}" class="action-btn secondary">
                                 <i class="fas fa-edit"></i> Edit
                             </a>
                         </div>
@@ -157,8 +101,8 @@
                     <div>0</div>
                     <div>${{ 0|floatformat:2 }}</div>
                     <div>
-                        <a href="{% url 'business:business_detail' business.id %}" class="action-btn primary" style="margin-right: 5px;">View</a>
-                        <a href="{% url 'business:business_edit' business.id %}" class="action-btn secondary">Edit</a>
+                        <a href="{% url 'business:business_detail' business.name %}" class="action-btn primary" style="margin-right: 5px;">View</a>
+                        <a href="{% url 'business:business_edit' business.name %}" class="action-btn secondary">Edit</a>
                     </div>
                 </div>
                 {% endfor %}
@@ -178,7 +122,7 @@
         {% endif %}
     </div>
 </div>
-{% endblock body %}
+{% endblock content %}
 
 {% block script %}
 <script>

@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'user.apps.UserConfig',
     'client.apps.ClientConfig',
     'job.apps.JobConfig',
+    'schedule.apps.ScheduleConfig',
     'item.apps.ItemConfig',
     'business.apps.BusinessConfig',
     'fontawesomefree',
@@ -171,6 +172,7 @@ REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': [

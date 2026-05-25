@@ -39,7 +39,7 @@
     </ul>
     {% else %}
     <div class="fw-bold text-center texto">No hay trabajos realizado a {{ client.user.username}}.</div>
-    <a href="{% url 'job:create_job' %}"><button class="btn btn-outline-dark mb-2">Nuevo Trabajo</button></a>
+    <a href="{% url 'job:client_list' %}"><button class="btn btn-outline-dark mb-2">Nuevo Trabajo</button></a>
     {% endif %}
 </div>
 {% endblock content %}

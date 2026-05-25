@@ -1,4 +1,5 @@
 from django.db.models.functions import Now
+from django.utils.dateparse import parse_datetime
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
@@ -79,6 +80,11 @@ class JobView(APIView):
             client = Client.objects.get(id=client)
             new_job = Job(business=business, client=client, provider=provider_user, description=data['description'], address=data['address'], address2=data.get('address2', 'no extra address saved'), price=data['price'])
             new_job.image = data.get('image', new_job.image)
+            if data.get('scheduled_at'):
+                parsed_dt = parse_datetime(data.get('scheduled_at'))
+                if parsed_dt:
+                    new_job.scheduled_at = parsed_dt
+                    new_job.status = 'in_progress'
             new_job.save()
             response['message'] = "New job created."
             response['OK'] = True
@@ -92,7 +98,10 @@ class JobView(APIView):
                 job.address2 = data.get('address2', job.address2)
                 job.image = data.get('image', job.image)
                 if data.get('scheduled_at'):
-                    job.scheduled_at = data.get('scheduled_at', job.scheduled_at)
+                    parsed_dt = parse_datetime(data.get('scheduled_at'))
+                    if parsed_dt is None:
+                        return Response(status=status.HTTP_400_BAD_REQUEST, data={'message': 'Invalid scheduled_at format.'})
+                    job.scheduled_at = parsed_dt
                     job.status = 'in_progress'
                 job.save()
                 response['message'] = "Job Updated."

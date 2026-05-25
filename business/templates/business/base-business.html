@@ -4,9 +4,7 @@
 {% block title %}{% block page_title %}Business Dashboard{% endblock page_title %} - Advance Business Tools{% endblock title %}
 
 {% block head %}
-<link rel="stylesheet" href="{% static 'business/css/business-dashboard.css' %}">
-<link rel="stylesheet" href="{% static 'business/css/business-detail.css' %}">
-<link rel="stylesheet" href="{% static 'business/css/business-toolbar.css' %}">
+<link rel="stylesheet" href="{% static 'business/css/abt-business.css' %}">
 {% endblock head %}
 
 {% block body %}
@@ -30,18 +28,26 @@
             <!-- Navigation Links -->
             <nav class="toolbar-nav">
                 <ul class="nav-links">
-                    <li><a href="{% url 'business:business_list' %}" class="{% if request.resolver_match.url_name == 'business_list' %}active{% endif %}">
-                        <i class="fas fa-th-large"></i> Dashboard
+                    {% if business %}
+                    <li><a href="{% url 'business:business_detail' business.name %}" class="{% if request.resolver_match.url_name == 'business_detail' %}active{% endif %}">
+                        <i class="fas fa-chart-line"></i> Overview
                     </a></li>
-                    <li><a href="{% url 'business:business_list' %}" class="{% if 'business' in request.resolver_match.url_name %}active{% endif %}">
-                        <i class="fas fa-building"></i> Businesses
+                    <li><a href="{% url 'business:business_clients' business.name %}" class="{% if request.resolver_match.url_name == 'business_clients' %}active{% endif %}">
+                        <i class="fas fa-users"></i> Clients
                     </a></li>
-                    <li><a href="#" onclick="showComingSoon('Analytics')">
-                        <i class="fas fa-chart-line"></i> Analytics
+                    <li><a href="{% url 'job:job_list' business.id %}" class="{% if request.resolver_match.url_name == 'job_list' %}active{% endif %}">
+                        <i class="fas fa-briefcase"></i> Jobs
                     </a></li>
-                    <li><a href="#" onclick="showComingSoon('Reports')">
+                    <li><a href="{% url 'business:business_schedule' business.name %}" class="{% if request.resolver_match.url_name == 'business_schedule' %}active{% endif %}">
+                        <i class="fas fa-calendar-alt"></i> Schedule
+                    </a></li>
+                    <li><a href="{% url 'business:business_items' business.name %}" class="{% if request.resolver_match.url_name == 'business_items' %}active{% endif %}">
+                        <i class="fas fa-boxes"></i> Items
+                    </a></li>
+                    <li><a href="{% url 'business:financial_report' business.name %}" class="{% if request.resolver_match.url_name == 'financial_report' %}active{% endif %}">
                         <i class="fas fa-file-alt"></i> Reports
                     </a></li>
+                    {% endif %}
                 </ul>
             </nav>
 
@@ -57,6 +63,11 @@
 
                 <!-- Quick Actions -->
                 <div class="quick-actions">
+                    {% if business %}
+                    <a href="{% url 'business:business_list' %}" class="quick-btn secondary">
+                        <i class="fas fa-th-large"></i> My Businesses
+                    </a>
+                    {% endif %}
                     <a href="{% url 'business:create_business' %}" class="quick-btn primary">
                         <i class="fas fa-plus"></i> New Business
                     </a>
@@ -101,62 +112,47 @@
     {% block content %}
     {% endblock content %}
 </div>
-{% endblock body %}
 
-{% block script %}
+<!-- Toolbar JS — always rendered because it lives inside the body block -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Profile dropdown functionality
+    // Profile dropdown
     window.toggleProfileDropdown = function() {
         const dropdown = document.getElementById('profileDropdown');
         dropdown.classList.toggle('show');
     };
 
-    // Close dropdown when clicking outside
     document.addEventListener('click', function(e) {
         const profileMenu = document.querySelector('.user-profile-menu');
         const dropdown = document.getElementById('profileDropdown');
-        
-        if (!profileMenu.contains(e.target)) {
+        if (profileMenu && dropdown && !profileMenu.contains(e.target)) {
             dropdown.classList.remove('show');
         }
     });
 
-    // Search functionality
+    // Search
     window.performSearch = function() {
         const searchInput = document.getElementById('businessSearch');
-        const query = searchInput.value.trim();
-        
+        const query = searchInput ? searchInput.value.trim() : '';
         if (query) {
-            // Simple search implementation - you can enhance this
             window.location.href = `{% url 'business:business_list' %}?search=${encodeURIComponent(query)}`;
         }
     };
 
-    // Enter key search
-    document.getElementById('businessSearch').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            performSearch();
-        }
-    });
+    const searchInput = document.getElementById('businessSearch');
+    if (searchInput) {
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') performSearch();
+        });
+    }
 
-    // Coming soon notifications
+    // Coming soon
     window.showComingSoon = function(feature) {
-        // Simple alert - you can replace with a modal
-        alert(`${feature} feature is coming soon! Stay tuned for updates.`);
+        alert(`${feature} feature is coming soon!`);
     };
-
-    // Smooth transitions for interactive elements
-    const interactiveElements = document.querySelectorAll('.quick-btn, .nav-links a, .profile-btn');
-    interactiveElements.forEach(el => {
-        el.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-2px)';
-        });
-        
-        el.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateY(0)';
-        });
-    });
 });
 </script>
-{% endblock script %}
+
+{% endblock body %}
+
+{% block script %}{% endblock script %}

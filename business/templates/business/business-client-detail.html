@@ -1,0 +1,101 @@
+{% extends "business/base-business.html" %}
+{% load static %}
+
+{% block page_title %}{{ client.name }} {{ client.last_name }} — {{ business.name }}{% endblock page_title %}
+
+{% block toolbar_title %}
+<h1>{{ business.name }}</h1>
+<p>Client Details</p>
+{% endblock toolbar_title %}
+
+{% block content %}
+<div style="max-width:800px; margin:0 auto;">
+
+    <!-- Client Card -->
+    <div class="recent-transactions" data-aos="fade-up" style="margin-bottom:24px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+            <h3 style="margin:0;"><i class="fas fa-user"></i> Client Details</h3>
+            <a href="{% url 'business:business_clients' business.name %}" style="font-size:13px; color:var(--gray-400); text-decoration:none;">
+                <i class="fas fa-arrow-left"></i> Back to Clients
+            </a>
+        </div>
+
+        <div style="display:grid; grid-template-columns:auto 1fr; gap:24px; align-items:start;">
+            <!-- Avatar -->
+            <div style="width:80px; height:80px; border-radius:50%; background:linear-gradient(135deg,var(--primary),var(--primary-dark)); display:flex; align-items:center; justify-content:center; color:white; font-size:28px; font-weight:700; flex-shrink:0;">
+                {{ client.name|first|upper }}
+            </div>
+            <!-- Info -->
+            <div>
+                <h2 style="font-size:22px; font-weight:700; color:var(--gray-900); margin:0 0 4px;">{{ client.name }} {{ client.last_name }}</h2>
+                <p style="color:var(--gray-400); font-size:13px; margin:0 0 16px;">Client since {{ client.created_at|date:"M d, Y" }}</p>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <i class="fas fa-phone" style="color:var(--primary); width:16px;"></i>
+                        <a href="tel:{{ client.phone }}" style="color:var(--gray-700); text-decoration:none; font-size:14px;">{{ client.phone }}</a>
+                    </div>
+                    {% if client.email != 'no@email.saved' %}
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <i class="fas fa-envelope" style="color:var(--primary); width:16px;"></i>
+                        <a href="mailto:{{ client.email }}" style="color:var(--gray-700); text-decoration:none; font-size:14px;">{{ client.email }}</a>
+                    </div>
+                    {% endif %}
+                    {% if client.address != 'no address saved' %}
+                    <div style="display:flex; align-items:center; gap:8px; grid-column:1/-1;">
+                        <i class="fas fa-map-marker-alt" style="color:var(--primary); width:16px;"></i>
+                        <a href="https://www.google.com/maps?q={{ client.address }}" target="_blank" style="color:var(--gray-700); text-decoration:none; font-size:14px;">{{ client.address }}</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Jobs -->
+    <div class="recent-transactions" data-aos="fade-up" data-aos-delay="100">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+            <h3 style="margin:0;"><i class="fas fa-briefcase"></i> Jobs
+                <span style="font-size:13px; font-weight:500; color:var(--gray-400); margin-left:8px;">{{ jobs.count }} total</span>
+            </h3>
+            <a href="{% url 'job:add_job' business.id %}?client={{ client.id }}" class="btn-add">
+                <i class="fas fa-plus"></i> Create Job
+            </a>
+        </div>
+
+        <div class="transactions-list">
+            {% for job in jobs %}
+            <a href="{% url 'job:job_detail' job.id %}" style="text-decoration:none; color:inherit;">
+                <div class="transaction-item" style="cursor:pointer;">
+                    <div class="transaction-icon">
+                        <i class="fas fa-briefcase"></i>
+                    </div>
+                    <div class="transaction-details">
+                        <h4>{{ job.description }}</h4>
+                        <p>{{ job.address }} • {{ job.created_at|date:"M d, Y" }}</p>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <span style="font-size:12px; padding:3px 10px; border-radius:20px; font-weight:600;
+                            {% if job.status == 'completed' or job.status == 'paid' %}background:#d1fae5; color:#065f46;
+                            {% elif job.status == 'pending' or job.status == 'confirmed' %}background:#fef3c7; color:#92400e;
+                            {% else %}background:#dbeafe; color:#1e40af;{% endif %}">
+                            {{ job.get_status_display }}
+                        </span>
+                        <span class="transaction-amount positive">${{ job.price }}</span>
+                    </div>
+                </div>
+            </a>
+            {% empty %}
+            <div class="transaction-item">
+                <div class="transaction-icon"><i class="fas fa-briefcase"></i></div>
+                <div class="transaction-details">
+                    <h4>No jobs yet</h4>
+                    <p>No jobs have been assigned to this client.</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+{% endblock content %}

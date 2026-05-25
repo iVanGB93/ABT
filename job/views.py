@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect
+import json
 
-import business
+from business.models import Business
+from client.models import Client as ClientModel
 from .models import Job, Spent, Invoice
 from .forms import JobForm, SpentForm
 from django.contrib.auth.models import User
@@ -49,47 +51,49 @@ def client_detail(request, id):
     return render(request, 'job/client-detail.html', content)
 
 def job_list(request, pk):
-    jobs = Job.objects.filter(business_id=pk)
-    content = {'jobs': jobs}
+    business = Business.objects.get(id=pk)
+    jobs = Job.objects.filter(business_id=pk).order_by('-created_at')
+    content = {'jobs': jobs, 'pk': pk, 'business': business}
     return render(request, 'job/job-list.html', content)
 
 def create_job(request, pk):
-    form = JobForm
-    business = business.objects.get(id=pk)
-    content = {'form': form}
+    business = Business.objects.get(id=pk)
+    clients = ClientModel.objects.filter(business=business)
+    client_addresses = {str(c.id): c.address for c in clients}
+    form = JobForm()
+    form.fields['client'].queryset = clients
+    preselected_client = request.GET.get('client')
+    if preselected_client:
+        form.initial = {'client': preselected_client}
+    content = {'form': form, 'pk': pk, 'business': business, 'client_addresses_json': json.dumps(client_addresses)}
     if request.method == 'POST':
-        copydata = request.POST.copy()
-        profile = Profile.objects.get(id=request.POST['client'])
-        if request.POST.get('sameAddress'):
-            if profile.address != None:
-                copydata['address'] = profile.address
-            else:
-                content['message': 'El cliente no tiene direccion guardada']
-                return render(request, 'job/create-job.html', content)
-        form = JobForm(copydata, request.FILES)
+        form = JobForm(request.POST, request.FILES)
+        form.fields['client'].queryset = clients
         if form.is_valid():
-            form.save()
-            return redirect('job:job_list')
+            job = form.save(commit=False)
+            job.business = business
+            job.provider = request.user
+            job.save()
+            return redirect('job:job_list', pk)
         else:
             content['message'] = form.errors
+            content['form'] = form
     return render(request, 'job/create-job.html', content)
 
 def job_detail(request, id):
     job = Job.objects.get(id=id)
+    business = job.business
     spents = Spent.objects.filter(job=job)
-    total_spent = 0
-    for spent in spents:
-        total_spent = total_spent + spent.amount
+    total_spent = sum(s.amount for s in spents)
     profit = job.price - total_spent
-    content = {'job': job, 'spents': spents, 'total_spent': total_spent, 'profit': profit}
+    content = {'job': job, 'business': business, 'spents': spents, 'total_spent': total_spent, 'profit': profit}
     return render(request, 'job/job-detail.html', content)
 
 def delete_job(request, id):
     job = Job.objects.get(id=id)
+    business_id = job.business_id
     job.delete()
-    jobs = Job.objects.all()
-    content = {'jobs': jobs}
-    return render(request, 'job/job-list.html', content)
+    return redirect('job:job_list', business_id)
 
 def create_spent(request, id):
     job = Job.objects.get(id=id)
@@ -133,7 +137,6 @@ def delete_spent(request, id):
 
 def close_job(request, id):
     job = Job.objects.get(id=id)
-    job.closed = True
-    job.status = 'finished'
+    job.status = 'completed'
     job.save()
-    return redirect('job:job_list')
+    return redirect('job:job_detail', id)

@@ -4,7 +4,7 @@
 {% block page_title %}Add Income - {{ business.name }}{% endblock page_title %}
 
 {% block head %}
-<link rel="stylesheet" href="{% static 'business/css/business-detail.css' %}">
+{{ block.super }}
 <style>
     .add-income-container {
         max-width: 600px;
@@ -320,7 +320,7 @@
                         <i class="fas fa-plus"></i>
                         Add Income
                     </button>
-                    <a href="{% url 'business:business_detail' business.id %}" class="btn btn-secondary">
+                    <a href="{% url 'business:business_detail' business.name %}" class="btn btn-secondary">
                         <i class="fas fa-arrow-left"></i>
                         Cancel
                     </a>
@@ -358,21 +358,35 @@ document.addEventListener('DOMContentLoaded', function() {
     form.addEventListener('submit', function(e) {
         const description = document.getElementById('description').value.trim();
         const amount = parseFloat(document.getElementById('amount').value);
-        
+        let errorMsg = '';
+
         if (!description) {
-            e.preventDefault();
-            alert('Please enter a description for this income.');
+            errorMsg = 'Please enter a description for this income.';
+            document.getElementById('description').style.borderColor = '#ef4444';
             document.getElementById('description').focus();
-            return;
-        }
-        
-        if (isNaN(amount) || amount <= 0) {
-            e.preventDefault();
-            alert('Please enter a valid amount greater than 0.');
+        } else if (isNaN(amount) || amount <= 0) {
+            errorMsg = 'Please enter a valid amount greater than 0.';
+            document.getElementById('amount').style.borderColor = '#ef4444';
             document.getElementById('amount').focus();
+        }
+
+        if (errorMsg) {
+            e.preventDefault();
+            let banner = document.getElementById('jsErrorBanner');
+            if (!banner) {
+                banner = document.createElement('div');
+                banner.id = 'jsErrorBanner';
+                banner.style.cssText = 'background:#fee2e2; color:#991b1b; padding:12px 16px; border-radius:10px; margin-bottom:16px; font-size:14px; display:flex; align-items:center; gap:8px;';
+                form.prepend(banner);
+            }
+            banner.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + errorMsg;
             return;
         }
-        
+
+        // Clear any previous error
+        const banner = document.getElementById('jsErrorBanner');
+        if (banner) banner.remove();
+
         // Show loading state
         const submitBtn = form.querySelector('button[type="submit"]');
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding Income...';

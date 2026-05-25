@@ -37,6 +37,7 @@
                     required 
                     placeholder="Enter your username"
                     autocomplete="username"
+                    value="{{ prefill_username }}"
                 >
                 <i class="fas fa-user input-icon"></i>
             </div>
@@ -59,8 +60,8 @@
         </div>
 
         <button type="submit" class="btn" id="loginBtn">
-            <i class="fas fa-sign-in-alt"></i>
-            Sign In
+            <span id="loginBtnText"><i class="fas fa-sign-in-alt"></i> Sign In</span>
+            <span id="loginBtnLoading" style="display:none;"><i class="fas fa-spinner fa-spin"></i> Signing in…</span>
         </button>
     </form>
 
@@ -82,4 +83,14 @@
             Back to Home
         </a>
     </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('loginForm').addEventListener('submit', function() {
+    document.getElementById('loginBtnText').style.display = 'none';
+    document.getElementById('loginBtnLoading').style.display = 'inline';
+    document.getElementById('loginBtn').disabled = true;
+});
+</script>
 {% endblock %}

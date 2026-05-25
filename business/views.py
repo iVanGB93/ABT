@@ -3,6 +3,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
 from django.db.models import Sum
+from django.contrib.contenttypes.models import ContentType
+from django.core.serializers.json import DjangoJSONEncoder
 from django.utils import timezone
 from datetime import datetime, timedelta
 import json
@@ -10,6 +12,8 @@ import json
 from .models import Business, ExtraIncome, ExtraExpense, Invitation
 from job.models import Job
 from client.models import Client
+from item.models import Item_List
+from schedule.models import Schedule
 
 
 @login_required
@@ -19,13 +23,13 @@ def business_list(request):
     return render(request, 'business/business-list.html', context)
 
 @login_required
-def add_income(request, pk):
-    business = get_object_or_404(Business, pk=pk)
+def add_income(request, business_name):
+    business = get_object_or_404(Business, name=business_name)
     
     # Verificar que el usuario sea propietario del negocio
     if request.user not in business.owners.all():
         messages.error(request, 'You do not have permission to manage this business.')
-        return redirect('business:business_detail', pk=pk)
+        return redirect('business:business_detail', business_name=business.name)
     
     if request.method == 'POST':
         description = request.POST.get('description')
@@ -44,7 +48,7 @@ def add_income(request, pk):
         else:
             messages.error(request, 'Please fill in all required fields.')
             
-        return redirect('business:business_detail', pk=pk)
+        return redirect('business:business_detail', business_name=business.name)
     
     context = {
         'business': business,
@@ -52,13 +56,13 @@ def add_income(request, pk):
     return render(request, 'business/add-income.html', context)
 
 @login_required
-def add_expense(request, pk):
-    business = get_object_or_404(Business, pk=pk)
+def add_expense(request, business_name):
+    business = get_object_or_404(Business, name=business_name)
     
     # Verificar que el usuario sea propietario del negocio
     if request.user not in business.owners.all():
         messages.error(request, 'You do not have permission to manage this business.')
-        return redirect('business:business_detail', pk=pk)
+        return redirect('business:business_detail', business_name=business.name)
     
     if request.method == 'POST':
         description = request.POST.get('description')
@@ -81,7 +85,7 @@ def add_expense(request, pk):
         else:
             messages.error(request, 'Please fill in all required fields.')
             
-        return redirect('business:business_detail', pk=pk)
+        return redirect('business:business_detail', business_name=business.name)
     
     # Obtener las opciones de categorías desde el modelo
     category_choices = ExtraExpense.CATEGORY_CHOICES
@@ -93,13 +97,13 @@ def add_expense(request, pk):
     return render(request, 'business/add-expense.html', context)
 
 @login_required
-def financial_report(request, pk):
-    business = get_object_or_404(Business, pk=pk)
+def financial_report(request, business_name):
+    business = get_object_or_404(Business, name=business_name)
     
     # Verificar que el usuario sea propietario del negocio
     if request.user not in business.owners.all():
         messages.error(request, 'You do not have permission to view this business.')
-        return redirect('business:business_detail', pk=pk)
+        return redirect('business:business_detail', business_name=business.name)
     
     # Obtener parámetros de filtro
     period = request.GET.get('period', 'month')
@@ -166,13 +170,13 @@ def financial_report(request, pk):
     return render(request, 'business/financial-report.html', context)
 
 @login_required
-def business_edit(request, pk):
-    business = get_object_or_404(Business, pk=pk)
+def business_edit(request, business_name):
+    business = get_object_or_404(Business, name=business_name)
     
     # Verificar permisos
     if request.user not in business.owners.all():
         messages.error(request, 'You do not have permission to edit this business.')
-        return redirect('business:business_detail', pk=pk)
+        return redirect('business:business_detail', business_name=business.name)
     
     if request.method == 'POST':
         business.name = request.POST.get('name', business.name)
@@ -181,7 +185,7 @@ def business_edit(request, pk):
         business.save()
         
         messages.success(request, 'Business updated successfully!')
-        return redirect('business:business_detail', pk=pk)
+        return redirect('business:business_detail', business_name=business.name)
     
     context = {
         'business': business,
@@ -189,13 +193,13 @@ def business_edit(request, pk):
     return render(request, 'business/business-edit.html', context)
 
 @login_required
-def business_delete(request, pk):
-    business = get_object_or_404(Business, pk=pk)
+def business_delete(request, business_name):
+    business = get_object_or_404(Business, name=business_name)
     
     # Verificar permisos
     if request.user not in business.owners.all():
         messages.error(request, 'You do not have permission to delete this business.')
-        return redirect('business:business_detail', pk=pk)
+        return redirect('business:business_detail', business_name=business.name)
     
     if request.method == 'POST':
         business_name = business.name
@@ -224,15 +228,19 @@ def create_business(request):
             business.owners.add(request.user)
             
             messages.success(request, f'Business "{name}" created successfully!')
-            return redirect('business:business_detail', pk=business.id)
+            return redirect('business:business_detail', business_name=business.name)
         else:
             messages.error(request, 'Business name is required.')
     
     return render(request, 'business/business-create.html')
 
 @login_required
-def business_detail(request, pk):
-    business = get_object_or_404(Business, pk=pk)
+def business_detail(request, business_name):
+    business = get_object_or_404(Business, name=business_name)
+
+    if request.user not in business.owners.all():
+        messages.error(request, 'You do not have permission to view this business.')
+        return redirect('business:business_list')
     
     # Calcular métricas financieras básicas - CONVERTIR A FLOAT INMEDIATAMENTE
     extra_income_raw = business.extra_income.aggregate(Sum('amount'))['amount__sum'] or 0
@@ -340,6 +348,24 @@ def business_detail(request, pk):
     active_clients = 0
     total_clients = Client.objects.filter(business=business).count()
     active_clients = total_clients
+
+    recent_clients = Client.objects.filter(business=business).order_by('-created_at')[:5]
+
+    total_items = Item_List.objects.filter(business=business).count()
+    low_stock_items_count = Item_List.objects.filter(business=business, amount__lte=3).count()
+    recent_items = Item_List.objects.filter(business=business).order_by('-date')[:5]
+
+    job_content_type = ContentType.objects.get_for_model(Job)
+    business_job_ids = Job.objects.filter(business=business).values_list('id', flat=True)
+    schedules = Schedule.objects.filter(
+        content_type=job_content_type,
+        object_id__in=business_job_ids,
+    )
+    total_schedules = schedules.count()
+    today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    today_end = today_start + timedelta(days=1)
+    today_schedules_count = schedules.filter(start_at__lt=today_end, end_at__gte=today_start).count()
+    upcoming_schedules = schedules.filter(start_at__gte=timezone.now(), is_cancelled=False).order_by('start_at')[:5]
     
     context = {
         'business': business,
@@ -364,9 +390,180 @@ def business_detail(request, pk):
         'in_progress_jobs_count': in_progress_jobs_count,
         'total_clients': total_clients,
         'active_clients': active_clients,
+        'recent_clients': recent_clients,
+        'total_items': total_items,
+        'low_stock_items_count': low_stock_items_count,
+        'recent_items': recent_items,
+        'total_schedules': total_schedules,
+        'today_schedules_count': today_schedules_count,
+        'upcoming_schedules': upcoming_schedules,
     }
     
     return render(request, 'business/business-detail.html', context)
+
+
+@login_required
+def business_schedule(request, business_name):
+    business = get_object_or_404(Business, name=business_name)
+
+    if request.user not in business.owners.all():
+        messages.error(request, 'You do not have permission to view this business schedule.')
+        return redirect('business:business_list')
+
+    job_content_type = ContentType.objects.get_for_model(Job)
+    business_job_ids = Job.objects.filter(business=business).values_list('id', flat=True)
+
+    schedules = Schedule.objects.filter(
+        content_type=job_content_type,
+        object_id__in=business_job_ids,
+    ).order_by('start_at')
+
+    jobs_by_id = {
+        job.id: job
+        for job in Job.objects.filter(id__in=business_job_ids).select_related('client')
+    }
+
+    schedule_events = []
+    for event in schedules:
+        linked_job = jobs_by_id.get(event.object_id)
+        title = event.title
+        if not title and linked_job:
+            title = linked_job.description
+        schedule_events.append(
+            {
+                'id': event.id,
+                'title': title,
+                'start': event.start_at,
+                'end': event.end_at,
+                'location': event.location,
+                'is_cancelled': event.is_cancelled,
+                'job_id': linked_job.id if linked_job else None,
+                'job_status': linked_job.status if linked_job else '',
+                'client_name': f'{linked_job.client.name} {linked_job.client.last_name}' if linked_job else '',
+            }
+        )
+
+    now = timezone.now()
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    today_end = today_start + timedelta(days=1)
+
+    pending_jobs = Job.objects.filter(
+        business=business,
+    ).exclude(
+        status__in=['completed', 'cancelled', 'paid']
+    ).select_related('client').order_by('-created_at')
+
+    pending_jobs_json = json.dumps([
+        {
+            'id': j.id,
+            'description': j.description,
+            'client_name': f'{j.client.name} {j.client.last_name}',
+            'status': j.status,
+            'status_display': j.get_status_display(),
+            'price': str(j.price),
+        }
+        for j in pending_jobs
+    ])
+
+    context = {
+        'business': business,
+        'schedules': schedules,
+        'today_schedules': schedules.filter(start_at__lt=today_end, end_at__gte=today_start),
+        'upcoming_schedules': schedules.filter(start_at__gte=now, is_cancelled=False)[:10],
+        'past_schedules': schedules.filter(end_at__lt=now)[:10],
+        'total_schedules': schedules.count(),
+        'today_schedules_count': schedules.filter(start_at__lt=today_end, end_at__gte=today_start).count(),
+        'schedule_events_json': json.dumps(schedule_events, cls=DjangoJSONEncoder),
+        'pending_jobs_json': pending_jobs_json,
+        'job_content_type_id': job_content_type.id,
+    }
+
+    return render(request, 'business/business-schedule.html', context)
+
+
+@login_required
+def business_clients(request, business_name):
+    business = get_object_or_404(Business, name=business_name)
+
+    if request.user not in business.owners.all():
+        messages.error(request, 'You do not have permission to view this business clients.')
+        return redirect('business:business_list')
+
+    clients = Client.objects.filter(business=business).order_by('-created_at')
+
+    context = {
+        'business': business,
+        'clients': clients,
+        'total_clients': clients.count(),
+        'clients_with_email': clients.exclude(email='no@email.saved').count(),
+    }
+
+    return render(request, 'business/business-clients.html', context)
+
+
+@login_required
+def create_business_client(request, business_name):
+    business = get_object_or_404(Business, name=business_name)
+    if request.user not in business.owners.all():
+        messages.error(request, 'You do not have permission.')
+        return redirect('business:business_list')
+
+    if request.method == 'POST':
+        client = Client(
+            business=business,
+            provider=request.user,
+            name=request.POST.get('name', ''),
+            last_name=request.POST.get('last_name', ''),
+            email=request.POST.get('email', 'no@email.saved'),
+            phone=request.POST.get('phone', 'no phone saved'),
+            address=request.POST.get('address', 'no address saved'),
+        )
+        if request.FILES.get('image'):
+            client.image = request.FILES['image']
+        client.save()
+        messages.success(request, 'Client created successfully.')
+        return redirect('business:business_clients', business_name=business_name)
+
+    return render(request, 'business/business-create-client.html', {'business': business})
+
+
+@login_required
+def business_client_detail(request, business_name, client_id):
+    business = get_object_or_404(Business, name=business_name)
+    if request.user not in business.owners.all():
+        messages.error(request, 'You do not have permission.')
+        return redirect('business:business_list')
+
+    client = get_object_or_404(Client, id=client_id, business=business)
+    jobs = client.jobs.order_by('-created_at')
+
+    context = {
+        'business': business,
+        'client': client,
+        'jobs': jobs,
+    }
+    return render(request, 'business/business-client-detail.html', context)
+
+
+@login_required
+def business_items(request, business_name):
+    business = get_object_or_404(Business, name=business_name)
+
+    if request.user not in business.owners.all():
+        messages.error(request, 'You do not have permission to view this business items.')
+        return redirect('business:business_list')
+
+    items = Item_List.objects.filter(business=business).order_by('-date')
+
+    context = {
+        'business': business,
+        'items': items,
+        'total_items': items.count(),
+        'low_stock_items_count': items.filter(amount__lte=3).count(),
+        'inventory_value': sum(float(item.price) * int(item.amount) for item in items),
+    }
+
+    return render(request, 'business/business-items.html', context)
 
 @login_required(login_url='/user/login/')
 def business_invitation(request, code):

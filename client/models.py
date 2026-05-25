@@ -32,7 +32,7 @@ class Client(models.Model):
     )
 
     def __str__(self):
-        return self.provider.username + self.name
+        return f'{self.name} {self.last_name}'
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)

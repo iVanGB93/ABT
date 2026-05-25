@@ -39,6 +39,7 @@
                     required 
                     placeholder="Enter your first name"
                     autocomplete="given-name"
+                    value="{{ prefill_first_name }}"
                 >
                 <i class="fas fa-user input-icon"></i>
             </div>
@@ -54,6 +55,7 @@
                     required 
                     placeholder="Enter your last name"
                     autocomplete="family-name"
+                    value="{{ prefill_last_name }}"
                 >
                 <i class="fas fa-user input-icon"></i>
             </div>
@@ -69,6 +71,7 @@
                     required 
                     placeholder="Choose a username"
                     autocomplete="username"
+                    value="{{ prefill_username }}"
                 >
                 <i class="fas fa-at input-icon"></i>
             </div>
@@ -84,6 +87,7 @@
                     required 
                     placeholder="youremail@example.com"
                     autocomplete="email"
+                    value="{{ prefill_email }}"
                 >
                 <i class="fas fa-envelope input-icon"></i>
             </div>
@@ -136,8 +140,8 @@
         </div>
 
         <button type="submit" class="btn" id="registerBtn">
-            <i class="fas fa-user-plus"></i>
-            Create Account
+            <span id="registerBtnText"><i class="fas fa-user-plus"></i> Create Account</span>
+            <span id="registerBtnLoading" style="display:none;"><i class="fas fa-spinner fa-spin"></i> Creating account…</span>
         </button>
     </form>
 
@@ -205,6 +209,14 @@
                 password2Field.addEventListener('input', validatePasswords);
                 validatePasswords(); // Initial validation
             }
+
+            document.getElementById('registerForm').addEventListener('submit', function() {
+                if (!document.getElementById('registerBtn').disabled) {
+                    document.getElementById('registerBtnText').style.display = 'none';
+                    document.getElementById('registerBtnLoading').style.display = 'inline';
+                    document.getElementById('registerBtn').disabled = true;
+                }
+            });
         });
     </script>
 {% endblock %}

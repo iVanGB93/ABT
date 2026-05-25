@@ -1,11 +1,11 @@
 from django import forms
 from .models import Job, Spent
 from item.models import Item_List
-from user.models import Profile
+from client.models import Client
 
 class JobForm(forms.ModelForm):
 
-    client = forms.ModelChoiceField(queryset=Profile.objects.filter(is_client=True), widget=forms.Select(attrs={'class': 'form-control', 'placeholder': 'Nombre del cliente'}))
+    client = forms.ModelChoiceField(queryset=Client.objects.all(), widget=forms.Select(attrs={'class': 'form-control'}))
     description = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'En que consiste el trabajo'}))
     address = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ubicacion'}))
     price = forms.IntegerField(widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '0'}))

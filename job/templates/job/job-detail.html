@@ -1,75 +1,133 @@
-{% extends "job/base-job.html" %}
+{% extends "business/base-business.html" %}
 {% load static %}
-{% block bar %}
-<p class="lead text-center fw-bold titulo">Detalles del trabajo:</p>
-{% endblock bar %}
+
+{% block page_title %}Job — {{ job.client.name }} {{ job.client.last_name }}{% endblock page_title %}
+
+{% block toolbar_title %}
+<h1>{{ business.name }}</h1>
+<p>Job Detail</p>
+{% endblock toolbar_title %}
+
 {% block content %}
-<div class="col-10 mt-0 mb-4 m-auto">
-    <a href="{% url 'job:job_list' %}"><button class="btn btn-outline-dark mb-2">Atras</button></a>
-    <div class="card caja">
-        <div class="row g-0">
-            <div class="col-md-8">
-                <div class="card-body">
-                    <h5 class="card-title titulo">Cliente</h5>
-                    <p class="card-text texto m-0">Nombre: <a style="text-decoration: none;" href="{% url 'job:client_detail' job.client.id %}">{{ job.client.user.username }}</a></p>
-                    <p class="card-text texto m-0">Telefono: <a style="text-decoration: none;" href="tel:{{ job.client.phone }}">{{ job.client.phone }}</a></p>
-                    <p class="card-text texto m-0">Direccion: <a style="text-decoration: none;" target="_blank" href="https://www.google.com/maps?q={{ job.client.address }}">{{ job.client.address }}</a></p>
-                    <p class="card-text texto m-0">Email: <a style="text-decoration: none;" href="mailto:{{ job.client.user.email }}">{{ job.client.user.email }}</a></p>
+<div style="max-width:720px; margin:0 auto; display:flex; flex-direction:column; gap:20px;" data-aos="fade-up">
+
+    <!-- Header row -->
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <a href="{% url 'job:job_list' business.id %}" style="font-size:13px; color:var(--gray-400); text-decoration:none;">
+            <i class="fas fa-arrow-left"></i> Back to Jobs
+        </a>
+        <span class="status-badge status-{{ job.status }}">{{ job.get_status_display }}</span>
+    </div>
+
+    <!-- Client card -->
+    <div class="recent-transactions">
+        <h3 style="margin:0 0 1rem;"><i class="fas fa-user"></i> Client</h3>
+        <div style="display:flex; align-items:center; gap:16px;">
+            <img src="{{ job.client.image.url }}" style="width:56px; height:56px; border-radius:50%; object-fit:cover; border:2px solid var(--gray-200);" alt="client">
+            <div style="flex:1;">
+                <div style="font-weight:700; font-size:15px; color:var(--gray-800);">{{ job.client.name }} {{ job.client.last_name }}</div>
+                <div style="font-size:13px; color:var(--gray-500); margin-top:4px; display:flex; flex-wrap:wrap; gap:12px;">
+                    {% if job.client.phone != 'no phone saved' %}
+                    <a href="tel:{{ job.client.phone }}" style="color:var(--primary); text-decoration:none;"><i class="fas fa-phone"></i> {{ job.client.phone }}</a>
+                    {% endif %}
+                    {% if job.client.email != 'no@email.saved' %}
+                    <a href="mailto:{{ job.client.email }}" style="color:var(--primary); text-decoration:none;"><i class="fas fa-envelope"></i> {{ job.client.email }}</a>
+                    {% endif %}
+                    {% if job.client.address != 'no address saved' %}
+                    <a href="https://www.google.com/maps?q={{ job.client.address }}" target="_blank" style="color:var(--primary); text-decoration:none;"><i class="fas fa-map-marker-alt"></i> {{ job.client.address }}</a>
+                    {% endif %}
                 </div>
             </div>
-            <div class="col-md-4 text-end m-auto">
-                <img src="{{ job.client.user.profile.image.url }}" style="width: 8rem; height: 8rem;" class="img-fluid rounded" alt="...client">
-            </div>
+            <a href="{% url 'business:business_client_detail' business.name job.client.id %}" style="font-size:12px; color:var(--gray-400); text-decoration:none;">
+                View Profile <i class="fas fa-chevron-right"></i>
+            </a>
         </div>
     </div>
-</div>  
-<div class="col-10 mt-0 mb-4 m-auto">
-    <div class="card caja">
-        <div class="row g-0">
-            <p class="text-end fw-bold m-0 texto">Precio: {{ job.price }} usd, {{ job.status }}</p>
-            <div class="col-md-8">
-                <div class="card-body">
-                    <h5 class="card-title texto">{{ job.description }}</h5>
-                    <p class="card-text texto"><a style="text-decoration: none;" href="geo:0,0?q={{ job.address }}">{{ job.address }}</a></p>
-                    <p class="card-text texto"><small class="text-body-secondary">{{ job.date }}</small></p>
-                </div>
-            </div>
-            <div class="col-md-4 text-end m-auto">
-                <img src="{{ job.image.url }}" id="image-detail" style="width: 10rem; height: 10rem; border-radius: 5px;" class="img-fluid" alt="...receipt">
-            </div>
+
+    <!-- Job details card -->
+    <div class="recent-transactions">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1rem;">
+            <h3 style="margin:0;"><i class="fas fa-briefcase"></i> Job Details</h3>
+            <span style="font-size:20px; font-weight:700; color:var(--gray-800);">${{ job.price }}</span>
         </div>
-    </div>
-    <div class="list-group-item d-flex justify-content-end align-items-start">
-        {% if not job.closed %}
-        <a href="{% url 'job:job_list' %}"><button class="btn btn-outline-dark m-2">Editar</button></a>
-        <a href="{% url 'job:close_job' job.id %}"><button class="btn btn-danger m-2">Cerrar</button></a>
-        <a href="{% url 'job:delete_job' job.id %}"><button class="btn btn-danger m-2">Eliminar</button></a>
-        {% else %}
-        <button disabled class="btn btn-danger m-2">Cerrado</button>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
+            <div>
+                <div style="font-size:11px; font-weight:600; color:var(--gray-400); text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px;">Description</div>
+                <div style="font-size:14px; color:var(--gray-700);">{{ job.description }}</div>
+            </div>
+            <div>
+                <div style="font-size:11px; font-weight:600; color:var(--gray-400); text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px;">Address</div>
+                <a href="https://www.google.com/maps?q={{ job.address }}" target="_blank" style="font-size:14px; color:var(--primary); text-decoration:none;">{{ job.address }}</a>
+            </div>
+            <div>
+                <div style="font-size:11px; font-weight:600; color:var(--gray-400); text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px;">Created</div>
+                <div style="font-size:14px; color:var(--gray-700);">{{ job.created_at|date:"M d, Y" }}</div>
+            </div>
+            {% if job.scheduled_at %}
+            <div>
+                <div style="font-size:11px; font-weight:600; color:var(--gray-400); text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px;">Scheduled</div>
+                <div style="font-size:14px; color:var(--gray-700);">{{ job.scheduled_at|date:"M d, Y H:i" }}</div>
+            </div>
+            {% endif %}
+        </div>
+        {% if job.image %}
+        <img src="{{ job.image.url }}" style="width:100%; max-height:200px; object-fit:cover; border-radius:8px; margin-bottom:16px;" alt="job image">
         {% endif %}
+        <!-- Action buttons -->
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            {% if job.status not in 'completed,cancelled,paid' %}
+            <a href="{% url 'job:close_job' job.id %}" class="btn-primary-large" style="background:#d1fae5; color:#065f46; border-color:#a7f3d0;">
+                <i class="fas fa-check"></i> Mark Complete
+            </a>
+            <a href="{% url 'job:delete_job' job.id %}" class="btn-primary-large" style="background:#fee2e2; color:#991b1b; border-color:#fca5a5;" onclick="return confirm('Delete this job?')">
+                <i class="fas fa-trash"></i> Delete
+            </a>
+            {% else %}
+            <span class="status-badge status-{{ job.status }}" style="padding:8px 16px; font-size:13px;">{{ job.get_status_display }}</span>
+            {% endif %}
+        </div>
     </div>
-    <p class="lead text-center fw-bold texto">Total de gastos: {{ total_spent }}usd, Ganancia: {{ profit }}usd</p>
-    {% if not job.closed %}
-    <div class="list-group-item d-flex justify-content-start align-items-start">
-        <a href="{% url 'job:create_spent' job.id %}"><button class="btn btn-outline-dark m-2">Agregar gasto</button></a>
-    </div>
-    {% endif %}
-    <p class="lead text-center fw-bold titulo">Gastos:</p>
-    {% if spents %}
-    <ul class="list-group listDisplay">
-        {% for spent in spents %}
-        <li class="caja list-group-item mb-1">
-            <a class="d-flex justify-content-between align-items-start" href="{% url 'job:spent_detail' spent.id %}">
-                <div class="ms-2 me-auto text-dark">
-                    <div class="fw-bold texto m-0">{{ spent.amount }} usd</div>
-                    <p class="texto m-0">{{ spent.description}}</p>
+
+    <!-- Expenses card -->
+    <div class="recent-transactions">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+            <h3 style="margin:0;"><i class="fas fa-receipt"></i> Expenses
+                <span style="font-size:13px; font-weight:500; color:var(--gray-400); margin-left:8px;">Total: ${{ total_spent }}</span>
+            </h3>
+            <div style="display:flex; align-items:center; gap:12px;">
+                <span style="font-size:13px; color:{% if profit >= 0 %}#065f46{% else %}#991b1b{% endif %}; font-weight:600;">
+                    Profit: ${{ profit }}
+                </span>
+                {% if job.status not in 'completed,cancelled,paid' %}
+                <a href="{% url 'job:create_spent' job.id %}" class="btn-add">
+                    <i class="fas fa-plus"></i> Add Expense
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="transactions-list">
+            {% for spent in spents %}
+            <a href="{% url 'job:spent_detail' spent.id %}" style="text-decoration:none; color:inherit;">
+                <div class="transaction-item" style="cursor:pointer;">
+                    <div class="transaction-icon"><i class="fas fa-receipt"></i></div>
+                    <div class="transaction-details">
+                        <h4>{{ spent.description|default:"Expense" }}</h4>
+                        <p>{{ spent.item }}</p>
+                    </div>
+                    <div style="font-weight:600; color:var(--gray-700);">${{ spent.amount }}</div>
                 </div>
             </a>
-        </li>
-        {% endfor %}
-    </ul>
-    {% else %}
-    <div class="fw-bold text-center texto">No hay gastos, cree el primero.</div>
-    {% endif %}
+            {% empty %}
+            <div class="transaction-item">
+                <div class="transaction-icon"><i class="fas fa-receipt"></i></div>
+                <div class="transaction-details">
+                    <h4>No expenses yet</h4>
+                    <p>Add expenses to track job costs.</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
 </div>
 {% endblock content %}

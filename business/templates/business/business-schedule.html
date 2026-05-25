@@ -1,0 +1,299 @@
+{% extends "business/base-business.html" %}
+
+{% block page_title %}{{ business.name }} Schedule{% endblock page_title %}
+
+{% block toolbar_title %}
+<h1>{{ business.name }}</h1>
+<p>Schedule</p>
+{% endblock toolbar_title %}
+
+{% block content %}
+
+<!-- Day modal -->
+<div id="dayModal" style="display:none; position:fixed; inset:0; z-index:2000; align-items:center; justify-content:center;">
+    <div style="position:absolute; inset:0; background:rgba(0,0,0,.45);" id="dayModalBackdrop"></div>
+    <div style="position:relative; background:white; border-radius:16px; width:100%; max-width:900px; margin:16px; box-shadow:0 20px 60px rgba(0,0,0,.2); display:flex; flex-direction:column; max-height:88vh;">
+        <!-- Header -->
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:18px 24px 14px; border-bottom:1px solid var(--gray-100); flex-shrink:0;">
+            <h3 style="margin:0; font-size:16px;"><i class="fas fa-calendar-day" style="color:var(--primary); margin-right:8px;"></i><span id="modalDateLabel"></span></h3>
+            <button onclick="closeDayModal()" style="background:none; border:none; cursor:pointer; color:var(--gray-400); font-size:18px; padding:4px;"><i class="fas fa-times"></i></button>
+        </div>
+        <!-- Two columns -->
+        <div style="display:flex; flex:1; overflow:hidden; min-height:0;">
+            <!-- Left: scheduled -->
+            <div style="flex:1; display:flex; flex-direction:column; border-right:1px solid var(--gray-100);">
+                <div style="padding:12px 18px 8px; flex-shrink:0; background:#f8fafc; border-bottom:1px solid var(--gray-100);">
+                    <span style="font-size:12px; font-weight:700; text-transform:uppercase; color:var(--gray-500); letter-spacing:.04em;"><i class="fas fa-clock" style="margin-right:6px;"></i>Scheduled</span>
+                </div>
+                <div id="modalScheduled" style="overflow-y:auto; flex:1;"></div>
+            </div>
+            <!-- Right: pending -->
+            <div style="flex:1; display:flex; flex-direction:column;">
+                <div style="padding:12px 18px 8px; flex-shrink:0; background:#f8fafc; border-bottom:1px solid var(--gray-100);">
+                    <span style="font-size:12px; font-weight:700; text-transform:uppercase; color:var(--gray-500); letter-spacing:.04em;"><i class="fas fa-plus-circle" style="margin-right:6px;"></i>Add to Day</span>
+                </div>
+                <div id="modalPending" style="overflow-y:auto; flex:1;"></div>
+            </div>
+        </div>
+        <!-- Feedback -->
+        <div id="modalFeedback" style="display:none; padding:10px 24px; font-size:13px; border-top:1px solid var(--gray-100); flex-shrink:0;"></div>
+    </div>
+</div>
+
+<div style="display:flex; flex-direction:column; gap:20px;" data-aos="fade-up">
+
+    <!-- Month calendar card -->
+    <div class="recent-transactions">
+        <div style="margin-bottom:1rem;">
+            <h3 style="margin:0;"><i class="fas fa-calendar-alt"></i> Schedule
+                <span style="font-size:13px; font-weight:500; color:var(--gray-400); margin-left:8px;">{{ total_schedules }} total • {{ today_schedules_count }} today</span>
+            </h3>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; gap:10px; flex-wrap:wrap;">
+            <button id="prevMonth" class="btn-warning" type="button"><i class="fas fa-chevron-left"></i></button>
+            <h4 id="calendarMonthLabel" style="margin:0;"></h4>
+            <button id="nextMonth" class="btn-warning" type="button"><i class="fas fa-chevron-right"></i></button>
+        </div>
+        <div id="calendarGrid" style="display:grid; grid-template-columns:repeat(7, minmax(0, 1fr)); gap:6px;"></div>
+    </div>
+
+    <!-- Upcoming -->
+    <div class="recent-transactions">
+        <h3 style="margin:0 0 1rem;"><i class="fas fa-forward"></i> Upcoming</h3>
+        <div class="transactions-list">
+            {% for event in upcoming_schedules %}
+            <div class="transaction-item">
+                <div class="transaction-icon"><i class="fas fa-calendar-check"></i></div>
+                <div class="transaction-details">
+                    <h4>{{ event.title }}</h4>
+                    <p>{{ event.start_at|date:"M d, Y g:i A" }} — {{ event.end_at|date:"g:i A" }}</p>
+                </div>
+                <div style="font-size:13px; color:var(--gray-500);">{% if event.location %}{{ event.location }}{% else %}No location{% endif %}</div>
+            </div>
+            {% empty %}
+            <div class="transaction-item">
+                <div class="transaction-icon"><i class="fas fa-calendar-check"></i></div>
+                <div class="transaction-details"><h4>No upcoming events</h4><p>Schedule a job to see it here.</p></div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+{% endblock content %}
+
+{% block script %}
+{{ block.super }}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const events = JSON.parse('{{ schedule_events_json|escapejs }}');
+    const pendingJobs = JSON.parse('{{ pending_jobs_json|escapejs }}');
+    const jobContentTypeId = {{ job_content_type_id }};
+    const monthLabel = document.getElementById('calendarMonthLabel');
+    const grid = document.getElementById('calendarGrid');
+    const prevBtn = document.getElementById('prevMonth');
+    const nextBtn = document.getElementById('nextMonth');
+    const modal = document.getElementById('dayModal');
+    const modalDateLabel = document.getElementById('modalDateLabel');
+    const modalScheduled = document.getElementById('modalScheduled');
+    const modalPending   = document.getElementById('modalPending');
+    const modalFeedback  = document.getElementById('modalFeedback');
+
+    let viewDate = new Date();
+    let selectedDate = null;
+
+    // CSRF token from cookie
+    function getCsrf() {
+        const match = document.cookie.match(/csrftoken=([^;]+)/);
+        return match ? match[1] : '';
+    }
+
+    window.closeDayModal = function() { modal.style.display = 'none'; };
+    document.getElementById('dayModalBackdrop').addEventListener('click', closeDayModal);
+
+    function startOfDay(date) {
+        const d = new Date(date); d.setHours(0,0,0,0); return d;
+    }
+    function sameDay(a, b) {
+        return startOfDay(a).getTime() === startOfDay(b).getTime();
+    }
+    function eventsForDate(date) {
+        return events.filter(e => sameDay(new Date(e.start), date));
+    }
+
+    const STATUS_COLORS = {
+        pending:     ['#fef3c7','#92400e'],
+        confirmed:   ['#dbeafe','#1e40af'],
+        in_progress: ['#ede9fe','#5b21b6'],
+        on_hold:     ['#f3f4f6','#6b7280'],
+        review:      ['#fce7f3','#9d174d'],
+        invoiced:    ['#dbeafe','#1e40af'],
+    };
+
+    function showFeedback(msg, ok) {
+        modalFeedback.style.display = 'block';
+        modalFeedback.style.background = ok ? '#d1fae5' : '#fee2e2';
+        modalFeedback.style.color = ok ? '#065f46' : '#991b1b';
+        modalFeedback.textContent = msg;
+    }
+
+    function renderModal() {
+        const dayEvents = eventsForDate(selectedDate)
+            .sort((a, b) => new Date(a.start) - new Date(b.start));
+        const scheduledJobIds = dayEvents.map(e => e.job_id);
+        const timeFmt = t => new Date(t).toLocaleTimeString([], { hour:'numeric', minute:'2-digit' });
+
+        // --- Left: scheduled events ---
+        if (!dayEvents.length) {
+            modalScheduled.innerHTML = `
+                <div style="padding:28px 18px; text-align:center; color:var(--gray-400);">
+                    <i class="fas fa-calendar-times" style="font-size:22px; margin-bottom:8px; display:block;"></i>
+                    <span style="font-size:13px;">No jobs scheduled yet.</span>
+                </div>`;
+        } else {
+            modalScheduled.innerHTML = dayEvents.map(ev => {
+                const [bg, fg] = STATUS_COLORS[ev.job_status] || ['#f3f4f6','#374151'];
+                return `
+                <div style="display:flex; gap:12px; padding:12px 18px; border-bottom:1px solid var(--gray-100); align-items:flex-start;">
+                    <div style="flex-shrink:0; width:64px; text-align:right;">
+                        <div style="font-size:12px; font-weight:700; color:var(--gray-700);">${timeFmt(ev.start)}</div>
+                        <div style="font-size:11px; color:var(--gray-400); margin-top:1px;">${timeFmt(ev.end)}</div>
+                    </div>
+                    <div style="width:2px; background:#e5e7eb; border-radius:2px; flex-shrink:0; margin-top:3px; align-self:stretch;"></div>
+                    <div style="flex:1; min-width:0;">
+                        <div style="font-weight:600; font-size:13px; color:var(--gray-800); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${ev.title || 'Untitled'}</div>
+                        <div style="font-size:11px; color:var(--gray-500); margin-top:2px;">${ev.client_name || ''}</div>
+                        <span style="display:inline-block; margin-top:4px; background:${bg}; color:${fg}; border-radius:20px; font-size:10px; font-weight:600; padding:2px 8px;">${ev.job_status || ''}</span>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        // --- Right: unscheduled pending jobs ---
+        const unscheduled = pendingJobs.filter(j => !scheduledJobIds.includes(j.id));
+        if (!unscheduled.length) {
+            modalPending.innerHTML = `
+                <div style="padding:28px 18px; text-align:center; color:var(--gray-400);">
+                    <i class="fas fa-check-circle" style="font-size:22px; margin-bottom:8px; display:block; color:#10b981;"></i>
+                    <span style="font-size:13px;">All active jobs are scheduled!</span>
+                </div>`;
+        } else {
+            modalPending.innerHTML = unscheduled.map(job => {
+                const [bg, fg] = STATUS_COLORS[job.status] || ['#f3f4f6','#374151'];
+                const safeTitle = job.description.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+                return `
+                <div style="display:flex; align-items:center; gap:12px; padding:12px 18px; border-bottom:1px solid var(--gray-100); cursor:pointer;"
+                     onclick="scheduleJob(${job.id}, '${safeTitle}')"
+                     onmouseover="this.style.background='#f0f9ff'" onmouseout="this.style.background=''">
+                    <div style="flex:1; min-width:0;">
+                        <div style="font-weight:600; font-size:13px; color:var(--gray-800); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${job.description}</div>
+                        <div style="font-size:11px; color:var(--gray-500); margin-top:2px;">${job.client_name} • $${job.price}</div>
+                        <span style="display:inline-block; margin-top:4px; background:${bg}; color:${fg}; border-radius:20px; font-size:10px; font-weight:600; padding:2px 8px;">${job.status_display}</span>
+                    </div>
+                    <button style="flex-shrink:0; background:var(--primary); border:none; border-radius:8px; padding:6px 10px; cursor:pointer; color:#fff;" title="Schedule for this day">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>`;
+            }).join('');
+        }
+    }
+
+    window.scheduleJob = async function(jobId, jobTitle) {
+        const date = selectedDate;
+        const start = new Date(date); start.setHours(8, 0, 0, 0);
+        const end   = new Date(date); end.setHours(9, 0, 0, 0);
+
+        const payload = {
+            title: jobTitle,
+            start_at: start.toISOString(),
+            end_at: end.toISOString(),
+            content_type: jobContentTypeId,
+            object_id: jobId,
+        };
+
+        try {
+            const res = await fetch('/api/schedule/create/', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
+                body: JSON.stringify(payload),
+            });
+            if (res.ok) {
+                const newEvent = await res.json();
+                // Add to local events so both columns update immediately
+                const job = pendingJobs.find(j => j.id === jobId);
+                events.push({
+                    id: newEvent.id,
+                    title: jobTitle,
+                    start: newEvent.start_at,
+                    end: newEvent.end_at,
+                    location: '',
+                    is_cancelled: false,
+                    job_id: jobId,
+                    job_status: job ? job.status : '',
+                    client_name: job ? job.client_name : '',
+                });
+                renderModal();
+                renderCalendar();
+                showFeedback('✓ Job added to this day.', true);
+            } else {
+                const err = await res.json();
+                showFeedback('Error: ' + JSON.stringify(err), false);
+            }
+        } catch(e) {
+            showFeedback('Network error. Please try again.', false);
+        }
+    };
+
+    function openDayModal(date) {
+        selectedDate = date;
+        modalFeedback.style.display = 'none';
+        modalDateLabel.textContent = date.toLocaleDateString([], { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+        renderModal();
+        modal.style.display = 'flex';
+    }
+
+    function renderCalendar() {
+        const year = viewDate.getFullYear();
+        const month = viewDate.getMonth();
+        const last = new Date(year, month + 1, 0);
+        const startWeekDay = new Date(year, month, 1).getDay();
+
+        monthLabel.textContent = viewDate.toLocaleDateString([], { month:'long', year:'numeric' });
+
+        const cells = [];
+        ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(l =>
+            cells.push(`<div style="font-weight:700; text-align:center; padding:6px 4px; font-size:12px; color:var(--gray-500);">${l}</div>`)
+        );
+        for (let i = 0; i < startWeekDay; i++) cells.push('<div></div>');
+
+        const today = new Date();
+        for (let day = 1; day <= last.getDate(); day++) {
+            const date = new Date(year, month, day);
+            const count = eventsForDate(date).length;
+            const isToday = sameDay(date, today);
+            const bg = isToday ? '#e0f2fe' : '#f8fafc';
+            const border = isToday ? '2px solid #0ea5e9' : '1px solid #e5e7eb';
+            cells.push(`
+                <button type="button" data-date="${date.toISOString()}" style="
+                    border:${border}; border-radius:8px; min-height:60px; background:${bg};
+                    color:#1f2937; position:relative; cursor:pointer; padding:6px; text-align:left; transition:background .15s;"
+                    onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='${bg}'">
+                    <span style="font-weight:700; font-size:13px;">${day}</span>
+                    ${count ? `<span style="position:absolute; top:5px; right:5px; background:#0ea5e9; color:#fff; border-radius:999px; font-size:10px; padding:1px 5px; font-weight:600;">${count}</span>` : ''}
+                </button>`);
+        }
+        grid.innerHTML = cells.join('');
+        grid.querySelectorAll('button[data-date]').forEach(btn =>
+            btn.addEventListener('click', () => openDayModal(new Date(btn.getAttribute('data-date'))))
+        );
+    }
+
+    prevBtn.addEventListener('click', () => { viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth()-1, 1); renderCalendar(); });
+    nextBtn.addEventListener('click', () => { viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth()+1, 1); renderCalendar(); });
+    renderCalendar();
+});
+</script>
+{% endblock script %}
+
